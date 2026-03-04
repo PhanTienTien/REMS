@@ -1,11 +1,11 @@
-package com.rems.user.model;
+package com.rems.auth.model;
 
 import java.time.LocalDateTime;
 
 public class UserOtp {
 
     private Long id;
-    private Long userId;
+    private Long authId;
     private String otpCode;
     private LocalDateTime expiredAt;
     private Integer attemptCount;
@@ -17,8 +17,8 @@ public class UserOtp {
     }
 
     // Constructor tạo mới OTP
-    public UserOtp(Long userId, String otpCode, LocalDateTime expiredAt) {
-        this.userId = userId;
+    public UserOtp(Long authId, String otpCode, LocalDateTime expiredAt) {
+        this.authId = authId;
         this.otpCode = otpCode;
         this.expiredAt = expiredAt;
         this.attemptCount = 0;
@@ -26,12 +26,12 @@ public class UserOtp {
     }
 
     // Constructor đầy đủ
-    public UserOtp(Long id, Long userId, String otpCode,
+    public UserOtp(Long id, Long authId, String otpCode,
                    LocalDateTime expiredAt, Integer attemptCount,
                    Boolean isUsed, LocalDateTime createdAt) {
 
         this.id = id;
-        this.userId = userId;
+        this.authId = authId;
         this.otpCode = otpCode;
         this.expiredAt = expiredAt;
         this.attemptCount = attemptCount;
@@ -44,8 +44,8 @@ public class UserOtp {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public Long getUserId() { return authId; }
+    public void setUserId(Long userId) { this.authId = userId; }
 
     public String getOtpCode() { return otpCode; }
     public void setOtpCode(String otpCode) { this.otpCode = otpCode; }
@@ -68,11 +68,19 @@ public class UserOtp {
     public String toString() {
         return "UserOtp{" +
                 "id=" + id +
-                ", userId=" + userId +
+                ", userId=" + authId +
                 ", otpCode='" + otpCode + '\'' +
                 ", expiredAt=" + expiredAt +
                 ", attemptCount=" + attemptCount +
                 ", isUsed=" + isUsed +
                 '}';
+    }
+
+    public long getAuthId() {
+        return authId;
+    }
+
+    public void setAuthId(long authId) {
+        this.authId = authId;
     }
 }

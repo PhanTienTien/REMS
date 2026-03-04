@@ -1,7 +1,4 @@
-package com.rems.user.model.dto;
-
-import com.rems.common.exception.BusinessException;
-import com.rems.common.exception.ErrorCode;
+package com.rems.auth.model.dto;
 
 public class LoginDto {
 

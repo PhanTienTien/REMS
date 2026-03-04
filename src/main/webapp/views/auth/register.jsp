@@ -31,7 +31,7 @@
               class="auth-form">
             <input type="hidden" name="action" value="register"/>
 
-            <input type="text" name="fullName" placeholder="Họ tên" required>
+            <input type="text" name="userName" placeholder="Họ tên" required>
             <input type="email" name="email" placeholder="Email" required>
             <input type="text" name="phoneNumber" placeholder="Số điện thoại" required>
             <input type="password" name="password" placeholder="Mật khẩu" required>

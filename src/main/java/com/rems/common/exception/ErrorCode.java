@@ -25,7 +25,19 @@ public enum ErrorCode {
     PERMISSION_DENIED("AUTH_0021", "Permission denied" ),
     CHECK_FAILED("AUTH_0022", "Check failed" ),
     INVALID_CREDENTIAL("AUTH_0023", "Invalid credential" ),
-    ACCOUNT_NOT_ACTIVE("AUTH_0024", "Account not active" ),;
+    ACCOUNT_NOT_ACTIVE("AUTH_0024", "Account not active" ),
+    ACCOUNT_NOT_FOUND("AUTH_0025", "Account not found" ),
+    INVALID_OTP("AUTH_0026", "Invalid OTP" ),
+    ACCOUNT_ALREADY_VERIFIED("AUTH_0027", "Account already verified" ),
+    OTP_ALREADY_EXISTS("AUTH_0028", "OTP already exists" ),
+    OTP_ALREADY_USED("AUTH_0029", "OTP already used" ),
+    TOO_MANY_REQUEST("AUTH_0030", "Too many requests" ),
+    EMAIL_INVALID("AUTH_0031", "Email invalid" ),
+    PHONE_REQUIRED("AUTH_0032", "Phone required" ),
+    PHONE_INVALID("AUTH_0033", "Phone invalid" ),
+    PASSWORD_TOO_SHORT("AUTH_0034", "Password too short" ),
+    PASSWORD_NOT_MATCH("AUTH_0035", "Password not match" ),
+    USERNAME_REQUIRED("AUTH_0036", "Username required" ),;
 
     private final String code;
     private final String message;

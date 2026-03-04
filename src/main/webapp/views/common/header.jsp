@@ -56,7 +56,7 @@
                         <c:when test="${not empty sessionScope.user}">
 
                             <li class="has-children">
-                                <a href="#">${sessionScope.user.fullName}</a>
+                                <a href="#">${sessionScope.user.userName}</a>
                                 <ul class="dropdown">
                                     <li>
                                         <a href="${pageContext.request.contextPath}/user/profile">
