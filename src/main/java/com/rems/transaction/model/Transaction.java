@@ -1,5 +1,6 @@
 package com.rems.transaction.model;
 
+import com.rems.common.constant.PropertyType;
 import com.rems.common.constant.TransactionStatus;
 
 import java.math.BigDecimal;
@@ -11,12 +12,15 @@ public class Transaction {
     private Long bookingId;
     private Long propertyId;
     private Long customerId;
+    private PropertyType type;
+    private BigDecimal amount;
     private BigDecimal propertyPriceSnapshot;
     private String propertyTitleSnapshot;
     private String customerNameSnapshot;
     private TransactionStatus status;
     private LocalDateTime completedAt;
     private LocalDateTime createdAt;
+    private Long ProcessedBy;
 
     public Transaction() {}
 
@@ -43,6 +47,18 @@ public class Transaction {
     }
     public void setCustomerId(Long customerId) {
         this.customerId = customerId;
+    }
+    public PropertyType getType() {
+        return type;
+    }
+    public void setType(PropertyType type) {
+        this.type = type;
+    }
+    public BigDecimal getAmount() {
+        return amount;
+    }
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
     public BigDecimal getPropertyPriceSnapshot() {
         return propertyPriceSnapshot;
@@ -79,5 +95,11 @@ public class Transaction {
     }
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+    public Long getProcessedBy() {
+        return ProcessedBy;
+    }
+    public void setProcessedBy(Long processedBy) {
+        ProcessedBy = processedBy;
     }
 }

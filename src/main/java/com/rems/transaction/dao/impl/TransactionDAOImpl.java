@@ -12,13 +12,21 @@ public class TransactionDAOImpl implements TransactionDAO {
     public Long insert(Connection conn, Transaction tx) {
 
         String sql = """
-        INSERT INTO transactions
-        (booking_id, property_id, customer_id,
-         property_price_snapshot,
-         property_title_snapshot,
-         customer_name_snapshot,
-         status, completed_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO transactions
+    (
+        booking_id,
+        property_id,
+        customer_id,
+        type,
+        amount,
+        property_price_snapshot,
+        property_title_snapshot,
+        customer_name_snapshot,
+        status,
+        completed_at,
+        processed_by
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """;
 
         try (PreparedStatement ps =
@@ -27,21 +35,33 @@ public class TransactionDAOImpl implements TransactionDAO {
             ps.setLong(1, tx.getBookingId());
             ps.setLong(2, tx.getPropertyId());
             ps.setLong(3, tx.getCustomerId());
-            ps.setBigDecimal(4, tx.getPropertyPriceSnapshot());
-            ps.setString(5, tx.getPropertyTitleSnapshot());
-            ps.setString(6, tx.getCustomerNameSnapshot());
-            ps.setString(7, tx.getStatus().name());
+
+            ps.setString(4, tx.getType().name());
+            ps.setBigDecimal(5, tx.getAmount());
+
+            ps.setBigDecimal(6, tx.getPropertyPriceSnapshot());
+            ps.setString(7, tx.getPropertyTitleSnapshot());
+            ps.setString(8, tx.getCustomerNameSnapshot());
+
+            ps.setString(9, tx.getStatus().name());
 
             if (tx.getCompletedAt() != null) {
-                ps.setTimestamp(8, Timestamp.valueOf(tx.getCompletedAt()));
+                ps.setTimestamp(10, Timestamp.valueOf(tx.getCompletedAt()));
             } else {
-                ps.setNull(8, Types.TIMESTAMP);
+                ps.setNull(10, Types.TIMESTAMP);
+            }
+
+            if (tx.getProcessedBy() != null) {
+                ps.setLong(11, tx.getProcessedBy());
+            } else {
+                ps.setNull(11, Types.BIGINT);
             }
 
             ps.executeUpdate();
 
-            ResultSet rs = ps.getGeneratedKeys();
-            if (rs.next()) return rs.getLong(1);
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) return rs.getLong(1);
+            }
 
             throw new RuntimeException("Create transaction failed");
 

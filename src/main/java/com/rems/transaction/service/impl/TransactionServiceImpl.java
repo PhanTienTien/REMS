@@ -69,6 +69,8 @@ public class TransactionServiceImpl implements TransactionService {
             tx.setBookingId(booking.getId());
             tx.setPropertyId(property.getId());
             tx.setCustomerId(booking.getCustomerId());
+            tx.setAmount(property.getPrice());
+            tx.setType(property.getType());
 
             tx.setPropertyPriceSnapshot(property.getPrice());
             tx.setPropertyTitleSnapshot(property.getTitle());
