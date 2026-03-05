@@ -37,7 +37,20 @@ public enum ErrorCode {
     PHONE_INVALID("AUTH_0033", "Phone invalid" ),
     PASSWORD_TOO_SHORT("AUTH_0034", "Password too short" ),
     PASSWORD_NOT_MATCH("AUTH_0035", "Password not match" ),
-    USERNAME_REQUIRED("AUTH_0036", "Username required" ),;
+    USERNAME_REQUIRED("AUTH_0036", "Username required" ),
+    INVALID_INPUT("AUTH_0037", "Invalid input" ),
+    NOT_FOUND("AUTH_0038", "User not found" ),
+    INVALID_STATE_TRANSITION("AUTH_0039", "Invalid state transition" ),
+    PROPERTY_NOT_AVAILABLE("AUTH_0040", "Property not available" ),
+    TYPE_MISMATCH("AUTH_0041", "Type mismatch" ),
+    CANNOT_DEACTIVATE("AUTH_0042", "Cannot deactivate" ),
+    NEVER_APPROVED("AUTH_0043", "Never approved" ),
+    BOOKING_ALREADY_ACCEPTED("AUTH_0044", "Booking already accepted" ),
+    FORBIDDEN("AUTH_0045", "Forbidden" ),
+    INVALID_STATE("AUTH_0046", "Invalid state" ),
+    DUPLICATE_TRANSACTION("AUTH_0047", "Duplicate transaction" ),
+
+    ;
 
     private final String code;
     private final String message;

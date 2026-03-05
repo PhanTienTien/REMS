@@ -16,6 +16,7 @@ import com.rems.common.util.PasswordUtil;
 import com.rems.user.dao.UserDAO;
 import com.rems.user.model.User;
 
+import java.sql.Connection;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -48,16 +49,18 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void register(RegisterDto dto) {
 
-        txManager.execute(() -> {
+        txManager.execute(conn -> {
 
-            validateEmailNotExists(dto.getEmail());
+            if (authAccountDAO.findByEmail(conn, dto.getEmail()) != null) {
+                throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            }
 
             AuthAccount account = AuthAccount.local(
                     dto.getEmail(),
                     PasswordUtil.hash(dto.getPassword())
             );
 
-            Long authId = authAccountDAO.save(account);
+            Long authId = authAccountDAO.save(conn, account);
 
             User user = new User();
             user.setAuthId(authId);
@@ -66,16 +69,19 @@ public class AuthServiceImpl implements AuthService {
             user.setPhone_number(dto.getPhoneNumber());
             user.setRole(Role.CUSTOMER);
             user.setVerified(false);
+            user.setDeleted(false);
 
-            userDAO.save(user);
+            userDAO.save(conn, user);
 
-            String otpCode = OtpUtil.generateOtp();
-            LocalDateTime expiredAt =
-                    LocalDateTime.now().plusMinutes(OTP_EXPIRE_MINUTES);
+            UserOtp otp = new UserOtp(
+                    authId,
+                    OtpUtil.generateOtp(),
+                    LocalDateTime.now().plusMinutes(OTP_EXPIRE_MINUTES)
+            );
 
-            UserOtp otp = new UserOtp(authId, otpCode, expiredAt);
+            userOtpDAO.save(conn, otp);
 
-            userOtpDAO.save(otp);
+            return null;
         });
     }
 
@@ -84,21 +90,27 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthAccount login(String username, String password) {
 
-        return txManager.executeWithResult(() -> {
+        return txManager.execute(conn -> {
 
-            AuthAccount account = authAccountDAO.findByUserName(username);
+            AuthAccount account =
+                    authAccountDAO.findByUserName(conn, username);
 
             validateLogin(account);
             checkCooldown(account);
 
             if (!PasswordUtil.matches(password, account.getPasswordHash())) {
 
-                handleFailedLogin(account);
+                authAccountDAO.increaseLoginAttempt(
+                        conn,
+                        account.getId(),
+                        LocalDateTime.now()
+                );
 
                 throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
             }
 
-            authAccountDAO.resetLoginAttempt(account.getId());
+            authAccountDAO.resetLoginAttempt(conn, account.getId());
+
             return account;
         });
     }
@@ -108,21 +120,34 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void verifyOtp(String email, String otpInput) {
 
-        txManager.execute(() -> {
+        txManager.execute(conn -> {
 
-            AuthAccount account = getAccountByEmail(email);
+            AuthAccount account =
+                    authAccountDAO.findByEmail(conn, email);
 
-            UserOtp otp = userOtpDAO.findLatestByAuthId(account.getId());
+            if (account == null) {
+                throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
+            }
+
+            UserOtp otp =
+                    userOtpDAO.findLatestByAuthId(conn, account.getId());
+
             validateOtp(otp);
 
             if (!otp.getOtpCode().equals(otpInput)) {
 
-                userOtpDAO.increaseAttempt(otp.getId());
+                userOtpDAO.increaseAttempt(conn, otp.getId());
                 throw new BusinessException(ErrorCode.INVALID_OTP);
             }
 
-            userOtpDAO.markUsed(otp.getId());
-            authAccountDAO.updateStatus(account.getId(), AccountStatus.ACTIVE);
+            userOtpDAO.markUsed(conn, otp.getId());
+            authAccountDAO.updateStatus(
+                    conn,
+                    account.getId(),
+                    AccountStatus.ACTIVE
+            );
+
+            return null;
         });
     }
 
@@ -131,15 +156,21 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void resendOtp(String email) {
 
-        txManager.execute(() -> {
+        txManager.execute(conn -> {
 
-            AuthAccount account = getAccountByEmail(email);
+            AuthAccount account =
+                    authAccountDAO.findByEmail(conn, email);
+
+            if (account == null) {
+                throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
+            }
 
             if (AccountStatus.ACTIVE.equals(account.getStatus())) {
                 throw new BusinessException(ErrorCode.ACCOUNT_ALREADY_VERIFIED);
             }
 
-            UserOtp latest = userOtpDAO.findLatestByAuthId(account.getId());
+            UserOtp latest =
+                    userOtpDAO.findLatestByAuthId(conn, account.getId());
 
             if (latest != null) {
                 validateResendOtp(latest);
@@ -149,23 +180,32 @@ public class AuthServiceImpl implements AuthService {
             LocalDateTime expiredAt =
                     LocalDateTime.now().plusMinutes(OTP_EXPIRE_MINUTES);
 
-            userOtpDAO.save(new UserOtp(account.getId(), otpCode, expiredAt));
+            userOtpDAO.save(
+                    conn,
+                    new UserOtp(account.getId(), otpCode, expiredAt)
+            );
+
+            return null;
         });
     }
 
     // ================= PRIVATE HELPERS =================
 
-    private void validateEmailNotExists(String email) {
-        if (authAccountDAO.findByEmail(email) != null) {
+    private void validateEmailNotExists(Connection conn, String email) {
+        if (authAccountDAO.findByEmail(conn, email) != null) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
     }
 
-    private AuthAccount getAccountByEmail(String email) {
-        AuthAccount account = authAccountDAO.findByEmail(email);
+    private AuthAccount getAccountByEmail(Connection conn, String email) {
+
+        AuthAccount account =
+                authAccountDAO.findByEmail(conn, email);
+
         if (account == null) {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
+
         return account;
     }
 
@@ -181,14 +221,14 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_ACTIVE);
     }
 
-    private void handleFailedLogin(AuthAccount account) {
+    private void handleFailedLogin(Connection conn, AuthAccount account) {
 
         LocalDateTime now = LocalDateTime.now();
 
-        authAccountDAO.increaseLoginAttempt(account.getId(), now);
+        authAccountDAO.increaseLoginAttempt(conn, account.getId(), now);
 
         if (account.getLoginAttempt() + 1 >= MAX_LOGIN_ATTEMPT) {
-            authAccountDAO.updateStatus(account.getId(), AccountStatus.LOCKED);
+            authAccountDAO.updateStatus(conn, account.getId(), AccountStatus.LOCKED);
         }
     }
 

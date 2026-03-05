@@ -2,10 +2,17 @@ package com.rems.auth.dao;
 
 import com.rems.auth.model.UserOtp;
 
+import java.sql.Connection;
+
 public interface UserOtpDAO {
-    void save(UserOtp otp);
-    UserOtp findLatestByAuthId(Long authId);
-    void increaseAttempt(Long otpId);
-    void markUsed(Long otpId);
-    void deleteByAuthId(Long authId);
+
+    void save(Connection conn, UserOtp otp);
+
+    UserOtp findLatestByAuthId(Connection conn, Long authId);
+
+    void increaseAttempt(Connection conn, Long otpId);
+
+    void markUsed(Connection conn, Long otpId);
+
+    void deleteByAuthId(Connection conn, Long authId);
 }

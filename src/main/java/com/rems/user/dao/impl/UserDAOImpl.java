@@ -1,64 +1,95 @@
 package com.rems.user.dao.impl;
 
-import com.rems.common.base.BaseDAO;
 import com.rems.common.constant.Role;
 import com.rems.user.dao.UserDAO;
 import com.rems.user.model.User;
 
 import java.sql.*;
+import java.util.Optional;
 
-public class UserDAOImpl extends BaseDAO implements UserDAO {
+public class UserDAOImpl implements UserDAO {
 
-    // ==============================
-    // FIND BY EMAIL
-    // ==============================
-    public User findByEmail(String email) {
+    @Override
+    public Optional<User> findById(Connection conn, Long id) {
+
+        String sql = """
+        SELECT 
+            id,
+            auth_id,
+            full_name,
+            email,
+            phone_number,
+            role,
+            is_verified,
+            is_deleted,
+            created_at,
+            updated_at
+        FROM users
+        WHERE id = ?
+          AND is_deleted = FALSE
+    """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (rs.next()) {
+                    User user = mapRow(rs);
+                    return Optional.of(user);
+                }
+
+                return Optional.empty();
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding user by id", e);
+        }
+    }
+
+    @Override
+    public Optional<User> findByEmail(Connection conn, String email) {
 
         String sql = "SELECT * FROM users WHERE email = ? AND is_deleted = FALSE";
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return mapRow(rs);
+                    return Optional.of(mapRow(rs));
                 }
+                return Optional.empty();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        return null;
     }
 
-    // ==============================
-    // FIND BY AUTH ID (NEW)
-    // ==============================
-    public User findByAuthId(Long authId){
+    @Override
+    public Optional<User> findByAuthId(Connection conn, Long authId){
 
         String sql = "SELECT * FROM users WHERE auth_id = ? AND is_deleted = FALSE";
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setLong(1, authId);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return mapRow(rs);
+                    return Optional.of(mapRow(rs));
                 }
+                return Optional.empty();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        return null;
     }
 
-    // ==============================
-    // SAVE USER (NO PASSWORD HERE)
-    // ==============================
-    public void save(User user) {
+    @Override
+    public void save(Connection conn, User user) {
 
         String sql = """
                 INSERT INTO users
@@ -66,7 +97,7 @@ public class UserDAOImpl extends BaseDAO implements UserDAO {
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setLong(1, user.getAuthId());
             ps.setString(2, user.getFullName());
@@ -88,18 +119,17 @@ public class UserDAOImpl extends BaseDAO implements UserDAO {
         }
     }
 
-    // ==============================
-    // UPDATE VERIFIED
-    // ==============================
-    public void updateVerified(Long userId, boolean verified) {
+    @Override
+    public void updateVerified(Connection conn, Long userId, boolean verified) {
 
         String sql = """
                 UPDATE users
                 SET is_verified = ?, updated_at = NOW()
                 WHERE id = ?
+                  AND is_deleted = FALSE
                 """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setBoolean(1, verified);
             ps.setLong(2, userId);
@@ -109,19 +139,18 @@ public class UserDAOImpl extends BaseDAO implements UserDAO {
         }
     }
 
-    // ==============================
-    // SOFT DELETE
-    // ==============================
-    public void softDelete(Long userId){
+    @Override
+    public void softDelete(Connection conn, Long userId){
 
         String sql = """
                 UPDATE users
                 SET is_deleted = TRUE,
                     updated_at = NOW()
                 WHERE id = ?
+                  AND is_deleted = FALSE
                 """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setLong(1, userId);
             ps.executeUpdate();
@@ -130,9 +159,6 @@ public class UserDAOImpl extends BaseDAO implements UserDAO {
         }
     }
 
-    // ==============================
-    // MAP ROW
-    // ==============================
     private User mapRow(ResultSet rs) throws SQLException {
 
         Timestamp updatedTs = rs.getTimestamp("updated_at");

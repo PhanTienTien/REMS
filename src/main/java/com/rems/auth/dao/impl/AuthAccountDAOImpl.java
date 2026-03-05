@@ -2,22 +2,21 @@ package com.rems.auth.dao.impl;
 
 import com.rems.auth.dao.AuthAccountDAO;
 import com.rems.auth.model.AuthAccount;
-import com.rems.common.base.BaseDAO;
 import com.rems.common.constant.AccountStatus;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 
-public class AuthAccountDAOImpl extends BaseDAO implements AuthAccountDAO {
+public class AuthAccountDAOImpl implements AuthAccountDAO {
 
     // =====================================
     // FIND BY USERNAME
     // =====================================
-    public AuthAccount findByUserName(String userName) {
+    public AuthAccount findByUserName(Connection conn, String userName) {
 
         String sql = "SELECT * FROM auth_accounts WHERE userName = ?";
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, userName);
 
@@ -33,11 +32,11 @@ public class AuthAccountDAOImpl extends BaseDAO implements AuthAccountDAO {
         return null;
     }
 
-    public AuthAccount findByEmail(String email) {
+    public AuthAccount findByEmail(Connection conn, String email) {
 
         String sql = "SELECT * FROM auth_accounts WHERE email = ?";
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
 
@@ -56,11 +55,11 @@ public class AuthAccountDAOImpl extends BaseDAO implements AuthAccountDAO {
     // =====================================
     // FIND BY ID (optional but recommended)
     // =====================================
-    public AuthAccount findById(Long id) {
+    public AuthAccount findById(Connection conn, Long id) {
 
         String sql = "SELECT * FROM auth_accounts WHERE id = ?";
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setLong(1, id);
 
@@ -79,7 +78,7 @@ public class AuthAccountDAOImpl extends BaseDAO implements AuthAccountDAO {
     // =====================================
     // SAVE ACCOUNT
     // =====================================
-    public Long save(AuthAccount account) {
+    public Long save(Connection conn, AuthAccount account) {
 
         String sql = """
                 INSERT INTO auth_accounts
@@ -87,7 +86,7 @@ public class AuthAccountDAOImpl extends BaseDAO implements AuthAccountDAO {
                 VALUES (?, ?, ?, ?, ?, ?)
                 """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, account.getUserName());
             ps.setString(2, account.getEmail());
@@ -113,7 +112,7 @@ public class AuthAccountDAOImpl extends BaseDAO implements AuthAccountDAO {
     // =====================================
     // UPDATE STATUS (ACTIVE / LOCKED)
     // =====================================
-    public void updateStatus(Long authId, AccountStatus status) {
+    public void updateStatus(Connection conn, Long authId, AccountStatus status) {
 
         String sql = """
                 UPDATE auth_accounts
@@ -121,7 +120,7 @@ public class AuthAccountDAOImpl extends BaseDAO implements AuthAccountDAO {
                 WHERE id = ?
                 """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, status.name());
             ps.setLong(2, authId);
@@ -134,8 +133,7 @@ public class AuthAccountDAOImpl extends BaseDAO implements AuthAccountDAO {
     // =====================================
     // INCREASE LOGIN ATTEMPT
     // =====================================
-    public void increaseLoginAttempt(Long authId,
-                                     LocalDateTime now) {
+    public void increaseLoginAttempt(Connection conn, Long authId, LocalDateTime now) {
 
         String sql = """
                 UPDATE auth_accounts
@@ -144,7 +142,7 @@ public class AuthAccountDAOImpl extends BaseDAO implements AuthAccountDAO {
                 WHERE id = ?
                 """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setTimestamp(1, Timestamp.valueOf(now));
             ps.setLong(2, authId);
@@ -157,7 +155,7 @@ public class AuthAccountDAOImpl extends BaseDAO implements AuthAccountDAO {
     // =====================================
     // RESET LOGIN ATTEMPT
     // =====================================
-    public void resetLoginAttempt(Long authId) {
+    public void resetLoginAttempt(Connection conn, Long authId) {
 
         String sql = """
                 UPDATE auth_accounts
@@ -166,7 +164,7 @@ public class AuthAccountDAOImpl extends BaseDAO implements AuthAccountDAO {
                 WHERE id = ?
                 """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setLong(1, authId);
             ps.executeUpdate();

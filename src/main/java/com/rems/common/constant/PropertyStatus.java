@@ -1,8 +1,10 @@
 package com.rems.common.constant;
 
 public enum PropertyStatus {
+    DRAFT,
     AVAILABLE,
-    PENDING,
+    RESERVED,
     SOLD,
+    RENTED,
     INACTIVE
 }

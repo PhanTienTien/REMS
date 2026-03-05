@@ -2,16 +2,15 @@ package com.rems.auth.dao.impl;
 
 import com.rems.auth.dao.UserOtpDAO;
 import com.rems.auth.model.UserOtp;
-import com.rems.common.base.BaseDAO;
 
 import java.sql.*;
 
-public class UserOtpDAOImpl extends BaseDAO implements UserOtpDAO {
+public class UserOtpDAOImpl implements UserOtpDAO {
 
     // ==========================
     // SAVE OTP
     // ==========================
-    public void save(UserOtp otp) {
+    public void save(Connection conn, UserOtp otp) {
 
         String sql = """
                 INSERT INTO user_otps
@@ -19,7 +18,7 @@ public class UserOtpDAOImpl extends BaseDAO implements UserOtpDAO {
                 VALUES (?, ?, ?, ?, ?)
                 """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setLong(1, otp.getAuthId());
             ps.setString(2, otp.getOtpCode());
@@ -42,7 +41,7 @@ public class UserOtpDAOImpl extends BaseDAO implements UserOtpDAO {
     // ==========================
     // FIND LATEST OTP BY AUTH ID
     // ==========================
-    public UserOtp findLatestByAuthId(Long authId){
+    public UserOtp findLatestByAuthId(Connection conn, Long authId){
 
         String sql = """
                 SELECT *
@@ -52,7 +51,7 @@ public class UserOtpDAOImpl extends BaseDAO implements UserOtpDAO {
                 LIMIT 1
                 """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps =conn.prepareStatement(sql)) {
 
             ps.setLong(1, authId);
 
@@ -71,7 +70,7 @@ public class UserOtpDAOImpl extends BaseDAO implements UserOtpDAO {
     // ==========================
     // INCREASE OTP ATTEMPT
     // ==========================
-    public void increaseAttempt(Long otpId){
+    public void increaseAttempt(Connection conn, Long otpId){
 
         String sql = """
                 UPDATE user_otps
@@ -79,7 +78,7 @@ public class UserOtpDAOImpl extends BaseDAO implements UserOtpDAO {
                 WHERE id = ?
                 """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setLong(1, otpId);
             ps.executeUpdate();
@@ -91,7 +90,7 @@ public class UserOtpDAOImpl extends BaseDAO implements UserOtpDAO {
     // ==========================
     // MARK OTP USED
     // ==========================
-    public void markUsed(Long otpId) {
+    public void markUsed(Connection conn, Long otpId) {
 
         String sql = """
                 UPDATE user_otps
@@ -99,7 +98,7 @@ public class UserOtpDAOImpl extends BaseDAO implements UserOtpDAO {
                 WHERE id = ?
                 """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setLong(1, otpId);
             ps.executeUpdate();
@@ -111,14 +110,14 @@ public class UserOtpDAOImpl extends BaseDAO implements UserOtpDAO {
     // ==========================
     // DELETE ALL OTP BY AUTH ID
     // ==========================
-    public void deleteByAuthId(Long authId){
+    public void deleteByAuthId(Connection conn, Long authId){
 
         String sql = """
                 DELETE FROM user_otps
                 WHERE auth_id = ?
                 """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setLong(1, authId);
             ps.executeUpdate();
