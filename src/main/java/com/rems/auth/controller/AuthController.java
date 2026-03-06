@@ -64,6 +64,11 @@ public class AuthController extends HttpServlet {
 
         String action = request.getParameter("action");
 
+        if (action == null) {
+            sendJson(response, "error", "Invalid action");
+            return;
+        }
+
         try {
 
             switch (action) {
@@ -98,7 +103,7 @@ public class AuthController extends HttpServlet {
         HttpSession session = request.getSession();
         session.setAttribute("currentUser", user);
 
-        response.sendRedirect(request.getContextPath() + "/user/dashboard");
+        response.sendRedirect(request.getContextPath() + "/admin/dashboard");
     }
 
     // ============================

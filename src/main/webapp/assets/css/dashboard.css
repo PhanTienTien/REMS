@@ -1,0 +1,159 @@
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+}
+
+.dashboard-container{
+    display:flex;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:220px;
+    background:#1e293b;
+    color:white;
+    height:100vh;
+}
+
+.sidebar-logo{
+    padding:20px;
+    font-size:20px;
+}
+
+.sidebar-menu{
+    list-style:none;
+    padding:0;
+}
+
+.sidebar-menu li{
+    padding:15px 20px;
+}
+
+.sidebar-menu a{
+    color:white;
+    text-decoration:none;
+}
+
+/* MAIN */
+
+.main-content{
+    flex:1;
+}
+
+/* TOPBAR */
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    padding:15px 25px;
+    background:#f1f5f9;
+}
+
+/* CONTENT */
+
+.dashboard-content{
+    padding:25px;
+}
+
+/* CARDS */
+
+.cards-container{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.card-title{
+    font-size:14px;
+    color:#64748b;
+}
+
+.card-value{
+    font-size:24px;
+    font-weight:bold;
+}
+
+/* CHART */
+
+.chart-container{
+    margin-top:30px;
+    background:white;
+    padding:20px;
+}
+
+/* TABLE */
+
+.transactions-container{
+    margin-top:30px;
+    background:white;
+    padding:20px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:10px;
+    border-bottom:1px solid #ddd;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-completed {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge-failed {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.property-status {
+    margin-top: 30px;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 10px;
+}
+
+.status-grid div {
+    background: #f1f5f9;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.status-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+}
+
+.status-box{
+    padding:15px;
+    background:#f4f6f8;
+    border-radius:8px;
+    font-weight:600;
+}

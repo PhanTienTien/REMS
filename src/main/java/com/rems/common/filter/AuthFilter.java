@@ -21,16 +21,17 @@ public class AuthFilter implements Filter {
 
         String uri = req.getRequestURI();
 
-        boolean isAuthPage = uri.contains("/auth")
+        boolean isPublic = uri.contains("/auth")
                 || uri.contains("/assets")
                 || uri.contains("/css")
                 || uri.contains("/js");
 
         HttpSession session = req.getSession(false);
+
         boolean loggedIn = session != null
                 && session.getAttribute("currentUser") != null;
 
-        if (loggedIn || isAuthPage) {
+        if (isPublic || loggedIn) {
             chain.doFilter(request, response);
         } else {
             res.sendRedirect(req.getContextPath() + "/auth");

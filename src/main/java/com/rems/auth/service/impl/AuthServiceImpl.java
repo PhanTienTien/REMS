@@ -88,12 +88,12 @@ public class AuthServiceImpl implements AuthService {
     // ================= LOGIN =================
 
     @Override
-    public AuthAccount login(String username, String password) {
+    public AuthAccount login(String email, String password) {
 
         return txManager.execute(conn -> {
 
             AuthAccount account =
-                    authAccountDAO.findByUserName(conn, username);
+                    authAccountDAO.findByEmail(conn, email);
 
             validateLogin(account);
             checkCooldown(account);
