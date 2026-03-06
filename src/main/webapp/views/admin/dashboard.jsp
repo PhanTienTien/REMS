@@ -53,12 +53,35 @@
 
         <div class="status-grid">
 
-          <div>DRAFT: ${dashboard.propertyStats['DRAFT']}</div>
-          <div>AVAILABLE: ${dashboard.propertyStats['AVAILABLE']}</div>
-          <div>RESERVED: ${dashboard.propertyStats['RESERVED']}</div>
-          <div>SOLD: ${dashboard.propertyStats['SOLD']}</div>
-          <div>RENTED: ${dashboard.propertyStats['RENTED']}</div>
-          <div>INACTIVE: ${dashboard.propertyStats['INACTIVE']}</div>
+          <div class="status-card">
+            <div class="status-title">DRAFT</div>
+            <div class="status-value">${dashboard.propertyStats['DRAFT']}</div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-title">AVAILABLE</div>
+            <div class="status-value">${dashboard.propertyStats['AVAILABLE']}</div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-title">RESERVED</div>
+            <div class="status-value">${dashboard.propertyStats['RESERVED']}</div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-title">SOLD</div>
+            <div class="status-value">${dashboard.propertyStats['SOLD']}</div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-title">RENTED</div>
+            <div class="status-value">${dashboard.propertyStats['RENTED']}</div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-title">INACTIVE</div>
+            <div class="status-value">${dashboard.propertyStats['INACTIVE']}</div>
+          </div>
 
         </div>
 
@@ -70,10 +93,33 @@
 
         <div class="status-grid">
 
-          <div>PENDING: ${dashboard.transactionStats['PENDING']}</div>
-          <div>COMPLETED: ${dashboard.transactionStats['COMPLETED']}</div>
-          <div>FAILED: ${dashboard.transactionStats['FAILED']}</div>
-          <div>CANCELLED: ${dashboard.transactionStats['CANCELLED']}</div>
+          <div class="status-card">
+            <div class="status-title">PENDING</div>
+            <div class="status-value">
+              ${dashboard.transactionStats['PENDING']}
+            </div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-title">COMPLETED</div>
+            <div class="status-value">
+              ${dashboard.transactionStats['COMPLETED']}
+            </div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-title">FAILED</div>
+            <div class="status-value">
+              ${dashboard.transactionStats['FAILED']}
+            </div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-title">CANCELLED</div>
+            <div class="status-value">
+              ${dashboard.transactionStats['CANCELLED']}
+            </div>
+          </div>
 
         </div>
 
@@ -115,31 +161,7 @@
         </div>
       </c:if>
 
-      <div class="status-container">
 
-        <h3>Transaction Status</h3>
-
-        <div class="status-grid">
-
-          <div class="status-box">
-            PENDING: ${dashboard.transactionStats['PENDING']}
-          </div>
-
-          <div class="status-box">
-            COMPLETED: ${dashboard.transactionStats['COMPLETED']}
-          </div>
-
-          <div class="status-box">
-            FAILED: ${dashboard.transactionStats['FAILED']}
-          </div>
-
-          <div class="status-box">
-            REFUNDED: ${dashboard.transactionStats['REFUNDED']}
-          </div>
-
-        </div>
-
-      </div>
 
       <!-- REVENUE CHART -->
       <div class="chart-container">

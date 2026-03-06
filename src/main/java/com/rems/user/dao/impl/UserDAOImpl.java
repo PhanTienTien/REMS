@@ -1,6 +1,7 @@
 package com.rems.user.dao.impl;
 
 import com.rems.common.constant.Role;
+import com.rems.common.util.DBUtil;
 import com.rems.user.dao.UserDAO;
 import com.rems.user.model.User;
 
@@ -77,15 +78,24 @@ public class UserDAOImpl implements UserDAO {
 
             ps.setLong(1, authId);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapRow(rs));
-                }
-                return Optional.empty();
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                User user = new User();
+
+                user.setId(rs.getLong("id"));
+                user.setFullName(rs.getString("full_name"));
+                user.setRole(Role.valueOf(rs.getString("role")));
+
+                return Optional.of(user);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+        return null;
     }
 
     @Override

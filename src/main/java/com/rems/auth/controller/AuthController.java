@@ -13,6 +13,9 @@ import com.rems.auth.model.dto.RegisterDto;
 import com.rems.common.transaction.TransactionManager;
 import com.rems.user.dao.UserDAO;
 import com.rems.user.dao.impl.UserDAOImpl;
+import com.rems.user.model.User;
+import com.rems.user.service.UserService;
+import com.rems.user.service.impl.UserServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -24,6 +27,7 @@ import java.io.PrintWriter;
 public class AuthController extends HttpServlet {
 
     private AuthService authService;
+    private UserService userService;
 
     @Override
     public void init() {
@@ -33,12 +37,18 @@ public class AuthController extends HttpServlet {
         UserDAO userDAO = new UserDAOImpl();
         UserOtpDAO userOtpDAO = new UserOtpDAOImpl();
 
+
         authService = new AuthServiceImpl(
                 authAccountDAO,
                 userDAO,
                 userOtpDAO,
                 txManager
         );
+
+        userService = new UserServiceImpl(
+                txManager,
+                userDAO
+                );
     }
 
     @Override
@@ -98,10 +108,15 @@ public class AuthController extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        AuthAccount user = authService.login(email, password);
+        AuthAccount account = authService.login(email, password);
+
+        User user = userService.findByAuthId(account.getId());
 
         HttpSession session = request.getSession();
-        session.setAttribute("currentUser", user);
+
+        session.setAttribute("currentUser", account);
+        session.setAttribute("userId", account.getId());
+        session.setAttribute("role", user.getRole().name());
 
         response.sendRedirect(request.getContextPath() + "/admin/dashboard");
     }

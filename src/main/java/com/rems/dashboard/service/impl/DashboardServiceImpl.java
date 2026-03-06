@@ -77,6 +77,30 @@ public class DashboardServiceImpl implements DashboardService {
         });
     }
 
+    @Override
+    public StaffDashboardDTO getStaffDashboard(long userId) {
+
+        return txManager.execute(conn -> {
+
+            try {
+
+                long myDraft = dashboardDAO.countMyDraftProperties(conn, userId);
+                long myActive = dashboardDAO.countMyActiveProperties(conn, userId);
+                long myTransactions = dashboardDAO.countMyTransactions(conn, userId);
+
+                StaffDashboardDTO dto = new StaffDashboardDTO();
+                dto.setMyDraftProperties(myDraft);
+                dto.setMyActiveProperties(myActive);
+                dto.setMyTransactions(myTransactions);
+
+                return dto;
+
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to load staff dashboard", e);
+            }
+        });
+    }
+
     private List<DashboardCardDTO> buildCards(
             long totalProperties,
             long availableProperties,

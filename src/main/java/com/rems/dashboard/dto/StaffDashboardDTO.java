@@ -1,25 +1,32 @@
 package com.rems.dashboard.dto;
 
-import java.util.List;
-
 public class StaffDashboardDTO {
 
-    private List<DashboardCardDTO> cards;
-    private List<RecentTransactionDTO> recentTransactions;
+    private long myDraftProperties;
+    private long myActiveProperties;
+    private long myTransactions;
 
-    public List<DashboardCardDTO> getCards() {
-        return cards;
+    public long getMyDraftProperties() {
+        return myDraftProperties;
     }
 
-    public void setCards(List<DashboardCardDTO> cards) {
-        this.cards = cards;
+    public void setMyDraftProperties(long myDraftProperties) {
+        this.myDraftProperties = myDraftProperties;
     }
 
-    public List<RecentTransactionDTO> getRecentTransactions() {
-        return recentTransactions;
+    public long getMyActiveProperties() {
+        return myActiveProperties;
     }
 
-    public void setRecentTransactions(List<RecentTransactionDTO> recentTransactions) {
-        this.recentTransactions = recentTransactions;
+    public void setMyActiveProperties(long myActiveProperties) {
+        this.myActiveProperties = myActiveProperties;
+    }
+
+    public long getMyTransactions() {
+        return myTransactions;
+    }
+
+    public void setMyTransactions(long myTransactions) {
+        this.myTransactions = myTransactions;
     }
 }

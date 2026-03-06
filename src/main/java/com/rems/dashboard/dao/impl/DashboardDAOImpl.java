@@ -331,4 +331,66 @@ public class DashboardDAOImpl implements DashboardDAO {
             return 0;
         }
     }
+
+    @Override
+    public long countMyDraftProperties(Connection conn, long userId) throws SQLException {
+
+        String sql = """
+        SELECT COUNT(*)
+        FROM properties
+        WHERE created_by = ?
+        AND status = 'DRAFT'
+    """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+
+            return 0;
+        }
+    }
+
+    @Override
+    public long countMyActiveProperties(Connection conn, long userId) throws SQLException {
+
+        String sql = """
+        SELECT COUNT(*)
+        FROM properties
+        WHERE created_by = ?
+        AND status IN ('AVAILABLE','RESERVED')
+    """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+
+            return 0;
+        }
+    }
+
+    @Override
+    public long countMyTransactions(Connection conn, long userId) throws SQLException {
+
+        String sql = """
+        SELECT COUNT(*)
+        FROM transactions
+        WHERE processed_by = ?
+    """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+
+            return 0;
+        }
+    }
 }

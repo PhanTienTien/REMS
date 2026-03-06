@@ -38,4 +38,10 @@ public interface DashboardDAO {
 
     long countReservedTooLong(Connection conn) throws SQLException;
 
+    long countMyDraftProperties(Connection conn, long userId) throws SQLException;
+
+    long countMyActiveProperties(Connection conn, long userId) throws SQLException;
+
+    long countMyTransactions(Connection conn, long userId) throws SQLException;
+
 }
