@@ -23,7 +23,7 @@ public class LoginDto {
 //        return email;
 //    }
 //
-//    public String getPassword() {
+//    public String getPasswordHash() {
 //        return password;
 //    }
 }

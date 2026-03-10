@@ -93,28 +93,28 @@
 
         <div class="status-grid">
 
-          <div class="status-card">
+          <div class="status-card pending">
             <div class="status-title">PENDING</div>
             <div class="status-value">
               ${dashboard.transactionStats['PENDING']}
             </div>
           </div>
 
-          <div class="status-card">
+          <div class="status-card completed">
             <div class="status-title">COMPLETED</div>
             <div class="status-value">
               ${dashboard.transactionStats['COMPLETED']}
             </div>
           </div>
 
-          <div class="status-card">
+          <div class="status-card failed">
             <div class="status-title">FAILED</div>
             <div class="status-value">
               ${dashboard.transactionStats['FAILED']}
             </div>
           </div>
 
-          <div class="status-card">
+          <div class="status-card cancelled">
             <div class="status-title">CANCELLED</div>
             <div class="status-value">
               ${dashboard.transactionStats['CANCELLED']}

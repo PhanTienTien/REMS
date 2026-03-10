@@ -75,9 +75,6 @@ public class AuthAccountDAOImpl implements AuthAccountDAO {
         return null;
     }
 
-    // =====================================
-    // SAVE ACCOUNT
-    // =====================================
     public Long save(Connection conn, AuthAccount account) {
 
         String sql = """

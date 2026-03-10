@@ -66,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
             user.setAuthId(authId);
             user.setFullName(dto.getFullName());
             user.setEmail(dto.getEmail());
-            user.setPhone_number(dto.getPhoneNumber());
+            user.setPhoneNumber(dto.getPhoneNumber());
             user.setRole(Role.CUSTOMER);
             user.setVerified(false);
             user.setDeleted(false);
@@ -188,8 +188,6 @@ public class AuthServiceImpl implements AuthService {
             return null;
         });
     }
-
-    // ================= PRIVATE HELPERS =================
 
     private void validateEmailNotExists(Connection conn, String email) {
         if (authAccountDAO.findByEmail(conn, email) != null) {

@@ -3,6 +3,7 @@ package com.rems.common.transaction;
 import com.rems.common.util.DBUtil;
 
 import java.sql.Connection;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class TransactionManager {
@@ -17,6 +18,25 @@ public class TransactionManager {
                 T result = action.apply(conn);
                 conn.commit();
                 return result;
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void executeWithoutResult(Consumer<Connection> action) {
+
+        try (Connection conn = DBUtil.getConnection()) {
+
+            conn.setAutoCommit(false);
+
+            try {
+                action.accept(conn);
+                conn.commit();
             } catch (Exception e) {
                 conn.rollback();
                 throw e;

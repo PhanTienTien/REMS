@@ -12,4 +12,5 @@ public interface AuthService {
     AuthAccount login(String username, String password);
 
     void resendOtp(String email);
+
 }

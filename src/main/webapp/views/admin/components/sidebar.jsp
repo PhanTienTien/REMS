@@ -10,9 +10,9 @@
       </a>
     </li>
 
-    <li>
-      <a href="#">Properties</a>
-    </li>
+    <a href="${pageContext.request.contextPath}/admin/properties">
+      Properties
+    </a>
 
     <li>
       <a href="#">Bookings</a>
@@ -23,7 +23,9 @@
     </li>
 
     <li>
-      <a href="#">Users</a>
+      <a href="${pageContext.request.contextPath}/admin/users">
+        Users
+      </a>
     </li>
 
     <li>

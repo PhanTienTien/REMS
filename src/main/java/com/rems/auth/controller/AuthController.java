@@ -5,11 +5,10 @@ import com.rems.auth.dao.UserOtpDAO;
 import com.rems.auth.dao.impl.AuthAccountDAOImpl;
 import com.rems.auth.dao.impl.UserOtpDAOImpl;
 import com.rems.auth.model.AuthAccount;
+import com.rems.auth.model.dto.RegisterDto;
 import com.rems.auth.service.AuthService;
 import com.rems.auth.service.impl.AuthServiceImpl;
 import com.rems.common.exception.BusinessException;
-
-import com.rems.auth.model.dto.RegisterDto;
 import com.rems.common.transaction.TransactionManager;
 import com.rems.user.dao.UserDAO;
 import com.rems.user.dao.impl.UserDAOImpl;
@@ -18,7 +17,10 @@ import com.rems.user.service.UserService;
 import com.rems.user.service.impl.UserServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -47,7 +49,8 @@ public class AuthController extends HttpServlet {
 
         userService = new UserServiceImpl(
                 txManager,
-                userDAO
+                userDAO,
+                authAccountDAO
                 );
     }
 
@@ -98,9 +101,6 @@ public class AuthController extends HttpServlet {
         }
     }
 
-    // ============================
-    // LOGIN
-    // ============================
     private void handleLogin(HttpServletRequest request,
                              HttpServletResponse response)
             throws Exception {
@@ -114,16 +114,18 @@ public class AuthController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        session.setAttribute("currentUser", account);
+        session.setAttribute("currentUser", user);
         session.setAttribute("userId", account.getId());
         session.setAttribute("role", user.getRole().name());
 
         response.sendRedirect(request.getContextPath() + "/admin/dashboard");
-    }
 
-    // ============================
-    // REGISTER
-    // ============================
+//        if (user.getRole() == Role.ADMIN || user.getRole() == Role.STAFF) {
+//            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+//        } else {
+//            response.sendRedirect(request.getContextPath() + "/user/dashboard");
+//        }
+    }
     private void handleRegister(HttpServletRequest request,
                                 HttpServletResponse response)
             throws Exception {
@@ -141,9 +143,6 @@ public class AuthController extends HttpServlet {
         sendJson(response, "success", null);
     }
 
-    // ============================
-    // VERIFY OTP
-    // ============================
     private void handleVerifyOtp(HttpServletRequest request,
                                  HttpServletResponse response)
             throws Exception {
@@ -156,9 +155,6 @@ public class AuthController extends HttpServlet {
         sendJson(response, "success", null);
     }
 
-    // ============================
-    // RESEND OTP
-    // ============================
     private void handleResendOtp(HttpServletRequest request,
                                  HttpServletResponse response)
             throws Exception {
@@ -170,9 +166,6 @@ public class AuthController extends HttpServlet {
         sendJson(response, "success", null);
     }
 
-    // ============================
-    // JSON RESPONSE
-    // ============================
     private void sendJson(HttpServletResponse response,
                           String status,
                           String message) throws IOException {

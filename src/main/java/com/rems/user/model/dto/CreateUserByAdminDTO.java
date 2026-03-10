@@ -1,30 +1,29 @@
-package com.rems.auth.model.dto;
+package com.rems.user.model.dto;
 
+import com.rems.common.constant.AccountStatus;
+import com.rems.common.constant.Role;
 import com.rems.common.exception.BusinessException;
 import com.rems.common.exception.ErrorCode;
 
 import java.util.regex.Pattern;
 
-public class RegisterDto {
-
+public class CreateUserByAdminDTO {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
     private final String fullName;
     private final String email;
     private final String phoneNumber;
     private final String password;
-    private final String confirmPassword;
+    private final Role role;
+    private final AccountStatus status;
 
-    public RegisterDto(String fullName,
-                       String email,
-                       String phoneNumber,
-                       String password,
-                       String confirmPassword ){
+    public CreateUserByAdminDTO(String fullName, String email, String phoneNumber, String password, Role role, AccountStatus status) {
         this.fullName = fullName;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.password = password;
-        this.confirmPassword = confirmPassword;
+        this.role = role;
+        this.status = status;
     }
 
     public void validate() {
@@ -42,8 +41,6 @@ public class RegisterDto {
         if (isBlank(password)) throw new BusinessException(ErrorCode.PASSWORD_REQUIRED);
 
         if (password.length() < 6) throw new BusinessException(ErrorCode.PASSWORD_TOO_SHORT);
-
-        if (!password.equals(confirmPassword)) throw new BusinessException(ErrorCode.PASSWORD_NOT_MATCH);
     }
 
     private boolean isBlank(String value) {
@@ -51,8 +48,16 @@ public class RegisterDto {
     }
 
     public String getFullName() { return fullName; }
+    public void setFullName(String fullName) {}
     public String getEmail() { return email; }
+    public void setEmail(String email) {}
     public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) {}
     public String getPassword() { return password; }
-    public String getConfirmPassword() { return confirmPassword; }
+    public void setPassword(String password) {}
+    public Role getRole() {return role;}
+    public void setRole(Role role) {}
+
+    public AccountStatus getStatus() {return status;}
+    public void setStatus(AccountStatus status) {}
 }

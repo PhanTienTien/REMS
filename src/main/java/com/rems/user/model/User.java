@@ -7,27 +7,27 @@ import java.time.LocalDateTime;
 public class User {
 
     private Long id;
-    private Long authId;   // NEW
+    private Long authId;
     private String fullName;
     private String email;
-    private String phone_number;
+    private String phoneNumber;
     private Role role;
     private boolean isVerified;
     private boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public User(long id, long authId, String fullName, String email, String phone_number, Role role, boolean isVerified, boolean isDeleted, LocalDateTime createdAt, LocalDateTime localDateTime) {
+    public User(long id, long authId, String fullName, String email, String phoneNumber, Role role, boolean isVerified, boolean isDeleted, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.authId = authId;
         this.fullName = fullName;
         this.email = email;
-        this.phone_number = phone_number;
+        this.phoneNumber = phoneNumber;
         this.role = role;
         this.isVerified = isVerified;
         this.isDeleted = isDeleted;
         this.createdAt = createdAt;
-        this.updatedAt = localDateTime;
+        this.updatedAt = updatedAt;
     }
 
     public User() {
@@ -57,11 +57,11 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
-    public String getPhone_number() {
-        return phone_number;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
-    public void setPhone_number(String phone_number) {
-        this.phone_number = phone_number;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
     public Role getRole() {
         return role;
