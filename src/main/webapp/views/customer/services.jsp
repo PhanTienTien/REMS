@@ -25,10 +25,10 @@
 
                 <ul class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end">
                     <li><a href="<%=path%>/home.jsp">Home</a></li>
-                    <li><a href="<%=path%>/views/properties.jsp">Properties</a></li>
-                    <li class="active"><a href="<%=path%>/views/services.jsp">Services</a></li>
-                    <li><a href="<%=path%>/views/about.jsp">About</a></li>
-                    <li><a href="<%=path%>/views/contact.jsp">Contact</a></li>
+                    <li><a href="<%=path%>/views/user/properties.jsps.jsp">Properties</a></li>
+                    <li class="active"><a href="<%=path%>/views/user/services.jsp">Services</a></li>
+                    <li><a href="<%=path%>/views/user/about.jspt.jsp">About</a></li>
+                    <li><a href="<%=path%>/views/user/contact.jspt.jsp">Contact</a></li>
                 </ul>
             </div>
         </div>

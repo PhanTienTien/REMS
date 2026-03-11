@@ -1,7 +1,7 @@
 <div class="topbar">
 
     <div class="topbar-left">
-        <h3>Admin Dashboard</h3>
+        <h3>Staff Dashboard</h3>
     </div>
 
     <div class="topbar-right">

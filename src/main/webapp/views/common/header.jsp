@@ -46,10 +46,10 @@
                 <ul class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end">
 
                     <li><a href="${pageContext.request.contextPath}/">Home</a></li>
-                    <li><a href="${pageContext.request.contextPath}/properties">Properties</a></li>
-                    <li><a href="${pageContext.request.contextPath}/services">Services</a></li>
-                    <li><a href="${pageContext.request.contextPath}/about">About</a></li>
-                    <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
+                    <li><a href="${pageContext.request.contextPath}/views/customer/properties">Properties</a></li>
+                    <li><a href="${pageContext.request.contextPath}/views/customer/services">Services</a></li>
+                    <li><a href="${pageContext.request.contextPath}/views/customer/about">About</a></li>
+                    <li><a href="${pageContext.request.contextPath}/views/customer/contact">Contact</a></li>
 
                     <c:choose>
 

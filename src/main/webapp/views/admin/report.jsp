@@ -27,8 +27,6 @@
 
             <h2>Reports</h2>
 
-            <!-- FILTER -->
-
             <div class="filter-container">
 
                 <form method="get"

@@ -125,7 +125,7 @@ public class AuthController extends HttpServlet {
 
         } else {
 
-            response.sendRedirect(request.getContextPath() + "/user/dashboard");
+            response.sendRedirect(request.getContextPath() + "/home.jsp");
 
         }
     }

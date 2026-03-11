@@ -3,6 +3,7 @@
 <%
     String path = request.getContextPath();
 %>
+<jsp:include page="/views/common/header.jsp"/>
 <!DOCTYPE html>
 <html>
 <head>
@@ -90,4 +91,5 @@
 </div>
 <script src="${pageContext.request.contextPath}/assets/js/auth.js"></script>
 </body>
+<jsp:include page="/views/common/footer.jsp"/>
 </html>

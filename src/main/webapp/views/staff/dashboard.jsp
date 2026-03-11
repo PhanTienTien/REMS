@@ -1,9 +1,74 @@
-<h2>Staff Dashboard</h2>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<div>My Draft Properties: ${dashboard.myDraftProperties}</div>
+<html>
+<head>
+    <title>REMS Staff Dashboard</title>
 
-<div>My Active Properties: ${dashboard.myActiveProperties}</div>
+    <link rel="stylesheet"
+          href="${pageContext.request.contextPath}/assets/css/admin/dashboard.css">
 
-<div>My Transactions: ${dashboard.myTransactions}</div>
+</head>
 
-<a href="/staff/properties/create">Create Property</a>
+<body>
+
+<div class="dashboard-container">
+
+    <jsp:include page="../staff/components/sidebar.jsp"/>
+
+    <div class="main-content">
+
+        <jsp:include page="../staff/components/topbar.jsp"/>
+
+        <div class="dashboard-content">
+
+            <h2>My Dashboard</h2>
+
+            <div class="cards-container">
+
+                <div class="card">
+
+                    <div class="card-title">
+                        My Draft Properties
+                    </div>
+
+                    <div class="card-value">
+                        ${dashboard.myDraftProperties}
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="card-title">
+                        My Active Properties
+                    </div>
+
+                    <div class="card-value">
+                        ${dashboard.myActiveProperties}
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="card-title">
+                        My Transactions
+                    </div>
+
+                    <div class="card-value">
+                        ${dashboard.myTransactions}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

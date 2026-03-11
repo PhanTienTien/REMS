@@ -4,13 +4,13 @@
 <html>
 <head>
 
-  <title>Activity Logs - REMS Admin</title>
+    <title>Activity Logs - REMS Admin</title>
 
-  <link rel="stylesheet"
-        href="${pageContext.request.contextPath}/assets/css/admin/dashboard.css">
+    <link rel="stylesheet"
+          href="${pageContext.request.contextPath}/assets/css/admin/dashboard.css">
 
-  <link rel="stylesheet"
-        href="${pageContext.request.contextPath}/assets/css/admin/activitylog.css">
+    <link rel="stylesheet"
+          href="${pageContext.request.contextPath}/assets/css/admin/activitylog.css">
 
 </head>
 
@@ -18,81 +18,99 @@
 
 <div class="dashboard-container">
 
-  <jsp:include page="components/sidebar.jsp"/>
+    <c:choose>
 
-  <div class="main-content">
+        <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
+            <jsp:include page="/views/admin/components/sidebar.jsp"/>
+        </c:when>
 
-    <jsp:include page="components/topbar.jsp"/>
+        <c:otherwise>
+            <jsp:include page="/views/staff/components/sidebar.jsp"/>
+        </c:otherwise>
 
-    <div class="dashboard-content">
+    </c:choose>
 
-      <div class="transactions-container">
+    <div class="main-content">
 
-        <h3>Activity Logs</h3>
+        <c:choose>
 
-        <!-- FILTER -->
+            <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
+                <jsp:include page="/views/admin/components/topbar.jsp"/>
+            </c:when>
 
-        <div class="filter-container">
+            <c:otherwise>
+                <jsp:include page="/views/staff/components/topbar.jsp"/>
+            </c:otherwise>
 
-          <form method="get"
-                action="${pageContext.request.contextPath}/admin/activity-logs">
+        </c:choose>
 
-            <input type="text"
-                   name="user"
-                   placeholder="Search user"
-                   value="${param.user}">
+        <div class="dashboard-content">
 
-            <select name="action">
+            <div class="transactions-container">
 
-              <option value="">All Actions</option>
+                <h3>Activity Logs</h3>
 
-              <option value="CREATE_PROPERTY">Create Property</option>
-              <option value="UPDATE_PROPERTY">Update Property</option>
-              <option value="DELETE_PROPERTY">Delete Property</option>
+                <!-- FILTER -->
 
-              <option value="CREATE_BOOKING">Create Booking</option>
-              <option value="CANCEL_BOOKING">Cancel Booking</option>
+                <div class="filter-container">
 
-              <option value="CREATE_TRANSACTION">Create Transaction</option>
-              <option value="COMPLETE_TRANSACTION">Complete Transaction</option>
+                    <form method="get"
+                          action="${pageContext.request.contextPath}/admin/activity-logs">
 
-            </select>
+                        <input type="text"
+                               name="user"
+                               placeholder="Search user"
+                               value="${param.user}">
 
-            <input type="date" name="fromDate" value="${param.fromDate}">
-            <input type="date" name="toDate" value="${param.toDate}">
+                        <select name="action">
 
-            <button type="submit">Filter</button>
+                            <option value="">All Actions</option>
 
-          </form>
+                            <option value="CREATE_PROPERTY">Create Property</option>
+                            <option value="UPDATE_PROPERTY">Update Property</option>
+                            <option value="DELETE_PROPERTY">Delete Property</option>
 
-        </div>
+                            <option value="CREATE_BOOKING">Create Booking</option>
+                            <option value="CANCEL_BOOKING">Cancel Booking</option>
 
-        <!-- TABLE -->
+                            <option value="CREATE_TRANSACTION">Create Transaction</option>
+                            <option value="COMPLETE_TRANSACTION">Complete Transaction</option>
 
-        <table>
+                        </select>
 
-          <thead>
-          <tr>
-            <th>ID</th>
-            <th>User</th>
-            <th>Action</th>
-            <th>Entity</th>
-            <th>Description</th>
-            <th>Date</th>
-          </tr>
-          </thead>
+                        <input type="date" name="fromDate" value="${param.fromDate}">
+                        <input type="date" name="toDate" value="${param.toDate}">
 
-          <tbody>
+                        <button type="submit">Filter</button>
 
-          <c:forEach items="${logs}" var="log">
+                    </form>
 
-            <tr>
+                </div>
 
-              <td>${log.id}</td>
+                <table>
 
-              <td>${log.fullName}</td>
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Entity</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                    </tr>
+                    </thead>
 
-              <td>
+                    <tbody>
+
+                    <c:forEach items="${logs}" var="log" varStatus="loop">
+
+                        <tr>
+
+                            <td>${loop.index + 1}</td>
+
+                            <td>${log.fullName}</td>
+
+                            <td>
 
                 <span class="badge
                 <c:choose>
@@ -112,45 +130,43 @@
                 </c:choose>
                 ">
 
-                    ${log.action}
+                        ${log.action}
 
                 </span>
 
-              </td>
+                            </td>
 
-              <td>${log.entityType} #${log.entityId}</td>
+                            <td>${log.entityType} #${log.entityId}</td>
 
-              <td>${log.description}</td>
+                            <td>${log.description}</td>
 
-              <td>${log.createdAt}</td>
+                            <td>${log.createdAt}</td>
 
-            </tr>
+                        </tr>
 
-          </c:forEach>
+                    </c:forEach>
 
-          </tbody>
+                    </tbody>
 
-        </table>
+                </table>
 
-      </div>
+            </div>
 
-      <!-- PAGINATION -->
+            <div class="pagination">
 
-      <div class="pagination">
+                <c:if test="${currentPage > 1}">
+                    <a href="?page=${currentPage-1}">Previous</a>
+                </c:if>
 
-        <c:if test="${currentPage > 1}">
-          <a href="?page=${currentPage-1}">Previous</a>
-        </c:if>
+                <span>Page ${currentPage}</span>
 
-        <span>Page ${currentPage}</span>
+                <a href="?page=${currentPage+1}">Next</a>
 
-        <a href="?page=${currentPage+1}">Next</a>
+            </div>
 
-      </div>
+        </div>
 
     </div>
-
-  </div>
 
 </div>
 

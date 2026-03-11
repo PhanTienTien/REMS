@@ -4,13 +4,13 @@
 <html>
 <head>
 
-  <title>Transactions - REMS Admin</title>
+    <title>Transactions - REMS Admin</title>
 
-  <link rel="stylesheet"
-        href="${pageContext.request.contextPath}/assets/css/admin/dashboard.css">
+    <link rel="stylesheet"
+          href="${pageContext.request.contextPath}/assets/css/admin/dashboard.css">
 
-  <link rel="stylesheet"
-        href="${pageContext.request.contextPath}/assets/css/admin/transaction-dashboard.css">
+    <link rel="stylesheet"
+          href="${pageContext.request.contextPath}/assets/css/admin/transaction-dashboard.css">
 
 </head>
 
@@ -18,77 +18,97 @@
 
 <div class="dashboard-container">
 
-  <jsp:include page="components/sidebar.jsp"/>
+    <c:choose>
 
-  <div class="main-content">
+        <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
+            <jsp:include page="/views/admin/components/sidebar.jsp"/>
+        </c:when>
 
-    <jsp:include page="components/topbar.jsp"/>
+        <c:otherwise>
+            <jsp:include page="/views/staff/components/sidebar.jsp"/>
+        </c:otherwise>
 
-    <div class="dashboard-content">
+    </c:choose>
 
-      <div class="transactions-container">
+    <div class="main-content">
 
-        <div class="page-header">
+        <c:choose>
 
-          <h2>Transactions</h2>
+            <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
+                <jsp:include page="/views/admin/components/topbar.jsp"/>
+            </c:when>
 
-          <div class="filter-box">
+            <c:otherwise>
+                <jsp:include page="/views/staff/components/topbar.jsp"/>
+            </c:otherwise>
 
-            <a class="filter-btn"
-               href="${pageContext.request.contextPath}/admin/transactions">
-              All
-            </a>
+        </c:choose>
 
-            <a class="filter-btn"
-               href="${pageContext.request.contextPath}/admin/transactions?status=PENDING">
-              Pending
-            </a>
+        <div class="dashboard-content">
 
-            <a class="filter-btn"
-               href="${pageContext.request.contextPath}/admin/transactions?status=COMPLETED">
-              Completed
-            </a>
+            <div class="transactions-container">
 
-            <a class="filter-btn"
-               href="${pageContext.request.contextPath}/admin/transactions?status=FAILED">
-              Failed
-            </a>
+                <div class="page-header">
 
-          </div>
+                    <h2>Transactions</h2>
 
-        </div>
+                    <div class="filter-box">
 
-        <table>
+                        <a class="filter-btn"
+                           href="${pageContext.request.contextPath}/admin/transactions">
+                            All
+                        </a>
 
-          <thead>
-          <tr>
-            <th>ID</th>
-            <th>Property</th>
-            <th>Customer</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Type</th>
-            <th>Date</th>
-            <th>Processed By</th>
-            <th>Action</th>
-          </tr>
-          </thead>
+                        <a class="filter-btn"
+                           href="${pageContext.request.contextPath}/admin/transactions?status=PENDING">
+                            Pending
+                        </a>
 
-          <tbody>
+                        <a class="filter-btn"
+                           href="${pageContext.request.contextPath}/admin/transactions?status=COMPLETED">
+                            Completed
+                        </a>
 
-          <c:forEach items="${transactions}" var="tx">
+                        <a class="filter-btn"
+                           href="${pageContext.request.contextPath}/admin/transactions?status=FAILED">
+                            Failed
+                        </a>
 
-            <tr>
+                    </div>
 
-              <td>${tx.id}</td>
+                </div>
 
-              <td>${tx.propertyTitleSnapshot}</td>
+                <table>
 
-              <td>${tx.customerNameSnapshot}</td>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Property</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Processed By</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
 
-              <td class="money">${tx.amount}</td>
+                    <tbody>
 
-              <td>
+                    <c:forEach items="${transactions}" var="tx">
+
+                        <tr>
+
+                            <td>${tx.id}</td>
+
+                            <td>${tx.propertyTitleSnapshot}</td>
+
+                            <td>${tx.customerNameSnapshot}</td>
+
+                            <td class="money">${tx.amount}</td>
+
+                            <td>
 
                 <span class="badge
                 <c:choose>
@@ -98,57 +118,57 @@
                     <c:otherwise>badge-cancelled</c:otherwise>
                 </c:choose>
                 ">
-                    ${tx.status}
+                        ${tx.status}
                 </span>
 
-              </td>
+                            </td>
 
-              <td>${tx.type}</td>
+                            <td>${tx.type}</td>
 
-              <td>${tx.createdAt}</td>
+                            <td>${tx.createdAt}</td>
 
-              <td>${tx.processedBy}</td>
+                            <td>${tx.processedBy}</td>
 
-              <td>
+                            <td>
 
-                <a class="action-btn view"
-                   href="${pageContext.request.contextPath}/admin/transactions/view?id=${tx.id}">
-                  View
-                </a>
+                                <a class="action-btn view"
+                                   href="${pageContext.request.contextPath}/admin/transactions/view?id=${tx.id}">
+                                    View
+                                </a>
 
-                <c:if test="${tx.status == 'PENDING'}">
+                                <c:if test="${tx.status == 'PENDING'}">
 
-                  <form method="post"
-                        action="${pageContext.request.contextPath}/admin/transactions/complete"
-                        class="complete-form">
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/admin/transactions/complete"
+                                          class="complete-form">
 
-                    <input type="hidden"
-                           name="bookingId"
-                           value="${tx.bookingId}"/>
+                                        <input type="hidden"
+                                               name="bookingId"
+                                               value="${tx.bookingId}"/>
 
-                    <button class="action-btn complete">
-                      Complete
-                    </button>
+                                        <button class="action-btn complete">
+                                            Complete
+                                        </button>
 
-                  </form>
+                                    </form>
 
-                </c:if>
+                                </c:if>
 
-              </td>
+                            </td>
 
-            </tr>
+                        </tr>
 
-          </c:forEach>
+                    </c:forEach>
 
-          </tbody>
+                    </tbody>
 
-        </table>
+                </table>
 
-      </div>
+            </div>
+
+        </div>
 
     </div>
-
-  </div>
 
 </div>
 

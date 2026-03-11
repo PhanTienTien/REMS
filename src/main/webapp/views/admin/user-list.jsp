@@ -84,7 +84,7 @@
 
                 <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>STT</th>
                     <th>Full Name</th>
                     <th>Email</th>
                     <th>Phone</th>
@@ -99,10 +99,10 @@
 
                 <tbody>
 
-                <c:forEach var="u" items="${users}">
+                <c:forEach var="u" items="${users}" varStatus="loop">
                     <tr>
 
-                        <td>${u.id}</td>
+                        <td>${loop.index + 1}</td>
                         <td>${u.fullName}</td>
                         <td>${u.email}</td>
                         <td>${u.phoneNumber}</td>
@@ -184,7 +184,6 @@
 
             </table>
 
-            <!-- CREATE USER MODAL -->
             <div id="createModal" class="modal">
 
                 <div class="modal-content">
@@ -233,7 +232,6 @@
 
             </div>
 
-            <!-- EDIT USER MODAL -->
             <div id="editModal" class="modal">
 
                 <div class="modal-content">
@@ -279,8 +277,6 @@
 
             </div>
 
-
-            <!-- PAGINATION -->
             <div class="pagination">
 
                 <c:if test="${currentPage > 1}">

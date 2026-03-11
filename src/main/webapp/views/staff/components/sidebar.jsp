@@ -31,21 +31,11 @@
         </li>
 
         <li>
-            <a href="${pageContext.request.contextPath}/admin/users">
-                Users
-            </a>
-        </li>
-
-        <li>
-            <a href="${pageContext.request.contextPath}/admin/reports">
-                Reports
-            </a>
-        </li>
-
-        <li>
             <a href="${pageContext.request.contextPath}/admin/activity-logs">
                 Activity Logs
             </a>
         </li>
+
     </ul>
+
 </div>

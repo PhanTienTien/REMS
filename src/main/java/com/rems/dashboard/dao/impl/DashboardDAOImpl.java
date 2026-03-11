@@ -2,7 +2,6 @@ package com.rems.dashboard.dao.impl;
 
 import com.rems.dashboard.dao.DashboardDAO;
 import com.rems.dashboard.dto.RecentTransactionDTO;
-import com.rems.dashboard.dto.RevenueChartDTO;
 import com.rems.dashboard.dto.RevenuePointDTO;
 
 import java.math.BigDecimal;
@@ -342,14 +341,18 @@ public class DashboardDAOImpl implements DashboardDAO {
         AND status = 'DRAFT'
     """;
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            if (rs.next()) {
-                return rs.getLong(1);
+            ps.setLong(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+
+                return 0;
             }
-
-            return 0;
         }
     }
 
@@ -363,14 +366,18 @@ public class DashboardDAOImpl implements DashboardDAO {
         AND status IN ('AVAILABLE','RESERVED')
     """;
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            if (rs.next()) {
-                return rs.getLong(1);
+            ps.setLong(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+
+                return 0;
             }
-
-            return 0;
         }
     }
 
@@ -383,14 +390,18 @@ public class DashboardDAOImpl implements DashboardDAO {
         WHERE processed_by = ?
     """;
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            if (rs.next()) {
-                return rs.getLong(1);
+            ps.setLong(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+
+                return 0;
             }
-
-            return 0;
         }
     }
 }

@@ -250,3 +250,19 @@
     margin-bottom:15px;
     font-weight:500;
 }
+
+.pagination{
+    margin-top:20px;
+}
+
+.pagination a{
+    padding:6px 10px;
+    border:1px solid #ddd;
+    margin-right:5px;
+    text-decoration:none;
+}
+
+.pagination a.active{
+    background:#3498db;
+    color:white;
+}

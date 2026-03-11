@@ -62,6 +62,8 @@ public class UserServiceImpl implements UserService {
                     PasswordUtil.hash(dto.getPassword())
             );
 
+            account.setStatus(AccountStatus.ACTIVE);
+
             Long authId = authAccountDAO.save(conn, account);
 
             User user = new User();
@@ -72,7 +74,6 @@ public class UserServiceImpl implements UserService {
             user.setRole(dto.getRole());
             user.setVerified(true);
             user.setDeleted(false);
-            account.setStatus(AccountStatus.ACTIVE);
 
             userDAO.save(conn, user);
 

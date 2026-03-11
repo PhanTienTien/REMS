@@ -15,11 +15,31 @@
 
 <div class="dashboard-container">
 
-    <jsp:include page="components/sidebar.jsp"/>
+    <c:choose>
+
+        <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
+            <jsp:include page="/views/admin/components/sidebar.jsp"/>
+        </c:when>
+
+        <c:otherwise>
+            <jsp:include page="/views/staff/components/sidebar.jsp"/>
+        </c:otherwise>
+
+    </c:choose>
 
     <div class="main-content">
 
-        <jsp:include page="components/topbar.jsp"/>
+        <c:choose>
+
+            <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
+                <jsp:include page="/views/admin/components/topbar.jsp"/>
+            </c:when>
+
+            <c:otherwise>
+                <jsp:include page="/views/staff/components/topbar.jsp"/>
+            </c:otherwise>
+
+        </c:choose>
 
         <div class="dashboard-content">
 

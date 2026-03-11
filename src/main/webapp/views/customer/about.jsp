@@ -1,4 +1,4 @@
-<%@ include file="common/header.jsp" %>
+<%@ include file="../common/header.jsp" %>
 
 <div class="hero page-inner overlay"
      style="background-image: url('${pageContext.request.contextPath}/assets/images/hero_bg_3.jpg')">
@@ -112,4 +112,4 @@
     </div>
 </div>
 
-<%@ include file="common/footer.jsp" %>
+<%@ include file="../common/footer.jsp" %>
