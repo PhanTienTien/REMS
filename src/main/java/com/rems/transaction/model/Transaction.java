@@ -20,7 +20,7 @@ public class Transaction {
     private TransactionStatus status;
     private LocalDateTime completedAt;
     private LocalDateTime createdAt;
-    private Long ProcessedBy;
+    private Long processedBy;
 
     public Transaction() {}
 
@@ -97,9 +97,9 @@ public class Transaction {
         this.createdAt = createdAt;
     }
     public Long getProcessedBy() {
-        return ProcessedBy;
+        return processedBy;
     }
     public void setProcessedBy(Long processedBy) {
-        ProcessedBy = processedBy;
+        processedBy = processedBy;
     }
 }

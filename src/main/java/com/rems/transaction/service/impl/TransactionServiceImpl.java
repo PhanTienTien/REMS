@@ -21,6 +21,7 @@ import com.rems.user.dao.impl.UserDAOImpl;
 import com.rems.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class TransactionServiceImpl implements TransactionService {
 
@@ -83,6 +84,7 @@ public class TransactionServiceImpl implements TransactionService {
 
             tx.setStatus(TransactionStatus.COMPLETED);
             tx.setCompletedAt(LocalDateTime.now());
+            tx.setProcessedBy(staffId);
 
             Long txId = transactionDAO.insert(conn, tx);
 
@@ -103,6 +105,17 @@ public class TransactionServiceImpl implements TransactionService {
                     finalStatus);
 
             return txId;
+        });
+    }
+
+    @Override
+    public List<Transaction> findAll() {
+
+        return txManager.execute(conn -> {
+
+            TransactionDAO dao = new TransactionDAOImpl();
+
+            return dao.findAll(conn);
         });
     }
 }

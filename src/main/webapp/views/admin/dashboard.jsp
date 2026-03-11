@@ -6,7 +6,7 @@
   <title>REMS Admin Dashboard</title>
 
   <link rel="stylesheet"
-        href="${pageContext.request.contextPath}/assets/css/dashboard.css">
+        href="${pageContext.request.contextPath}/assets/css/admin/dashboard.css">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -16,17 +16,14 @@
 
 <div class="dashboard-container">
 
-  <!-- SIDEBAR -->
   <jsp:include page="components/sidebar.jsp"/>
 
   <div class="main-content">
 
-    <!-- TOPBAR -->
     <jsp:include page="components/topbar.jsp"/>
 
     <div class="dashboard-content">
 
-      <!-- DASHBOARD CARDS -->
       <div class="cards-container">
 
         <c:forEach items="${dashboard.cards}" var="card">
@@ -159,11 +156,8 @@
           </a>
 
         </div>
+
       </c:if>
-
-
-
-      <!-- REVENUE CHART -->
       <div class="chart-container">
 
         <h3>Monthly Revenue</h3>
@@ -172,8 +166,6 @@
 
       </div>
 
-
-      <!-- RECENT TRANSACTIONS -->
       <div class="transactions-container">
 
         <h3>Recent Transactions</h3>
@@ -244,112 +236,7 @@
 
 </div>
 
-
-<!-- ========================= -->
-<!-- DASHBOARD SCRIPT -->
-<!-- ========================= -->
-
-<script>
-
-  document.addEventListener("DOMContentLoaded", function () {
-
-    /* =========================
-       FORMAT MONEY
-    ========================== */
-
-    document.querySelectorAll(".money").forEach(el => {
-
-      let value = parseFloat(el.innerText);
-
-      if (!isNaN(value)) {
-
-        el.innerText =
-                new Intl.NumberFormat('vi-VN', {
-                  style: 'currency',
-                  currency: 'VND'
-                }).format(value);
-
-      }
-
-    });
-
-
-    /* =========================
-       BUILD REVENUE CHART DATA
-    ========================== */
-
-    const labels = [
-      <c:forEach items="${dashboard.revenueChart.points}" var="p" varStatus="loop">
-      "${p.month}"${!loop.last ? "," : ""}
-      </c:forEach>
-    ];
-
-    const data = [
-      <c:forEach items="${dashboard.revenueChart.points}" var="p" varStatus="loop">
-      ${p.revenue}${!loop.last ? "," : ""}
-      </c:forEach>
-    ];
-
-
-    /* =========================
-       RENDER CHART
-    ========================== */
-
-    const ctx = document.getElementById('revenueChart');
-
-    new Chart(ctx, {
-
-      type: 'line',
-
-      data: {
-
-        labels: labels,
-
-        datasets: [{
-
-          label: 'Revenue',
-
-          data: data,
-
-          borderColor: '#2563eb',
-
-          backgroundColor: 'rgba(37,99,235,0.2)',
-
-          tension: 0.4,
-
-          fill: true
-
-        }]
-
-      },
-
-      options: {
-
-        responsive: true,
-
-        plugins: {
-
-          legend: {
-            display: false
-          }
-
-        },
-
-        scales: {
-
-          y: {
-            beginAtZero: true
-          }
-
-        }
-
-      }
-
-    });
-
-  });
-
-</script>
+<script src="${pageContext.request.contextPath}/assets/js/admin/dashboard.js"></script>
 
 </body>
 </html>

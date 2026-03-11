@@ -25,6 +25,29 @@ public class CreatePropertyDTO {
         this.price = price;
     }
 
+    public void validate() {
+
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Title is required");
+        }
+
+        if (address == null || address.isBlank()) {
+            throw new IllegalArgumentException("Address is required");
+        }
+
+        if (type == null) {
+            throw new IllegalArgumentException("Property type is required");
+        }
+
+        if (price == null) {
+            throw new IllegalArgumentException("Price is required");
+        }
+
+        if (price.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Price must be positive");
+        }
+    }
+
     public String getTitle() {
         return title;
     }

@@ -1,0 +1,52 @@
+.transactions-container{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+}
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.filter-box{
+    display:flex;
+    gap:10px;
+}
+
+.filter-btn{
+    padding:6px 12px;
+    background:#f2f2f2;
+    border-radius:6px;
+    text-decoration:none;
+    color:#333;
+    font-size:14px;
+}
+
+.filter-btn:hover{
+    background:#e0e0e0;
+}
+
+.action-btn{
+    padding:5px 10px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.action-btn.view{
+    background:#3498db;
+    color:white;
+}
+
+.action-btn.complete{
+    background:#27ae60;
+    color:white;
+}
+
+.complete-form{
+    display:inline;
+}

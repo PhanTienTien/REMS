@@ -6,25 +6,23 @@
     <title>User Management</title>
 
     <link rel="stylesheet"
-          href="${pageContext.request.contextPath}/assets/css/dashboard.css">
+          href="${pageContext.request.contextPath}/assets/css/admin/dashboard.css">
 
     <link rel="stylesheet"
-          href="${pageContext.request.contextPath}/assets/css/admin-users.css">
+          href="${pageContext.request.contextPath}/assets/css/admin/user-dashboard.css">
 </head>
 
-<script src="${pageContext.request.contextPath}/assets/js/admin-users.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/admin/users-dashboard.js"></script>
 
 <body>
 
 <div class="dashboard-container">
 
-    <!-- SIDEBAR -->
-    <jsp:include page="../components/sidebar.jsp"/>
+    <jsp:include page="components/sidebar.jsp"/>
 
     <div class="main-content">
 
-        <!-- TOPBAR -->
-        <jsp:include page="../components/topbar.jsp"/>
+        <jsp:include page="components/topbar.jsp"/>
 
         <div class="dashboard-content">
 

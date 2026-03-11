@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface PropertyDAO {
@@ -25,7 +24,18 @@ public interface PropertyDAO {
                         Long id,
                         LocalDateTime approvedAt);
 
-    //test
-    Long insertTestProperty(Connection conn, String title, BigDecimal price);
-    String getPropertyStatus(Connection conn, Long propertyId);
+    Long insert(Connection conn, Property property);
+
+    void update(Connection conn, Property property);
+
+    List<Property> findAll();
+
+    List<Property> search(
+            String address,
+            PropertyType type,
+            BigDecimal minPrice,
+            BigDecimal maxPrice
+    );
+
+    List<Property> findByStatus(PropertyStatus status);
 }

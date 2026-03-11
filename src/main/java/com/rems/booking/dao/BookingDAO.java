@@ -22,7 +22,4 @@ public interface BookingDAO {
 
     Long insert(Connection conn, Booking booking);
 
-    //test
-    Long insertTestBooking(Connection conn, Long propertyId, Long customerId);
-    String getBookingStatus(Connection conn, Long bookingId);
 }

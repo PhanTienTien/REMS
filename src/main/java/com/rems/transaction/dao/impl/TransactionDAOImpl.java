@@ -1,9 +1,12 @@
 package com.rems.transaction.dao.impl;
 
+import com.rems.common.constant.TransactionStatus;
 import com.rems.transaction.dao.TransactionDAO;
 import com.rems.transaction.model.Transaction;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class TransactionDAOImpl implements TransactionDAO {
@@ -97,25 +100,48 @@ public class TransactionDAOImpl implements TransactionDAO {
         }
     }
 
-    //test
-    public String getTransactionStatusByBookingId(Connection conn, Long bookingId) {
+    @Override
+    public List<Transaction> findAll(Connection conn) {
 
-        String sql = "SELECT status FROM transactions WHERE booking_id = ?";
+        String sql = """
+        SELECT *
+        FROM transactions
+        ORDER BY created_at DESC
+    """;
+
+        List<Transaction> list = new ArrayList<>();
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setLong(1, bookingId);
-
             ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                return rs.getString("status");
+            while (rs.next()) {
+
+                Transaction tx = new Transaction();
+
+                tx.setId(rs.getLong("id"));
+                tx.setBookingId(rs.getLong("booking_id"));
+                tx.setPropertyTitleSnapshot(
+                        rs.getString("property_title_snapshot"));
+                tx.setCustomerNameSnapshot(
+                        rs.getString("customer_name_snapshot"));
+                tx.setAmount(rs.getBigDecimal("amount"));
+
+                tx.setStatus(
+                        TransactionStatus.valueOf(
+                                rs.getString("status")));
+
+                tx.setCreatedAt(
+                        rs.getTimestamp("created_at").toLocalDateTime());
+
+                list.add(tx);
             }
 
-            return null;
-
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
+        return list;
     }
+
 }

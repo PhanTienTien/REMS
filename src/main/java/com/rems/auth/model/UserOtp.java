@@ -12,11 +12,9 @@ public class UserOtp {
     private Boolean isUsed;
     private LocalDateTime createdAt;
 
-    // Constructor rỗng
     public UserOtp() {
     }
 
-    // Constructor tạo mới OTP
     public UserOtp(Long authId, String otpCode, LocalDateTime expiredAt) {
         this.authId = authId;
         this.otpCode = otpCode;

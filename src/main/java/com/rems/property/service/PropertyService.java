@@ -1,12 +1,31 @@
 package com.rems.property.service;
 
+import com.rems.common.constant.PropertyStatus;
+import com.rems.common.constant.PropertyType;
+import com.rems.property.model.Property;
 import com.rems.property.model.dto.CreatePropertyDTO;
 import com.rems.property.model.dto.UpdatePropertyDTO;
-import com.rems.common.constant.Role;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
+import java.util.List;
 
 public interface PropertyService {
+
+    Long createProperty(CreatePropertyDTO dto, Long staffId);
+
+    void updateProperty(UpdatePropertyDTO dto);
+
+    Property getPropertyById(Long id);
+
+    List<Property> getAllProperties();
+
+    List<Property> getPropertiesByStatus(PropertyStatus status);
+
+    List<Property> search(String address,
+                          PropertyType type,
+                          BigDecimal minPrice,
+                          BigDecimal maxPrice);
 
     void approveProperty(Long propertyId, Long staffId);
 
@@ -21,4 +40,7 @@ public interface PropertyService {
     void deactivateProperty(Long propertyId, Long staffId);
 
     void restoreProperty(Long propertyId, Long staffId);
+
+    void deleteProperty(Long propertyId);
+
 }

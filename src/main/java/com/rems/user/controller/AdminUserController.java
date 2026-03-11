@@ -114,7 +114,7 @@ public class AdminUserController extends HttpServlet {
         req.setAttribute("currentPage", page);
         req.setAttribute("totalPages", totalPages);
 
-        req.getRequestDispatcher("/views/admin/user/list.jsp")
+        req.getRequestDispatcher("/views/admin/user-list.jsp")
                 .forward(req, resp);
     }
 
@@ -151,7 +151,7 @@ public class AdminUserController extends HttpServlet {
         req.setAttribute("currentPage", page);
         req.setAttribute("totalPages", totalPages);
 
-        req.getRequestDispatcher("/views/admin/user/list.jsp")
+        req.getRequestDispatcher("/views/admin/user/property-list.jsp")
                 .forward(req, resp);
     }
 
