@@ -115,17 +115,21 @@ public class AuthController extends HttpServlet {
         HttpSession session = request.getSession();
 
         session.setAttribute("currentUser", user);
-        session.setAttribute("userId", account.getId());
+        session.setAttribute("userId", user.getId());
         session.setAttribute("role", user.getRole().name());
 
-        response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+        if (user.getRole().name().equals("ADMIN")
+                || user.getRole().name().equals("STAFF")) {
 
-//        if (user.getRole() == Role.ADMIN || user.getRole() == Role.STAFF) {
-//            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
-//        } else {
-//            response.sendRedirect(request.getContextPath() + "/user/dashboard");
-//        }
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+
+        } else {
+
+            response.sendRedirect(request.getContextPath() + "/user/dashboard");
+
+        }
     }
+
     private void handleRegister(HttpServletRequest request,
                                 HttpServletResponse response)
             throws Exception {

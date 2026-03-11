@@ -34,6 +34,13 @@ public class AdminUserController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
+        String role = (String) req.getSession().getAttribute("role");
+
+        if (!"ADMIN".equals(role)) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
         String action = req.getParameter("action");
 
         if (action == null) {
@@ -63,6 +70,13 @@ public class AdminUserController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
+        String role = (String) req.getSession().getAttribute("role");
+
+        if (!"ADMIN".equals(role)) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
 
         String action = req.getParameter("action");
 

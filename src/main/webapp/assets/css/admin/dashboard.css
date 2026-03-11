@@ -50,6 +50,19 @@ body{
     background:#f1f5f9;
 }
 
+.logout-btn {
+    background: #e74c3c;
+    border: none;
+    padding: 6px 12px;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background: #c0392b;
+}
+
 /* CONTENT */
 
 .dashboard-content{

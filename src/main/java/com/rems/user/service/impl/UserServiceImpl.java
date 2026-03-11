@@ -2,6 +2,7 @@ package com.rems.user.service.impl;
 
 import com.rems.auth.dao.AuthAccountDAO;
 import com.rems.auth.model.AuthAccount;
+import com.rems.common.constant.AccountStatus;
 import com.rems.common.exception.BusinessException;
 import com.rems.common.exception.ErrorCode;
 import com.rems.common.transaction.TransactionManager;
@@ -71,6 +72,7 @@ public class UserServiceImpl implements UserService {
             user.setRole(dto.getRole());
             user.setVerified(true);
             user.setDeleted(false);
+            account.setStatus(AccountStatus.ACTIVE);
 
             userDAO.save(conn, user);
 
