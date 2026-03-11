@@ -2,6 +2,7 @@
 <%
     String path = request.getContextPath();
 %>
+<%@ include file="../common/header.jsp" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,81 +10,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Properties</title>
-
-    <link rel="stylesheet" href="<%=path%>/assets/fonts/icomoon/style.css" />
-    <link rel="stylesheet" href="<%=path%>/assets/fonts/flaticon/font/flaticon.css" />
-    <link rel="stylesheet" href="<%=path%>/assets/css/tiny-slider.css" />
-    <link rel="stylesheet" href="<%=path%>/assets/css/aos.css" />
-    <link rel="stylesheet" href="<%=path%>/assets/css/style.css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/customer/property.css">
 </head>
 
 <body>
-<nav class="site-nav">
+
+<div class="section">
+
     <div class="container">
-        <div class="site-navigation">
-            <a href="<%=path%>/home.jsp" class="logo">Property</a>
 
-            <ul class="site-menu float-end">
-                <li><a href="<%=path%>/home.jsp">Home</a></li>
-                <li class="active"><a href="<%=path%>/views/user/properties.jsp">Properties</a></li>
-                <li><a href="<%=path%>/views/user/services.jsps.jsp">Services</a></li>
-                <li><a href="<%=path%>/views/user/about.jspt.jsp">About</a></li>
-                <li><a href="<%=path%>/views/user/contact.jspt.jsp">Contact</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
+        <h2 class="mb-4">Find Your Dream Property</h2>
 
-<div class="hero page-inner overlay"
-     style="background-image: url('<%=path%>/images/hero_bg_1.jpg')">
-    <div class="container text-center">
-        <h1>Properties</h1>
-    </div>
-</div>
+        <form method="get"
+              action="${pageContext.request.contextPath}/properties">
 
-<div class="section section-properties">
-    <div class="container">
-        <div class="row">
+            <input type="text"
+                   name="address"
+                   placeholder="Address"
+                   value="${param.address}">
 
-            <div class="col-lg-4">
-                <div class="property-item mb-30">
-                    <a href="<%=path%>/property-single.jsp" class="img">
-                        <img src="<%=path%>/images/img_1.jpg" class="img-fluid" />
-                    </a>
+            <select name="type">
+                <option value="">All</option>
+                <option value="SALE">Sale</option>
+                <option value="RENT">Rent</option>
+            </select>
 
-                    <div class="property-content">
-                        <div class="price mb-2"><span>$1,291,000</span></div>
-                        <span class="d-block mb-2 text-black-50">
-              5232 California Fake, Ave. 21BC
-            </span>
-                        <span class="city d-block mb-3">California, USA</span>
+            <input type="number"
+                   name="minPrice"
+                   placeholder="Min Price"
+                   value="${param.minPrice}">
 
-                        <a href="<%=path%>/property-single.jsp"
-                           class="btn btn-primary">
-                            See details
+            <input type="number"
+                   name="maxPrice"
+                   placeholder="Max Price"
+                   value="${param.maxPrice}">
+
+            <select name="sort">
+                <option value="">Newest</option>
+                <option value="price_asc">Price Low → High</option>
+                <option value="price_desc">Price High → Low</option>
+            </select>
+
+            <button>Search</button>
+
+        </form>
+
+        <div class="property-grid">
+
+            <c:forEach var="p" items="${properties}">
+
+                <div class="property-card">
+
+                    <img src="${pageContext.request.contextPath}/assets/images/property.jpg">
+
+                    <h3>${p.title}</h3>
+
+                    <p>${p.address}</p>
+
+                    <p class="price">$${p.price}</p>
+
+                    <div class="property-actions">
+
+                        <a class="btn-view"
+                           href="${pageContext.request.contextPath}/properties/detail?id=${p.id}">
+                            View Detail
                         </a>
+
+                        <a class="btn-book"
+                           href="${pageContext.request.contextPath}/bookings/create?propertyId=${p.id}">
+                            Book Viewing
+                        </a>
+
                     </div>
+
                 </div>
-            </div>
+
+            </c:forEach>
 
         </div>
+
+        <div class="pagination">
+
+            <c:if test="${currentPage > 1}">
+                <a href="?page=${currentPage-1}">Previous</a>
+            </c:if>
+
+            <c:forEach begin="1" end="${totalPages}" var="i">
+
+                <a href="?page=${i}"
+                   class="${i==currentPage?'active':''}">
+                        ${i}
+                </a>
+
+            </c:forEach>
+
+            <c:if test="${currentPage < totalPages}">
+                <a href="?page=${currentPage+1}">Next</a>
+            </c:if>
+
+        </div>
+
     </div>
+
 </div>
 
-<div class="site-footer text-center">
-    <p>
-        Copyright &copy;
-        <%= java.time.Year.now() %>
-        All Rights Reserved.
-    </p>
-</div>
-
-<script src="<%=path%>/js/bootstrap.bundle.min.js"></script>
-<script src="<%=path%>/js/tiny-slider.js"></script>
-<script src="<%=path%>/js/aos.js"></script>
-<script src="<%=path%>/js/navbar.js"></script>
-<script src="<%=path%>/js/counter.js"></script>
-<script src="<%=path%>/js/custom.js"></script>
 
 </body>
 </html>
+
+<%@ include file="../common/footer.jsp" %>

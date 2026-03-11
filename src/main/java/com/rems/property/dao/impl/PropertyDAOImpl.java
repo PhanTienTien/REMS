@@ -299,5 +299,188 @@ public class PropertyDAOImpl implements PropertyDAO {
         return result;
     }
 
+    @Override
+    public List<Property> searchApproved(Connection conn,
+                                         String address,
+                                         String type) {
+
+        List<Property> list = new ArrayList<>();
+
+        String sql = """
+        SELECT *
+        FROM properties
+        WHERE status = 'AVAILABLE'
+        AND (? IS NULL OR address LIKE ?)
+        AND (? IS NULL OR type = ?)
+        ORDER BY created_at DESC
+        """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, address);
+            ps.setString(2, address == null ? null : "%" + address + "%");
+            ps.setString(3, type);
+            ps.setString(4, type);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                Property p = map(rs);
+                list.add(p);
+
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return list;
+    }
+
+    @Override
+    public List<Property> searchCustomer(
+            Connection conn,
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice,
+            String sort,
+            int page,
+            int size) {
+
+        List<Property> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT *
+        FROM properties
+        WHERE status='AVAILABLE'
+    """);
+
+        if (address != null && !address.isEmpty()) {
+            sql.append(" AND address LIKE ?");
+        }
+
+        if (type != null && !type.isEmpty()) {
+            sql.append(" AND type = ?");
+        }
+
+        if (minPrice != null) {
+            sql.append(" AND price >= ?");
+        }
+
+        if (maxPrice != null) {
+            sql.append(" AND price <= ?");
+        }
+
+        if ("price_asc".equals(sort)) {
+            sql.append(" ORDER BY price ASC");
+        } else if ("price_desc".equals(sort)) {
+            sql.append(" ORDER BY price DESC");
+        } else {
+            sql.append(" ORDER BY created_at DESC");
+        }
+
+        sql.append(" LIMIT ? OFFSET ?");
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int index = 1;
+
+            if (address != null && !address.isEmpty()) {
+                ps.setString(index++, "%" + address + "%");
+            }
+
+            if (type != null && !type.isEmpty()) {
+                ps.setString(index++, type);
+            }
+
+            if (minPrice != null) {
+                ps.setInt(index++, minPrice);
+            }
+
+            if (maxPrice != null) {
+                ps.setInt(index++, maxPrice);
+            }
+
+            ps.setInt(index++, size);
+            ps.setInt(index, (page - 1) * size);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Property p = map(rs);
+                list.add(p);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return list;
+    }
+
+    @Override
+    public int countCustomer(
+            Connection conn,
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice) {
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(*)
+        FROM properties
+        WHERE status='AVAILABLE'
+    """);
+
+        if (address != null && !address.isEmpty()) {
+            sql.append(" AND address LIKE ?");
+        }
+
+        if (type != null && !type.isEmpty()) {
+            sql.append(" AND type = ?");
+        }
+
+        if (minPrice != null) {
+            sql.append(" AND price >= ?");
+        }
+
+        if (maxPrice != null) {
+            sql.append(" AND price <= ?");
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int index = 1;
+
+            if (address != null && !address.isEmpty()) {
+                ps.setString(index++, "%" + address + "%");
+            }
+
+            if (type != null && !type.isEmpty()) {
+                ps.setString(index++, type);
+            }
+
+            if (minPrice != null) {
+                ps.setInt(index++, minPrice);
+            }
+
+            if (maxPrice != null) {
+                ps.setInt(index++, maxPrice);
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return 0;
+    }
 
 }

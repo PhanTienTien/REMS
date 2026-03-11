@@ -173,4 +173,54 @@ public class PropertyServiceImpl implements PropertyService {
         );
     }
 
+    @Override
+    public List<Property> searchApproved(String address, String type) {
+
+        return txManager.execute(conn ->
+                propertyDAO.searchApproved(conn, address, type)
+        );
+    }
+
+    @Override
+    public List<Property> searchCustomer(
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice,
+            String sort,
+            int page,
+            int size) {
+
+        return txManager.execute(conn ->
+                propertyDAO.searchCustomer(
+                        conn,
+                        address,
+                        type,
+                        minPrice,
+                        maxPrice,
+                        sort,
+                        page,
+                        size
+                )
+        );
+    }
+
+    @Override
+    public int countCustomer(
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice) {
+
+        return txManager.execute(conn ->
+                propertyDAO.countCustomer(
+                        conn,
+                        address,
+                        type,
+                        minPrice,
+                        maxPrice
+                )
+        );
+    }
+
 }

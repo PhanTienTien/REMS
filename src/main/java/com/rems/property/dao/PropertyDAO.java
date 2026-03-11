@@ -38,4 +38,27 @@ public interface PropertyDAO {
     );
 
     List<Property> findByStatus(PropertyStatus status);
+
+    List<Property> searchApproved(Connection conn,
+                                  String address,
+                                  String type);
+
+    List<Property> searchCustomer(
+            Connection conn,
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice,
+            String sort,
+            int page,
+            int size
+    );
+
+    int countCustomer(
+            Connection conn,
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice
+    );
 }

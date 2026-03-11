@@ -18,11 +18,31 @@
 
 <div class="dashboard-container">
 
-    <jsp:include page="/views/admin/components/sidebar.jsp"/>
+    <c:choose>
+
+        <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
+            <jsp:include page="/views/admin/components/sidebar.jsp"/>
+        </c:when>
+
+        <c:otherwise>
+            <jsp:include page="/views/staff/components/sidebar.jsp"/>
+        </c:otherwise>
+
+    </c:choose>
 
     <div class="main-content">
 
-        <jsp:include page="/views/admin/components/topbar.jsp"/>
+        <c:choose>
+
+            <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
+                <jsp:include page="/views/admin/components/topbar.jsp"/>
+            </c:when>
+
+            <c:otherwise>
+                <jsp:include page="/views/staff/components/topbar.jsp"/>
+            </c:otherwise>
+
+        </c:choose>
 
         <div class="content">
             <c:if test="${not empty error}">
@@ -69,9 +89,10 @@
 
                     <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>STT</th>
                         <th>Title</th>
                         <th>Address</th>
+                        <th>Description</th>
                         <th>Type</th>
                         <th>Price</th>
                         <th>Status</th>
@@ -82,15 +103,17 @@
 
                     <tbody>
 
-                    <c:forEach var="p" items="${properties}">
+                    <c:forEach var="p" items="${properties}" varStatus="loop">
 
                         <tr>
 
-                            <td>${p.id}</td>
+                            <td>${loop.index + 1}</td>
 
                             <td>${p.title}</td>
 
                             <td>${p.address}</td>
+
+                            <td>${p.description}</td>
 
                             <td>${p.type}</td>
 
@@ -125,7 +148,13 @@
 
                                     <input type="hidden" name="id" value="${p.id}">
 
-                                    <button class="btn-approve">Approve</button>
+                                    <c:choose>
+
+                                        <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
+                                            <button class="btn-approve">Approve</button>
+                                        </c:when>
+
+                                    </c:choose>
 
                                 </form>
 
@@ -150,6 +179,29 @@
                     </tbody>
 
                 </table>
+
+            </div>
+
+            <div class="pagination">
+
+                <c:if test="${currentPage > 1}">
+                    <a href="?page=${currentPage - 1}&keyword=${param.keyword}">
+                        Previous
+                    </a>
+                </c:if>
+
+                <c:forEach begin="1" end="${totalPages}" var="i">
+                    <a href="?page=${i}&keyword=${param.keyword}"
+                       class="${i == currentPage ? 'active' : ''}">
+                            ${i}
+                    </a>
+                </c:forEach>
+
+                <c:if test="${currentPage < totalPages}">
+                    <a href="?page=${currentPage + 1}&keyword=${param.keyword}">
+                        Next
+                    </a>
+                </c:if>
 
             </div>
 

@@ -43,4 +43,23 @@ public interface PropertyService {
 
     void deleteProperty(Long propertyId);
 
+    List<Property> searchApproved(String address, String type);
+
+    List<Property> searchCustomer(
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice,
+            String sort,
+            int page,
+            int size
+    );
+
+    int countCustomer(
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice
+    );
+
 }
