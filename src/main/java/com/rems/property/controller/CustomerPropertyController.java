@@ -1,24 +1,33 @@
 package com.rems.property.controller;
 
-import com.rems.property.model.Property;
+import com.rems.property.dto.PropertyCardDTO;
+import com.rems.property.dto.PropertySearchDTO;
+import com.rems.property.model.PropertyImage;
+import com.rems.property.service.PropertyImageService;
 import com.rems.property.service.PropertyService;
+import com.rems.property.service.impl.PropertyImageServiceImpl;
 import com.rems.property.service.impl.PropertyServiceImpl;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@WebServlet("/properties")
+@WebServlet("/customer/properties")
 public class CustomerPropertyController extends HttpServlet {
 
     private PropertyService propertyService;
+    private PropertyImageService propertyImageService;
 
     @Override
     public void init() {
         propertyService = new PropertyServiceImpl();
+        propertyImageService = new PropertyImageServiceImpl();
     }
 
     @Override
@@ -26,45 +35,52 @@ public class CustomerPropertyController extends HttpServlet {
                          HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String address = req.getParameter("address");
-        String type = req.getParameter("type");
-        String sort = req.getParameter("sort");
+        PropertySearchDTO searchDTO = new PropertySearchDTO();
 
-        Integer minPrice = parseInt(req.getParameter("minPrice"));
-        Integer maxPrice = parseInt(req.getParameter("maxPrice"));
+        searchDTO.setKeyword(req.getParameter("keyword"));
+        searchDTO.setType(req.getParameter("type"));
 
-        int page = parseInt(req.getParameter("page"), 1);
-        int size = 6;
+        searchDTO.setMinPrice(parseLong(req.getParameter("minPrice")));
+        searchDTO.setMaxPrice(parseLong(req.getParameter("maxPrice")));
 
-        List<Property> properties =
-                propertyService.searchCustomer(
-                        address, type, minPrice, maxPrice, sort, page, size
-                );
+        searchDTO.setPage(parseInt(req.getParameter("page"), 1));
+        searchDTO.setSize(parseInt(req.getParameter("size"), 6));
 
-        int total =
-                propertyService.countCustomer(
-                        address, type, minPrice, maxPrice
-                );
+        List<PropertyCardDTO> properties =
+                propertyService.searchAvailableCard(searchDTO);
 
-        int totalPages =
-                (int) Math.ceil((double) total / size);
+        Map<Long, String> thumbnails = new HashMap<>();
+
+        for (PropertyCardDTO p : properties) {
+
+            List<PropertyImage> images =
+                    propertyImageService.getByPropertyId(p.getId());
+
+            if (!images.isEmpty()) {
+                thumbnails.put(p.getId(), images.get(0).getImageUrl());
+            }
+        }
 
         req.setAttribute("properties", properties);
-        req.setAttribute("currentPage", page);
-        req.setAttribute("totalPages", totalPages);
+        req.setAttribute("thumbnails", thumbnails);
 
-        req.getRequestDispatcher(
-                "/views/customer/properties.jsp"
-        ).forward(req, resp);
+        req.getRequestDispatcher("/views/customer/property-list.jsp")
+                .forward(req, resp);
     }
 
-    private Integer parseInt(String val) {
-        try { return Integer.parseInt(val); }
-        catch (Exception e) { return null; }
+    private Long parseLong(String val) {
+        try {
+            return val == null ? null : Long.parseLong(val);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private int parseInt(String val, int def) {
-        try { return Integer.parseInt(val); }
-        catch (Exception e) { return def; }
+        try {
+            return val == null ? def : Integer.parseInt(val);
+        } catch (Exception e) {
+            return def;
+        }
     }
 }

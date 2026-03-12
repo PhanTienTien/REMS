@@ -2,6 +2,8 @@ package com.rems.property.dao;
 
 import com.rems.common.constant.PropertyStatus;
 import com.rems.common.constant.PropertyType;
+import com.rems.property.dto.PropertyCardDTO;
+import com.rems.property.dto.PropertySearchDTO;
 import com.rems.property.model.Property;
 
 import java.math.BigDecimal;
@@ -61,4 +63,19 @@ public interface PropertyDAO {
             Integer minPrice,
             Integer maxPrice
     );
+
+    List<Property> searchAvailable(Connection conn,
+                                   PropertySearchDTO dto);
+
+    List<Property> findSimilar(
+            Connection conn,
+            String type,
+            String address,
+            Long minPrice,
+            Long maxPrice
+    );
+
+    List<PropertyCardDTO> searchAvailableCard(
+            Connection conn,
+            PropertySearchDTO dto);
 }

@@ -215,6 +215,7 @@
     <div class="modal-content">
         <h3>Create Property</h3>
         <form method="post"
+              enctype="multipart/form-data"
               action="${pageContext.request.contextPath}/admin/properties/create">
 
             <input type="text" name="title" placeholder="Title"
@@ -243,6 +244,13 @@
             <input type="number" name="price"
                    value="${formPrice}"
                    placeholder="Price" required>
+
+            <label>Property Images</label>
+
+            <input type="file"
+                   name="images"
+                   multiple
+                   accept="image/*">
 
             <div class="modal-actions">
 

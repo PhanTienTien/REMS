@@ -4,6 +4,8 @@ import com.rems.common.constant.PropertyStatus;
 import com.rems.common.constant.PropertyType;
 import com.rems.common.util.DBUtil;
 import com.rems.property.dao.PropertyDAO;
+import com.rems.property.dto.PropertyCardDTO;
+import com.rems.property.dto.PropertySearchDTO;
 import com.rems.property.model.Property;
 
 import java.math.BigDecimal;
@@ -481,6 +483,197 @@ public class PropertyDAOImpl implements PropertyDAO {
         }
 
         return 0;
+    }
+
+    @Override
+    public List<Property> searchAvailable(Connection conn,
+                                          PropertySearchDTO dto) {
+
+        List<Property> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT *
+        FROM properties
+        WHERE status = 'AVAILABLE'
+    """);
+
+        if (dto.getKeyword() != null && !dto.getKeyword().isEmpty()) {
+            sql.append(" AND title LIKE ?");
+        }
+
+        if (dto.getType() != null && !dto.getType().isEmpty()) {
+            sql.append(" AND type = ?");
+        }
+
+        if (dto.getMinPrice() != null) {
+            sql.append(" AND price >= ?");
+        }
+
+        if (dto.getMaxPrice() != null) {
+            sql.append(" AND price <= ?");
+        }
+
+        sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int index = 1;
+
+            if (dto.getKeyword() != null && !dto.getKeyword().isEmpty()) {
+                ps.setString(index++, "%" + dto.getKeyword() + "%");
+            }
+
+            if (dto.getType() != null && !dto.getType().isEmpty()) {
+                ps.setString(index++, dto.getType());
+            }
+
+            if (dto.getMinPrice() != null) {
+                ps.setLong(index++, dto.getMinPrice());
+            }
+
+            if (dto.getMaxPrice() != null) {
+                ps.setLong(index++, dto.getMaxPrice());
+            }
+
+            ps.setInt(index++, dto.getSize());
+            ps.setInt(index, dto.getOffset());
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                list.add(map(rs));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    @Override
+    public List<Property> findSimilar(
+            Connection conn,
+            String type,
+            String address,
+            Long minPrice,
+            Long maxPrice) {
+
+        List<Property> list = new ArrayList<>();
+
+        String sql = """
+        SELECT *
+        FROM properties
+        WHERE type = ?
+        AND address = ?
+        AND price BETWEEN ? AND ?
+        AND status = 'AVAILABLE'
+        LIMIT 6
+    """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, type);
+            ps.setString(2, address);
+            ps.setLong(3, minPrice);
+            ps.setLong(4, maxPrice);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                list.add(map(rs));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    @Override
+    public List<PropertyCardDTO> searchAvailableCard(
+            Connection conn,
+            PropertySearchDTO dto) {
+
+        List<PropertyCardDTO> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT 
+            p.id,
+            p.title,
+            p.address,
+            p.price,
+            p.type,
+            pi.image_url AS thumbnail
+        FROM properties p
+        LEFT JOIN property_images pi 
+            ON pi.property_id = p.id
+        WHERE p.status = 'AVAILABLE'
+    """);
+
+        if (dto.getKeyword() != null && !dto.getKeyword().isEmpty()) {
+            sql.append(" AND p.title LIKE ?");
+        }
+
+        if (dto.getType() != null && !dto.getType().isEmpty()) {
+            sql.append(" AND p.type = ?");
+        }
+
+        if (dto.getMinPrice() != null) {
+            sql.append(" AND p.price >= ?");
+        }
+
+        if (dto.getMaxPrice() != null) {
+            sql.append(" AND p.price <= ?");
+        }
+
+        sql.append(" ORDER BY p.created_at DESC LIMIT ? OFFSET ?");
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int index = 1;
+
+            if (dto.getKeyword() != null && !dto.getKeyword().isEmpty()) {
+                ps.setString(index++, "%" + dto.getKeyword() + "%");
+            }
+
+            if (dto.getType() != null && !dto.getType().isEmpty()) {
+                ps.setString(index++, dto.getType());
+            }
+
+            if (dto.getMinPrice() != null) {
+                ps.setLong(index++, dto.getMinPrice());
+            }
+
+            if (dto.getMaxPrice() != null) {
+                ps.setLong(index++, dto.getMaxPrice());
+            }
+
+            ps.setInt(index++, dto.getSize());
+            ps.setInt(index, dto.getOffset());
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                PropertyCardDTO dtoCard = new PropertyCardDTO();
+
+                dtoCard.setId(rs.getLong("id"));
+                dtoCard.setTitle(rs.getString("title"));
+                dtoCard.setAddress(rs.getString("address"));
+                dtoCard.setPrice(rs.getBigDecimal("price"));
+                dtoCard.setType(rs.getString("type"));
+                dtoCard.setThumbnail(rs.getString("thumbnail"));
+
+                list.add(dtoCard);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 
 }

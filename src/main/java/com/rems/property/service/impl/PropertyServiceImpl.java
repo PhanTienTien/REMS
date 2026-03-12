@@ -4,10 +4,15 @@ import com.rems.common.constant.PropertyStatus;
 import com.rems.common.constant.PropertyType;
 import com.rems.common.transaction.TransactionManager;
 import com.rems.property.dao.PropertyDAO;
+import com.rems.property.dao.PropertyImageDAO;
 import com.rems.property.dao.impl.PropertyDAOImpl;
+import com.rems.property.dao.impl.PropertyImageDAOImpl;
+import com.rems.property.dto.CreatePropertyDTO;
+import com.rems.property.dto.PropertyCardDTO;
+import com.rems.property.dto.PropertySearchDTO;
+import com.rems.property.dto.UpdatePropertyDTO;
 import com.rems.property.model.Property;
-import com.rems.property.model.dto.CreatePropertyDTO;
-import com.rems.property.model.dto.UpdatePropertyDTO;
+import com.rems.property.service.PropertyImageService;
 import com.rems.property.service.PropertyService;
 
 import java.math.BigDecimal;
@@ -20,9 +25,13 @@ public class PropertyServiceImpl implements PropertyService {
 
     private final PropertyDAO propertyDAO = new PropertyDAOImpl();
     private final TransactionManager txManager = new TransactionManager();
+    private final PropertyImageDAO propertyImageDAO = new PropertyImageDAOImpl();
+    private final PropertyImageService propertyImageService = new PropertyImageServiceImpl();
 
     @Override
-    public Long createProperty(CreatePropertyDTO dto, Long staffId) {
+    public Long createProperty(CreatePropertyDTO dto,
+                               Long staffId,
+                               List<String> imageUrls) {
 
         return txManager.execute(conn -> {
 
@@ -37,7 +46,20 @@ public class PropertyServiceImpl implements PropertyService {
             property.setStatus(PropertyStatus.DRAFT);
             property.setCreatedBy(staffId);
 
-            return propertyDAO.insert(conn, property);
+            Long propertyId = propertyDAO.insert(conn, property);
+            propertyImageService.addImages(propertyId, imageUrls);
+
+            if (imageUrls != null) {
+
+                for (String url : imageUrls) {
+
+                    propertyImageDAO.insert(conn, propertyId, url);
+
+                }
+
+            }
+
+            return propertyId;
         });
     }
 
@@ -220,6 +242,45 @@ public class PropertyServiceImpl implements PropertyService {
                         minPrice,
                         maxPrice
                 )
+        );
+    }
+
+    @Override
+    public List<Property> searchAvailable(PropertySearchDTO dto) {
+
+        return txManager.execute(conn ->
+                propertyDAO.searchAvailable(conn, dto)
+        );
+
+    }
+
+    @Override
+    public List<Property> findSimilar(Property property) {
+
+        long minPrice = property.getPrice()
+                .multiply(BigDecimal.valueOf(0.8))
+                .longValue();
+
+        long maxPrice = property.getPrice()
+                .multiply(BigDecimal.valueOf(1.2))
+                .longValue();
+
+        return txManager.execute(conn ->
+                propertyDAO.findSimilar(
+                        conn,
+                        String.valueOf(property.getType()),
+                        property.getAddress(),
+                        minPrice,
+                        maxPrice
+                )
+        );
+    }
+
+    @Override
+    public List<PropertyCardDTO> searchAvailableCard(PropertySearchDTO dto) {
+
+        return txManager.execute(conn ->
+                propertyDAO.searchAvailableCard(conn, dto)
         );
     }
 

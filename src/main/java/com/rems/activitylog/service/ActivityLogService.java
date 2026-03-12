@@ -20,4 +20,6 @@ public interface ActivityLogService {
                               String fromDate,
                               String toDate);
 
+    void logView(Long userId, Long propertyId);
+
 }

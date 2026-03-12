@@ -1,4 +1,4 @@
-package com.rems.property.model.dto;
+package com.rems.property.dto;
 
 import com.rems.common.constant.PropertyType;
 import java.math.BigDecimal;

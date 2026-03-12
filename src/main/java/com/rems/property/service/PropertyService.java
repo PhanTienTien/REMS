@@ -2,9 +2,11 @@ package com.rems.property.service;
 
 import com.rems.common.constant.PropertyStatus;
 import com.rems.common.constant.PropertyType;
+import com.rems.property.dto.CreatePropertyDTO;
+import com.rems.property.dto.PropertyCardDTO;
+import com.rems.property.dto.PropertySearchDTO;
+import com.rems.property.dto.UpdatePropertyDTO;
 import com.rems.property.model.Property;
-import com.rems.property.model.dto.CreatePropertyDTO;
-import com.rems.property.model.dto.UpdatePropertyDTO;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -12,7 +14,9 @@ import java.util.List;
 
 public interface PropertyService {
 
-    Long createProperty(CreatePropertyDTO dto, Long staffId);
+    Long createProperty(CreatePropertyDTO dto,
+                        Long staffId,
+                        List<String> imageUrls);
 
     void updateProperty(UpdatePropertyDTO dto);
 
@@ -61,5 +65,11 @@ public interface PropertyService {
             Integer minPrice,
             Integer maxPrice
     );
+
+    List<Property> searchAvailable(PropertySearchDTO dto);
+
+    List<Property> findSimilar(Property property);
+
+    List<PropertyCardDTO> searchAvailableCard(PropertySearchDTO dto);
 
 }

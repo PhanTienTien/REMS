@@ -5,6 +5,7 @@ import com.rems.activitylog.dao.impl.ActivityLogDAOImpl;
 import com.rems.activitylog.model.ActivityLog;
 import com.rems.activitylog.service.ActivityLogService;
 import com.rems.activitylog.service.impl.ActivityLogServiceImpl;
+import com.rems.common.transaction.TransactionManager;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -23,7 +24,9 @@ public class AdminActivityLogController extends HttpServlet {
     public void init() {
 
         ActivityLogDAO dao = new ActivityLogDAOImpl();
-        service = new ActivityLogServiceImpl(dao);
+        TransactionManager txManager = new TransactionManager();
+
+        service = new ActivityLogServiceImpl(dao, txManager);
 
     }
 

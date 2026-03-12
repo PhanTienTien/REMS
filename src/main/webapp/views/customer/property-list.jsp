@@ -22,7 +22,7 @@
         <h2 class="mb-4">Find Your Dream Property</h2>
 
         <form method="get"
-              action="${pageContext.request.contextPath}/properties">
+              action="${pageContext.request.contextPath}/customer/properties">
 
             <input type="text"
                    name="address"
@@ -61,27 +61,20 @@
 
                 <div class="property-card">
 
-                    <img src="${pageContext.request.contextPath}/assets/images/property.jpg">
+                    <img src="${pageContext.request.contextPath}${p.thumbnail}">
 
                     <h3>${p.title}</h3>
 
                     <p>${p.address}</p>
 
-                    <p class="price">$${p.price}</p>
+                    <p class="price">${p.price} VND</p>
 
-                    <div class="property-actions">
+                    <p class="type">${p.type}</p>
 
-                        <a class="btn-view"
-                           href="${pageContext.request.contextPath}/properties/detail?id=${p.id}">
-                            View Detail
-                        </a>
-
-                        <a class="btn-book"
-                           href="${pageContext.request.contextPath}/bookings/create?propertyId=${p.id}">
-                            Book Viewing
-                        </a>
-
-                    </div>
+                    <a class="btn-view"
+                       href="${pageContext.request.contextPath}/customer/properties/detail?id=${p.id}">
+                        View Detail
+                    </a>
 
                 </div>
 

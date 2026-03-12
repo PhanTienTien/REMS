@@ -3,16 +3,19 @@ package com.rems.activitylog.service.impl;
 import com.rems.activitylog.dao.ActivityLogDAO;
 import com.rems.activitylog.model.ActivityLog;
 import com.rems.activitylog.service.ActivityLogService;
+import com.rems.common.transaction.TransactionManager;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
 public class ActivityLogServiceImpl implements ActivityLogService {
 
-    private final ActivityLogDAO activityLogDao;
+    private final ActivityLogDAO activityLogDAO;
+    private final TransactionManager txManager;
 
-    public ActivityLogServiceImpl(ActivityLogDAO activityLogDao) {
-        this.activityLogDao = activityLogDao;
+    public ActivityLogServiceImpl(ActivityLogDAO activityLogDAO, TransactionManager txManager) {
+        this.activityLogDAO = activityLogDAO;
+        this.txManager = txManager;
     }
 
     @Override
@@ -33,7 +36,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
 
         log.setIpAddress(request.getRemoteAddr());
 
-        activityLogDao.save(log);
+        activityLogDAO.save(log);
     }
 
     @Override
@@ -46,6 +49,18 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         int limit = 20;
         int offset = (page - 1) * limit;
 
-        return activityLogDao.findAll(limit, offset, user, action, fromDate, toDate);
+        return activityLogDAO.findAll(limit, offset, user, action, fromDate, toDate);
+    }
+
+    @Override
+    public void logView(Long userId, Long propertyId) {
+
+        txManager.execute(conn -> {
+
+            activityLogDAO.insertView(conn, userId, propertyId);
+
+            return null;
+        });
+
     }
 }

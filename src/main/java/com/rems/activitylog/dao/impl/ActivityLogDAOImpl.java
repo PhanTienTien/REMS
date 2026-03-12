@@ -129,4 +129,27 @@ public class ActivityLogDAOImpl implements ActivityLogDAO {
 
         return logs;
     }
+
+    @Override
+    public void insertView(Connection conn,
+                           Long userId,
+                           Long propertyId) {
+
+        String sql = """
+        INSERT INTO activity_logs
+        (user_id, property_id, action, created_at)
+        VALUES (?, ?, 'VIEW_PROPERTY', NOW())
+    """;
+
+        try(PreparedStatement ps = conn.prepareStatement(sql)){
+
+            ps.setLong(1, userId);
+            ps.setLong(2, propertyId);
+
+            ps.executeUpdate();
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 }

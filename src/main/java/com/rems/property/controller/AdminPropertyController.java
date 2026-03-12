@@ -1,23 +1,33 @@
 package com.rems.property.controller;
 
 import com.rems.common.constant.PropertyType;
+import com.rems.property.dto.CreatePropertyDTO;
+import com.rems.property.dto.UpdatePropertyDTO;
 import com.rems.property.model.Property;
-import com.rems.property.model.dto.CreatePropertyDTO;
-import com.rems.property.model.dto.UpdatePropertyDTO;
 import com.rems.property.service.PropertyService;
 import com.rems.property.service.impl.PropertyServiceImpl;
 import com.rems.property.validator.PropertyValidator;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/admin/properties/*")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024,
+        maxFileSize = 1024 * 1024 * 5,
+        maxRequestSize = 1024 * 1024 * 20
+)
 public class AdminPropertyController extends HttpServlet {
 
     private final PropertyService propertyService = new PropertyServiceImpl();
@@ -126,9 +136,38 @@ public class AdminPropertyController extends HttpServlet {
 
             dto.validate();
 
+            List<String> imageUrls = new ArrayList<>();
+
+            String uploadPath =
+                    getServletContext().getRealPath("/uploads");
+
+            File uploadDir = new File(uploadPath);
+
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            for (Part part : req.getParts()) {
+
+                if ("images".equals(part.getName()) && part.getSize() > 0) {
+
+                    String fileName =
+                            System.currentTimeMillis() + "_"
+                                    + Paths.get(part.getSubmittedFileName())
+                                    .getFileName()
+                                    .toString();
+
+                    String filePath = uploadPath + File.separator + fileName;
+
+                    part.write(filePath);
+
+                    imageUrls.add("/uploads/" + fileName);
+                }
+            }
+
             Long staffId = 1L;
 
-            propertyService.createProperty(dto, staffId);
+            propertyService.createProperty(dto, staffId, imageUrls);
 
             resp.sendRedirect(req.getContextPath() + "/admin/properties");
 
