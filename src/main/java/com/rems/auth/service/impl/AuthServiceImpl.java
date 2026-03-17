@@ -189,6 +189,35 @@ public class AuthServiceImpl implements AuthService {
         });
     }
 
+    @Override
+    public void changePassword(Long userId,
+                               String currentPassword,
+                               String newPassword) {
+
+        txManager.executeWithoutResult(conn -> {
+
+            // 1. lấy user
+            User user = userDAO.findById(conn, userId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+            // 2. lấy auth account
+            AuthAccount account = authAccountDAO.findById(conn, user.getAuthId());
+
+            // 3. check password cũ
+            boolean match = PasswordUtil.verify(currentPassword, account.getPasswordHash());
+
+            if (!match) {
+                throw new BusinessException(ErrorCode.INVALID_PASSWORD);
+            }
+
+            // 4. hash password mới
+            String newHash = PasswordUtil.hash(newPassword);
+
+            // 5. update
+            authAccountDAO.updatePassword(conn, account.getId(), newHash);
+        });
+    }
+
     private void validateEmailNotExists(Connection conn, String email) {
         if (authAccountDAO.findByEmail(conn, email) != null) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);

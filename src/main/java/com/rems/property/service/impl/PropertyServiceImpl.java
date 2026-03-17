@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class PropertyServiceImpl implements PropertyService {
 
@@ -27,6 +27,11 @@ public class PropertyServiceImpl implements PropertyService {
     private final TransactionManager txManager = new TransactionManager();
     private final PropertyImageDAO propertyImageDAO = new PropertyImageDAOImpl();
     private final PropertyImageService propertyImageService = new PropertyImageServiceImpl();
+
+    @Override
+    public Optional<Property> findById(Long id){
+        return propertyDAO.findById(id);
+    }
 
     @Override
     public Long createProperty(CreatePropertyDTO dto,
@@ -48,16 +53,6 @@ public class PropertyServiceImpl implements PropertyService {
 
             Long propertyId = propertyDAO.insert(conn, property);
             propertyImageService.addImages(propertyId, imageUrls);
-
-            if (imageUrls != null) {
-
-                for (String url : imageUrls) {
-
-                    propertyImageDAO.insert(conn, propertyId, url);
-
-                }
-
-            }
 
             return propertyId;
         });
@@ -105,10 +100,9 @@ public class PropertyServiceImpl implements PropertyService {
     @Override
     public List<Property> getPropertiesByStatus(PropertyStatus status) {
 
-        return propertyDAO.findAll()
-                .stream()
-                .filter(p -> p.getStatus() == status)
-                .collect(Collectors.toList());
+        return txManager.execute(conn ->
+                propertyDAO.findByStatus(conn, status)
+        );
     }
 
     @Override

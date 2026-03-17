@@ -49,7 +49,7 @@ public enum ErrorCode {
     FORBIDDEN("AUTH_0045", "Forbidden" ),
     INVALID_STATE("AUTH_0046", "Invalid state" ),
     DUPLICATE_TRANSACTION("AUTH_0047", "Duplicate transaction" ),
-
+    INVALID_PASSWORD("AUTH_0048", "Invalid password" ),
     ;
 
     private final String code;

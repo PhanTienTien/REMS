@@ -19,7 +19,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/customer/properties/detail")
 public class CustomerPropertyDetailController extends HttpServlet {
@@ -39,47 +41,64 @@ public class CustomerPropertyDetailController extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
 
         Long propertyId = parseLong(req.getParameter("id"));
 
         if (propertyId == null) {
-            resp.sendRedirect(req.getContextPath()+"/customer/properties");
+            resp.sendRedirect(req.getContextPath() + "/customer/properties");
             return;
         }
 
         Property property = propertyService.getPropertyById(propertyId);
 
+        if (property == null) {
+            resp.sendRedirect(req.getContextPath() + "/customer/properties");
+            return;
+        }
+
         List<PropertyImage> images =
                 imageService.getByPropertyId(propertyId);
+
+        String mainImage = null;
+        if (!images.isEmpty()) {
+            mainImage = images.get(0).getImageUrl();
+        }
 
         List<Property> similar =
                 propertyService.findSimilar(property);
 
-        if (property == null) {
-            resp.sendRedirect(req.getContextPath()+"/customer/properties");
-            return;
+        Map<Long, String> thumbnails = new HashMap<>();
+
+        for (Property p : similar) {
+
+            String thumb =
+                    imageService.getThumbnail(p.getId());
+
+            thumbnails.put(p.getId(), thumb);
         }
 
-        // log view (if login)
         User user = (User) req.getSession().getAttribute("user");
 
-        if(user != null){
+        if (user != null) {
             activityLogService.logView(user.getId(), propertyId);
         }
 
         req.setAttribute("property", property);
         req.setAttribute("images", images);
+        req.setAttribute("mainImage", mainImage);
         req.setAttribute("similar", similar);
+        req.setAttribute("thumbnails", thumbnails);
 
         req.getRequestDispatcher("/views/customer/property-detail.jsp")
                 .forward(req, resp);
     }
 
-    private Long parseLong(String val){
-        try{
+    private Long parseLong(String val) {
+        try {
             return Long.parseLong(val);
-        }catch(Exception e){
+        } catch (Exception e) {
             return null;
         }
     }

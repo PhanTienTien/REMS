@@ -72,7 +72,7 @@ public class PropertyImageDAOImpl implements PropertyImageDAO {
         SELECT image_url
         FROM property_images
         WHERE property_id = ?
-        AND is_thumbnail = TRUE
+        ORDER BY is_thumbnail DESC
         LIMIT 1
     """;
 

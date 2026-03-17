@@ -15,7 +15,6 @@
 </head>
 
 <body>
-
 <div class="dashboard-container">
 
     <c:choose>
@@ -65,13 +64,18 @@
                         </a>
 
                         <a class="filter-btn"
+                           href="${pageContext.request.contextPath}/admin/transactions?status=CONFIRMED">
+                            Comfirmed
+                        </a>
+
+                        <a class="filter-btn"
                            href="${pageContext.request.contextPath}/admin/transactions?status=COMPLETED">
                             Completed
                         </a>
 
                         <a class="filter-btn"
-                           href="${pageContext.request.contextPath}/admin/transactions?status=FAILED">
-                            Failed
+                           href="${pageContext.request.contextPath}/admin/transactions?status=CANCELLED">
+                            Cancelled
                         </a>
 
                     </div>
@@ -106,47 +110,49 @@
 
                             <td>${tx.customerNameSnapshot}</td>
 
-                            <td class="money">${tx.amount}</td>
+                            <td>
+                                ${tx.createdAtFormatted}
+                            </td>
 
                             <td>
 
-                <span class="badge
-                <c:choose>
-                    <c:when test="${tx.status == 'COMPLETED'}">badge-completed</c:when>
-                    <c:when test="${tx.status == 'PENDING'}">badge-pending</c:when>
-                    <c:when test="${tx.status == 'FAILED'}">badge-failed</c:when>
-                    <c:otherwise>badge-cancelled</c:otherwise>
-                </c:choose>
-                ">
-                        ${tx.status}
-                </span>
+<span class="badge
+<c:choose>
+    <c:when test="${tx.status == 'COMPLETED'}">badge-completed</c:when>
+    <c:when test="${tx.status == 'PENDING'}">badge-pending</c:when>
+    <c:when test="${tx.status == 'CANCELLED'}">badge-failed</c:when>
+    <c:otherwise>badge-cancelled</c:otherwise>
+</c:choose>
+">
+        ${tx.status}
+</span>
 
                             </td>
 
                             <td>${tx.type}</td>
 
-                            <td>${tx.createdAt}</td>
+                            <td>
+                                <fmt:formatDate value="${tx.createdAt}" pattern="yyyy-MM-dd HH:mm"/>
+                            </td>
 
                             <td>${tx.processedBy}</td>
 
                             <td>
 
-                                <a class="action-btn view"
-                                   href="${pageContext.request.contextPath}/admin/transactions/view?id=${tx.id}">
+                                <a href="${pageContext.request.contextPath}/admin/transactions/view?id=${tx.id}">
                                     View
                                 </a>
 
                                 <c:if test="${tx.status == 'PENDING'}">
 
                                     <form method="post"
-                                          action="${pageContext.request.contextPath}/admin/transactions/complete"
-                                          class="complete-form">
+                                          action="${pageContext.request.contextPath}/admin/transactions"
+                                          style="display:inline">
 
-                                        <input type="hidden"
-                                               name="bookingId"
-                                               value="${tx.bookingId}"/>
+                                        <input type="hidden" name="action" value="complete"/>
+                                        <input type="hidden" name="transactionId" value="${tx.id}"/>
 
-                                        <button class="action-btn complete">
+                                        <button type="submit">
                                             Complete
                                         </button>
 

@@ -11,8 +11,11 @@ import com.rems.property.model.Property;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.List;
+import java.util.Optional;
 
 public interface PropertyService {
+
+    Optional<Property> findById(Long id);
 
     Long createProperty(CreatePropertyDTO dto,
                         Long staffId,

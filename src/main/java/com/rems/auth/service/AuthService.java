@@ -13,4 +13,8 @@ public interface AuthService {
 
     void resendOtp(String email);
 
+    void changePassword(Long userId,
+                        String currentPassword,
+                        String newPassword);
+
 }

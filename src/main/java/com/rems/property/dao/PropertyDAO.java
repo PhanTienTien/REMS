@@ -39,7 +39,7 @@ public interface PropertyDAO {
             BigDecimal maxPrice
     );
 
-    List<Property> findByStatus(PropertyStatus status);
+    List<Property> findByStatus(Connection conn, PropertyStatus status);
 
     List<Property> searchApproved(Connection conn,
                                   String address,

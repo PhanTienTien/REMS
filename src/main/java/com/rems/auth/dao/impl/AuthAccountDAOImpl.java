@@ -75,6 +75,27 @@ public class AuthAccountDAOImpl implements AuthAccountDAO {
         return null;
     }
 
+    @Override
+    public void updatePassword(Connection conn, Long id, String passwordHash) {
+
+        String sql = """
+        UPDATE auth_accounts
+        SET password_hash = ?
+        WHERE id = ?
+    """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, passwordHash);
+            ps.setLong(2, id);
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public Long save(Connection conn, AuthAccount account) {
 
         String sql = """

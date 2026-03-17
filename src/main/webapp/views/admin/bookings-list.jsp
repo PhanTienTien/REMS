@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <html>
 <head>
@@ -45,24 +46,43 @@
 
             <div class="transactions-container">
 
-                <h3>Bookings</h3>
+                <h2>Booking Management</h2>
+
+                <div class="filters">
+
+                    <a href="${pageContext.request.contextPath}/admin/bookings">
+                        All
+                    </a>
+
+                    <a href="${pageContext.request.contextPath}/admin/bookings?status=PENDING">
+                        Pending
+                    </a>
+
+                    <a href="${pageContext.request.contextPath}/admin/bookings?status=ACCEPTED">
+                        Accepted
+                    </a>
+
+                    <a href="${pageContext.request.contextPath}/admin/bookings?status=REJECTED">
+                        Rejected
+                    </a>
+
+                    <a href="${pageContext.request.contextPath}/admin/bookings?status=CANCELLED">
+                        Cancelled
+                    </a>
+
+                </div>
 
                 <table>
 
                     <thead>
-
                     <tr>
-
                         <th>ID</th>
                         <th>Property</th>
                         <th>Customer</th>
                         <th>Status</th>
-                        <th>Created At</th>
-                        <th>Accepted By</th>
+                        <th>Created</th>
                         <th>Action</th>
-
                     </tr>
-
                     </thead>
 
                     <tbody>
@@ -71,7 +91,7 @@
 
                         <tr>
 
-                            <td>${b.id}</td>
+                            <td>${b.bookingId}</td>
 
                             <td>${b.propertyTitle}</td>
 
@@ -79,63 +99,64 @@
 
                             <td>
 
-                                <span class="badge
-                                <c:choose>
-                                    <c:when test="${b.status == 'ACCEPTED'}">
-                                        badge-completed
-                                    </c:when>
+<span class="badge
+<c:choose>
 
-                                    <c:when test="${b.status == 'PENDING'}">
-                                        badge-pending
-                                    </c:when>
+<c:when test="${b.status == 'ACCEPTED'}">
+badge-completed
+</c:when>
 
-                                    <c:when test="${b.status == 'REJECTED'}">
-                                        badge-failed
-                                    </c:when>
+<c:when test="${b.status == 'PENDING'}">
+badge-pending
+</c:when>
 
-                                    <c:otherwise>
-                                        badge-failed
-                                    </c:otherwise>
-                                </c:choose>
-                                ">
+<c:when test="${b.status == 'REJECTED'}">
+badge-failed
+</c:when>
 
-                                        ${b.status}
+<c:when test="${b.status == 'CANCELLED'}">
+badge-cancelled
+</c:when>
 
-                                </span>
+</c:choose>
+">
+
+        ${b.status}
+
+</span>
 
                             </td>
 
-                            <td>${b.createdAt}</td>
+                            <td>${b.createdAtFormatted}</td>
 
-                            <td>
-                                <c:if test="${b.acceptedByName != null}">
-                                    ${b.acceptedByName}
-                                </c:if>
-                            </td>
+                            <td class="actions">
 
-                            <td>
+                                <a href="${pageContext.request.contextPath}/admin/bookings?action=view&id=${b.bookingId}">
+                                    View
+                                </a>
+
 
                                 <c:if test="${b.status == 'PENDING'}">
 
                                     <form method="post"
-                                          action="${pageContext.request.contextPath}/admin/bookings/accept"
-                                          style="display:inline;">
+                                          action="${pageContext.request.contextPath}/admin/bookings">
 
-                                        <input type="hidden" name="id" value="${b.id}"/>
+                                        <input type="hidden" name="action" value="accept"/>
+                                        <input type="hidden" name="id" value="${b.bookingId}"/>
 
-                                        <button class="btn btn-accept">
+                                        <button class="btn-accept">
                                             Accept
                                         </button>
 
                                     </form>
 
                                     <form method="post"
-                                          action="${pageContext.request.contextPath}/admin/bookings/reject"
-                                          style="display:inline;">
+                                          action="${pageContext.request.contextPath}/admin/bookings">
 
-                                        <input type="hidden" name="id" value="${b.id}"/>
+                                        <input type="hidden" name="action" value="reject"/>
+                                        <input type="hidden" name="id" value="${b.bookingId}"/>
 
-                                        <button class="btn btn-reject">
+                                        <button class="btn-reject">
                                             Reject
                                         </button>
 
@@ -152,6 +173,35 @@
                     </tbody>
 
                 </table>
+
+                <div class="pagination">
+
+                    <c:if test="${currentPage > 1}">
+
+                        <a href="?page=${currentPage - 1}">
+                            Previous
+                        </a>
+
+                    </c:if>
+
+                    <c:forEach begin="1" end="${totalPages}" var="p">
+
+                        <a href="?page=${p}"
+                           class="${p == currentPage ? 'active' : ''}">
+                                ${p}
+                        </a>
+
+                    </c:forEach>
+
+                    <c:if test="${currentPage < totalPages}">
+
+                        <a href="?page=${currentPage + 1}">
+                            Next
+                        </a>
+
+                    </c:if>
+
+                </div>
 
             </div>
 

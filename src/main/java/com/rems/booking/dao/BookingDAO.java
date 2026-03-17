@@ -1,5 +1,8 @@
 package com.rems.booking.dao;
 
+import com.rems.booking.dto.BookingAdminDetailDTO;
+import com.rems.booking.dto.BookingAdminViewDTO;
+import com.rems.booking.dto.CustomerBookingDTO;
 import com.rems.booking.model.Booking;
 import com.rems.common.constant.BookingStatus;
 
@@ -21,5 +24,37 @@ public interface BookingDAO {
                       Long staffId);
 
     Long insert(Connection conn, Booking booking);
+
+    boolean existsActiveBooking(Connection conn,
+                                Long propertyId,
+                                Long customerId);
+
+    List<BookingAdminViewDTO> findAllForAdmin(Connection conn);
+
+    List<BookingAdminViewDTO> findByStatusForAdmin(Connection conn,
+                                                   BookingStatus status);
+
+    List<BookingAdminViewDTO> findPageForAdmin(Connection conn,
+                                               int limit,
+                                               int offset);
+
+    int countAll(Connection conn);
+
+    List<BookingAdminViewDTO> findPageByStatusForAdmin(Connection conn,
+                                                       BookingStatus status,
+                                                       int limit,
+                                                       int offset);
+
+    int countByStatus(Connection conn,
+                      BookingStatus status);
+
+    Optional<BookingAdminDetailDTO> findDetailForAdmin(Connection conn,
+                                                       Long bookingId);
+
+    List<CustomerBookingDTO> findByCustomer(Connection conn,
+                                            Long customerId);
+
+    List<Booking> findExpiredPending(Connection conn,
+                                     int hours);
 
 }

@@ -17,3 +17,15 @@ document.addEventListener("DOMContentLoaded", function(){
     });
 
 });
+
+document.querySelectorAll("form").forEach(form => {
+
+    form.addEventListener("submit", function(e) {
+
+        if (!confirm("Complete this transaction?")) {
+            e.preventDefault();
+        }
+
+    });
+
+});

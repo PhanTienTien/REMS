@@ -55,7 +55,7 @@ public class PropertyDAOImpl implements PropertyDAO {
         String sql = "SELECT * FROM properties WHERE id = ?";
 
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setLong(1, id);
 
@@ -223,14 +223,13 @@ public class PropertyDAOImpl implements PropertyDAO {
     }
 
     @Override
-    public List<Property> findByStatus(PropertyStatus status) {
+    public List<Property> findByStatus(Connection conn, PropertyStatus status) {
 
         String sql = "SELECT * FROM properties WHERE status=?";
 
         List<Property> result = new ArrayList<>();
 
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, status.name());
 

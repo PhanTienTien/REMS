@@ -12,6 +12,8 @@ public interface AuthAccountDAO {
     AuthAccount findByEmail(Connection conn, String email);
     AuthAccount findById(Connection conn, Long id);
 
+    void updatePassword(Connection conn, Long id, String passwordHash);
+
     Long save(Connection conn, AuthAccount account);
 
     void updateStatus(Connection conn, Long authId, AccountStatus status);

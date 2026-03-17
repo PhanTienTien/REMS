@@ -1,0 +1,10 @@
+.page-section{
+    padding-top:120px;
+    padding-bottom:80px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:0 20px;
+}

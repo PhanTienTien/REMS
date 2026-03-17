@@ -14,3 +14,110 @@
     background:#e74c3c;
     color:white;
 }
+
+/* STATUS BADGE */
+
+.badge{
+    padding:6px 10px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.badge-pending{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.badge-completed{
+    background:#d4edda;
+    color:#155724;
+}
+
+.badge-failed{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+.badge-cancelled{
+    background:#e2e3e5;
+    color:#383d41;
+}
+
+
+/* ACTION BUTTON */
+
+.actions{
+    display:flex;
+    gap:6px;
+}
+
+.btn-accept{
+    background:#28a745;
+    color:white;
+    border:none;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:12px;
+}
+
+.btn-reject{
+    background:#dc3545;
+    color:white;
+    border:none;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:12px;
+}
+
+.btn-accept:hover{
+    background:#218838;
+}
+
+.btn-reject:hover{
+    background:#c82333;
+}
+
+.filters{
+    margin-bottom:15px;
+    display:flex;
+    gap:10px;
+}
+
+.filters a{
+    padding:6px 10px;
+    background:#f1f1f1;
+    border-radius:6px;
+    text-decoration:none;
+    color:#333;
+    font-size:13px;
+}
+
+.filters a:hover{
+    background:#ddd;
+}
+
+.pagination{
+    margin-top:20px;
+    display:flex;
+    gap:6px;
+}
+
+.pagination a{
+    padding:6px 10px;
+    background:#f1f1f1;
+    border-radius:6px;
+    text-decoration:none;
+    color:#333;
+}
+
+.pagination a.active{
+    background:#007bff;
+    color:white;
+}
+
+.pagination a:hover{
+    background:#ddd;
+}

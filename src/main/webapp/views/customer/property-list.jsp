@@ -1,21 +1,15 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%
-    String path = request.getContextPath();
-%>
 <%@ include file="../common/header.jsp" %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Properties</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/customer/property.css">
-</head>
 
-<body>
+<link rel="stylesheet"
+      href="${pageContext.request.contextPath}/assets/css/customer/property.css">
 
-<div class="section">
+<link rel="stylesheet"
+      href="${pageContext.request.contextPath}/assets/css/customer/layout.css">
+
+
+<div class="page-section">
 
     <div class="container">
 
@@ -106,9 +100,5 @@
     </div>
 
 </div>
-
-
-</body>
-</html>
 
 <%@ include file="../common/footer.jsp" %>

@@ -5,6 +5,7 @@ import com.rems.common.constant.TransactionStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Transaction {
 
@@ -101,5 +102,11 @@ public class Transaction {
     }
     public void setProcessedBy(Long processedBy) {
         processedBy = processedBy;
+    }
+
+    public String getCreatedAtFormatted() {
+        return createdAt.format(
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        );
     }
 }
