@@ -15,4 +15,6 @@ public interface ActivityLogDAO {
                     Long userId,
                     Long propertyId);
 
+    void insert(Connection conn, ActivityLog log);
+
 }

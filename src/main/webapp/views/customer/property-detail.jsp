@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%@ taglib prefix="c"
            uri="http://java.sun.com/jsp/jstl/core" %>
@@ -80,7 +81,9 @@
 
                         <h3>${p.title}</h3>
 
-                        <p>$${p.price}</p>
+                        <p class="price">
+                            <fmt:formatNumber value="${p.price}" type="number"/> đ
+                        </p>
 
                         <a href="${pageContext.request.contextPath}/customer/properties/detail?id=${p.id}">
                             View

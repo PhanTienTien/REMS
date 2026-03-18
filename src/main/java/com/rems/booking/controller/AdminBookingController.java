@@ -1,5 +1,8 @@
 package com.rems.booking.controller;
 
+import com.rems.activitylog.dao.ActivityLogDAO;
+import com.rems.activitylog.service.ActivityLogService;
+import com.rems.activitylog.service.impl.ActivityLogServiceImpl;
 import com.rems.booking.service.BookingService;
 import com.rems.booking.service.impl.BookingServiceImpl;
 import com.rems.common.constant.BookingStatus;
@@ -21,15 +24,23 @@ public class AdminBookingController extends HttpServlet {
 
     private BookingService bookingService;
     private TransactionManager txManager;
+    private ActivityLogService activityLogService;
+    private ActivityLogDAO activityLogDAO;
 
     @Override
     public void init() {
 
-        PropertyService propertyService = new PropertyServiceImpl();
-        TransactionService transactionService = new TransactionServiceImpl(txManager);
+        txManager = new TransactionManager();
+        activityLogService = new ActivityLogServiceImpl(activityLogDAO, txManager);
 
-        bookingService = new BookingServiceImpl(propertyService, transactionService);
+        PropertyService propertyService = new PropertyServiceImpl();
+        TransactionService transactionService =
+                new TransactionServiceImpl(txManager, activityLogService);
+
+        bookingService =
+                new BookingServiceImpl(propertyService, transactionService);
     }
+
 
     @Override
     protected void doGet(HttpServletRequest req,
@@ -112,7 +123,7 @@ public class AdminBookingController extends HttpServlet {
             }
 
         } catch (Exception e) {
-
+            e.printStackTrace();
             req.getSession().setAttribute("error", e.getMessage());
         }
 

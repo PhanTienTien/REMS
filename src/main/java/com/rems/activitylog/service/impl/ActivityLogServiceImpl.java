@@ -1,11 +1,12 @@
 package com.rems.activitylog.service.impl;
 
 import com.rems.activitylog.dao.ActivityLogDAO;
+import com.rems.activitylog.dao.impl.ActivityLogDAOImpl;
 import com.rems.activitylog.model.ActivityLog;
 import com.rems.activitylog.service.ActivityLogService;
 import com.rems.common.transaction.TransactionManager;
-import jakarta.servlet.http.HttpServletRequest;
 
+import java.sql.Connection;
 import java.util.List;
 
 public class ActivityLogServiceImpl implements ActivityLogService {
@@ -14,17 +15,17 @@ public class ActivityLogServiceImpl implements ActivityLogService {
     private final TransactionManager txManager;
 
     public ActivityLogServiceImpl(ActivityLogDAO activityLogDAO, TransactionManager txManager) {
-        this.activityLogDAO = activityLogDAO;
+        this.activityLogDAO = new ActivityLogDAOImpl();
         this.txManager = txManager;
     }
 
-    @Override
-    public void log(HttpServletRequest request,
+    public void log(Connection conn,
                     Long userId,
                     String action,
                     String entityType,
                     Long entityId,
-                    String description) {
+                    String description,
+                    String ipAddress) {
 
         ActivityLog log = new ActivityLog();
 
@@ -33,10 +34,9 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         log.setEntityType(entityType);
         log.setEntityId(entityId);
         log.setDescription(description);
+        log.setIpAddress(ipAddress);
 
-        log.setIpAddress(request.getRemoteAddr());
-
-        activityLogDAO.save(log);
+        activityLogDAO.insert(conn, log);
     }
 
     @Override

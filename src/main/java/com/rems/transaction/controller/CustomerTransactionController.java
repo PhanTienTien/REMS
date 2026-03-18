@@ -1,5 +1,6 @@
 package com.rems.transaction.controller;
 
+import com.rems.activitylog.service.ActivityLogService;
 import com.rems.common.transaction.TransactionManager;
 import com.rems.transaction.model.Transaction;
 import com.rems.transaction.service.TransactionService;
@@ -17,10 +18,11 @@ import java.util.List;
 @WebServlet("/customer/profile/transactions")
 public class CustomerTransactionController extends HttpServlet {
 
-    TransactionManager txManager = new TransactionManager();
+    private TransactionManager txManager = new TransactionManager();
+    private ActivityLogService activityLogService;
 
     private final TransactionService transactionService =
-            new TransactionServiceImpl(txManager);
+            new TransactionServiceImpl(txManager, activityLogService);
 
     @Override
     protected void doGet(HttpServletRequest req,

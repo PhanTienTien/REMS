@@ -52,7 +52,7 @@ public class PropertyServiceImpl implements PropertyService {
             property.setCreatedBy(staffId);
 
             Long propertyId = propertyDAO.insert(conn, property);
-            propertyImageService.addImages(propertyId, imageUrls);
+            propertyImageService.addImages(conn, propertyId, imageUrls);
 
             return propertyId;
         });

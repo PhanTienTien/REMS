@@ -4,7 +4,7 @@ import com.rems.common.transaction.TransactionManager;
 import com.rems.favorite.dao.FavoriteDAO;
 import com.rems.favorite.dao.impl.FavoriteDAOImpl;
 import com.rems.favorite.service.FavoriteService;
-import com.rems.property.model.Property;
+import com.rems.property.dto.PropertyCardDTO;
 
 import java.util.List;
 
@@ -41,8 +41,11 @@ public class FavoriteServiceImpl implements FavoriteService {
     }
 
     @Override
-    public List<Property> getFavorites(Long customerId) {
-        return List.of();
+    public List<PropertyCardDTO> getFavorites(Long customerId) {
+
+        return txManager.execute(conn ->
+                favoriteDAO.findByCustomer(conn, customerId)
+        );
     }
 
     @Override

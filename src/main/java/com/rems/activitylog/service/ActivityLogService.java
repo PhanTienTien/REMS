@@ -1,18 +1,19 @@
 package com.rems.activitylog.service;
 
 import com.rems.activitylog.model.ActivityLog;
-import jakarta.servlet.http.HttpServletRequest;
 
+import java.sql.Connection;
 import java.util.List;
 
 public interface ActivityLogService {
 
-    void log(HttpServletRequest request,
+    void log(Connection conn,
              Long userId,
              String action,
              String entityType,
              Long entityId,
-             String description);
+             String description,
+             String ipAddress);
 
     List<ActivityLog> getLogs(int page,
                               String user,

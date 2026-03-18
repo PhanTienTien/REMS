@@ -112,19 +112,18 @@ public class PropertyImageDAOImpl implements PropertyImageDAO {
 
                 ps.setLong(1, propertyId);
                 ps.setString(2, url);
-
-                // ảnh đầu tiên làm thumbnail
                 ps.setBoolean(3, order == 0);
-
                 ps.setInt(4, order++);
 
                 ps.addBatch();
             }
 
             ps.executeBatch();
+            System.out.println("Insert images size: " + imageUrls.size());
 
         } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }

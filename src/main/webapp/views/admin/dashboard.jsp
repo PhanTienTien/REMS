@@ -236,7 +236,23 @@
 
 </div>
 
-<script src="${pageContext.request.contextPath}/assets/js/admin/dashboard.js"></script>
+<script>
+
+    const revenueLabels = [
+        <c:forEach items="${dashboard.revenueChart.points}" var="p" varStatus="loop">
+        "${p.month}"${!loop.last ? "," : ""}
+        </c:forEach>
+    ];
+
+    const revenueData = [
+        <c:forEach items="${dashboard.revenueChart.points}" var="p" varStatus="loop">
+        ${p.revenue}${!loop.last ? "," : ""}
+        </c:forEach>
+    ];
+
+</script>
+
+<script src="${pageContext.request.contextPath}/assets/js/admin/dashboard.js?v=1"></script>
 
 </body>
 </html>

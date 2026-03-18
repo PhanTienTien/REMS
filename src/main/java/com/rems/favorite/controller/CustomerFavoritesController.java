@@ -2,7 +2,7 @@ package com.rems.favorite.controller;
 
 import com.rems.favorite.service.FavoriteService;
 import com.rems.favorite.service.impl.FavoriteServiceImpl;
-import com.rems.property.model.Property;
+import com.rems.property.dto.PropertyCardDTO;
 import com.rems.user.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -37,7 +37,7 @@ public class CustomerFavoritesController extends HttpServlet {
 
         Long customerId = user.getId();
 
-        List<Property> favorites =
+        List<PropertyCardDTO> favorites =
                 favoriteService.getFavorites(customerId);
 
         req.setAttribute("favorites", favorites);

@@ -90,7 +90,12 @@ public class BookingServiceImpl implements BookingService {
                     staffId);
 
             propertyService.reserveProperty(propertyId, conn);
-            transactionService.createTransaction(conn, bookingId);
+            transactionService.createTransaction(
+                    conn,
+                    bookingId,
+                    staffId,
+                    "SYSTEM"
+            );
 
             List<Booking> pending =
                     bookingDAO.findPendingByPropertyForUpdate(conn, propertyId);

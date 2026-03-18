@@ -6,6 +6,7 @@ import com.rems.property.dao.impl.PropertyImageDAOImpl;
 import com.rems.property.model.PropertyImage;
 import com.rems.property.service.PropertyImageService;
 
+import java.sql.Connection;
 import java.util.List;
 
 public class PropertyImageServiceImpl implements PropertyImageService {
@@ -30,10 +31,10 @@ public class PropertyImageServiceImpl implements PropertyImageService {
     }
 
     @Override
-    public void addImages(Long propertyId, List<String> imageUrls) {
+    public void addImages(Connection conn,
+                          Long propertyId,
+                          List<String> imageUrls) {
 
-        txManager.executeWithoutResult(conn ->
-                propertyImageDAO.insertMultiple(conn, propertyId, imageUrls)
-        );
+        propertyImageDAO.insertMultiple(conn, propertyId, imageUrls);
     }
 }

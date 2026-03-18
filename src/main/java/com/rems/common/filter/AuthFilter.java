@@ -35,6 +35,7 @@ public class AuthFilter implements Filter {
                         || uri.contains("/customer/profile/favorites")
                         || uri.contains("/customer/profile/bookings")
                         || uri.contains("/auth")
+                        || uri.contains("/logout")
                         || uri.contains("/uploads")
                         || uri.contains("/assets")
                         || uri.contains("/css")

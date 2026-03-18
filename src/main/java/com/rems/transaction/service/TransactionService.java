@@ -7,7 +7,10 @@ import java.util.List;
 
 public interface TransactionService {
 
-    public Long createTransaction(Connection conn, Long bookingId);
+    Long createTransaction(Connection conn,
+                           Long bookingId,
+                           Long performedBy,
+                           String ipAddress);
 
     Long completeTransaction(Long bookingId, Long staffId);
 

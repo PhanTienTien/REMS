@@ -1,5 +1,6 @@
 package com.rems.booking.controller;
 
+import com.rems.activitylog.service.ActivityLogService;
 import com.rems.booking.service.BookingService;
 import com.rems.booking.service.impl.BookingServiceImpl;
 import com.rems.common.transaction.TransactionManager;
@@ -20,9 +21,10 @@ import java.io.IOException;
 public class CustomerCreateBookingController extends HttpServlet {
 
     private TransactionManager txManager;
+    private ActivityLogService activityLogService;
 
     PropertyService propertyService = new PropertyServiceImpl();
-    TransactionService transactionService = new TransactionServiceImpl(txManager);
+    TransactionService transactionService = new TransactionServiceImpl(txManager, activityLogService);
 
     private final BookingService bookingService =
             new BookingServiceImpl(propertyService, transactionService);
@@ -52,7 +54,7 @@ public class CustomerCreateBookingController extends HttpServlet {
 
             response.sendRedirect(
                     request.getContextPath()
-                            + "/customer/bookings?id="
+                            + "/customer/profile/bookings?id="
                             + bookingId
             );
 

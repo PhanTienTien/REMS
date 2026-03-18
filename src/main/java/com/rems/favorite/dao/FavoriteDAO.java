@@ -1,6 +1,6 @@
 package com.rems.favorite.dao;
 
-import com.rems.property.model.Property;
+import com.rems.property.dto.PropertyCardDTO;
 
 import java.sql.Connection;
 import java.util.List;
@@ -13,5 +13,5 @@ public interface FavoriteDAO {
 
     void delete(Connection conn, Long customerId, Long propertyId);
 
-    List<Property> findByCustomer(Connection conn, Long customerId);
+    List<PropertyCardDTO> findByCustomer(Connection conn, Long customerId);
 }

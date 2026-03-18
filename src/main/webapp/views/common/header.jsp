@@ -63,9 +63,13 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="${pageContext.request.contextPath}/logout">
-                                            Logout
-                                        </a>
+                                        <form action="${pageContext.request.contextPath}/logout"
+                                              method="post"
+                                              style="display:inline;">
+                                            <button type="submit" class="logout-link">
+                                                Logout
+                                            </button>
+                                        </form>
                                     </li>
                                 </ul>
                             </li>

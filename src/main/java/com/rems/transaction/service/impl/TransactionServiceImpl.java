@@ -1,5 +1,6 @@
 package com.rems.transaction.service.impl;
 
+import com.rems.activitylog.service.ActivityLogService;
 import com.rems.booking.dao.BookingDAO;
 import com.rems.booking.dao.impl.BookingDAOImpl;
 import com.rems.booking.model.Booking;
@@ -28,14 +29,19 @@ import java.util.List;
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionManager txManager;
-    TransactionDAO transactionDAO = new TransactionDAOImpl();
+    private final TransactionDAO transactionDAO = new TransactionDAOImpl();
+    private final ActivityLogService activityLogService;
 
-    public TransactionServiceImpl(TransactionManager txManager) {
+    public TransactionServiceImpl(TransactionManager txManager, ActivityLogService activityLogService) {
         this.txManager = txManager;
+        this.activityLogService = activityLogService;
     }
 
     @Override
-    public Long createTransaction(Connection conn, Long bookingId) {
+    public Long createTransaction(Connection conn,
+                                  Long bookingId,
+                                  Long performedBy,
+                                  String ipAddress) {
 
 
         BookingDAO bookingDAO = new BookingDAOImpl();
@@ -81,7 +87,19 @@ public class TransactionServiceImpl implements TransactionService {
 
         tx.setStatus(TransactionStatus.PENDING);
 
-        return transactionDAO.insert(conn, tx);
+        Long transactionId = transactionDAO.insert(conn, tx);
+
+        activityLogService.log(
+                conn,
+                performedBy,
+                "CREATE_TRANSACTION",
+                "TRANSACTION",
+                transactionId,
+                "Created transaction for booking " + bookingId,
+                ipAddress
+        );
+
+        return transactionId;
     }
 
     @Override

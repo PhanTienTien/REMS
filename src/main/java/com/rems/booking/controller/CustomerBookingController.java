@@ -1,5 +1,6 @@
 package com.rems.booking.controller;
 
+import com.rems.activitylog.service.ActivityLogService;
 import com.rems.booking.service.BookingService;
 import com.rems.booking.service.impl.BookingServiceImpl;
 import com.rems.common.transaction.TransactionManager;
@@ -21,12 +22,13 @@ public class CustomerBookingController extends HttpServlet {
 
     private BookingService bookingService;
     private TransactionManager txManager;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
 
         PropertyService propertyService = new PropertyServiceImpl();
-        TransactionService transactionService = new TransactionServiceImpl(txManager);
+        TransactionService transactionService = new TransactionServiceImpl(txManager, activityLogService);
 
         bookingService = new BookingServiceImpl(propertyService, transactionService);
     }

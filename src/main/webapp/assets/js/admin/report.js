@@ -1,12 +1,12 @@
-const revenueData = JSON.parse(document.getElementById("revenueData").value);
-const transactionData = JSON.parse(document.getElementById("transactionData").value);
+if (!revenueData || revenueData.length === 0) {
+    console.warn("No data for chart");
+} else {
 
-const months = revenueData.map(r => r.month);
-const revenue = revenueData.map(r => r.revenue);
+    const months = revenueData.map(r => r.month);
+    const revenue = revenueData.map(r => r.revenue);
+    const txCounts = revenueData.map(r => r.count);
 
-new Chart(
-    document.getElementById('revenueChart'),
-    {
+    new Chart(document.getElementById('revenueChart'), {
         type: 'line',
         data: {
             labels: months,
@@ -15,15 +15,9 @@ new Chart(
                 data: revenue
             }]
         }
-    }
-);
+    });
 
-
-const txCounts = transactionData.map(t => t.count);
-
-new Chart(
-    document.getElementById('transactionChart'),
-    {
+    new Chart(document.getElementById('transactionChart'), {
         type: 'bar',
         data: {
             labels: months,
@@ -32,5 +26,5 @@ new Chart(
                 data: txCounts
             }]
         }
-    }
-);
+    });
+}

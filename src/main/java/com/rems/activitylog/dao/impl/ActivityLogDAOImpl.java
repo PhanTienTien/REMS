@@ -152,4 +152,29 @@ public class ActivityLogDAOImpl implements ActivityLogDAO {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void insert(Connection conn, ActivityLog log) {
+
+        String sql = """
+        INSERT INTO activity_logs
+        (user_id, action, entity_type, entity_id, description, ip_address)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, log.getUserId());
+            ps.setString(2, log.getAction());
+            ps.setString(3, log.getEntityType());
+            ps.setLong(4, log.getEntityId());
+            ps.setString(5, log.getDescription());
+            ps.setString(6, log.getIpAddress());
+
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

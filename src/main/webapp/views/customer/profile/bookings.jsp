@@ -58,7 +58,7 @@
                                 <c:if test="${b.status == 'PENDING'}">
 
                                     <form method="post"
-                                          action="${pageContext.request.contextPath}/customer/bookings">
+                                          action="${pageContext.request.contextPath}/customer/profile/bookings">
 
                                         <input type="hidden" name="action" value="cancel"/>
                                         <input type="hidden" name="id" value="${b.bookingId}"/>

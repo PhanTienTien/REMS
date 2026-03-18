@@ -1,5 +1,6 @@
 package com.rems.transaction.controller;
 
+import com.rems.activitylog.service.ActivityLogService;
 import com.rems.common.constant.Role;
 import com.rems.common.transaction.TransactionManager;
 import com.rems.transaction.model.Transaction;
@@ -19,11 +20,12 @@ import java.util.List;
 public class AdminTransactionController extends HttpServlet {
 
     private TransactionService transactionService;
+    private ActivityLogService activityLogService;
 
     @Override
     public void init() {
         TransactionManager txManager = new TransactionManager();
-        transactionService = new TransactionServiceImpl(txManager);
+        transactionService = new TransactionServiceImpl(txManager, activityLogService);
     }
 
     @Override

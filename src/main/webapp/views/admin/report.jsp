@@ -121,7 +121,19 @@
 
 </div>
 
-<script src="${pageContext.request.contextPath}/assets/js/admin/report.js"></script>
+<script>
+    const revenueData = [
+        <c:forEach items="${reports}" var="r" varStatus="loop">
+        {
+            month: "${r.month}",
+            revenue: ${r.revenue != null ? r.revenue : 0},
+            count: ${r.transactions != null ? r.transactions : 0}
+        }<c:if test="${!loop.last}">,</c:if>
+        </c:forEach>
+    ];
+</script>
+
+<script src="${pageContext.request.contextPath}/assets/js/admin/report.js?v=1"></script>
 
 </body>
 </html>

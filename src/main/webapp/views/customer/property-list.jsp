@@ -1,6 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ include file="../common/header.jsp" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
+
+<%@ include file="../common/header.jsp" %>
 
 <link rel="stylesheet"
       href="${pageContext.request.contextPath}/assets/css/customer/property.css">
@@ -13,39 +15,40 @@
 
     <div class="container">
 
-        <h2 class="mb-4">Find Your Dream Property</h2>
+        <h2 class="page-title">Tìm kiếm bất động sản phù hợp</h2>
 
         <form method="get"
-              action="${pageContext.request.contextPath}/customer/properties">
+              action="${pageContext.request.contextPath}/customer/properties"
+              class="search-form">
 
             <input type="text"
                    name="address"
-                   placeholder="Address"
+                   placeholder="Nhập địa chỉ..."
                    value="${param.address}">
 
             <select name="type">
-                <option value="">All</option>
-                <option value="SALE">Sale</option>
-                <option value="RENT">Rent</option>
+                <option value="">Tất cả</option>
+                <option value="SALE">Bán</option>
+                <option value="RENT">Cho thuê</option>
             </select>
 
             <input type="number"
                    name="minPrice"
-                   placeholder="Min Price"
+                   placeholder="Giá từ"
                    value="${param.minPrice}">
 
             <input type="number"
                    name="maxPrice"
-                   placeholder="Max Price"
+                   placeholder="Đến"
                    value="${param.maxPrice}">
 
             <select name="sort">
-                <option value="">Newest</option>
-                <option value="price_asc">Price Low → High</option>
-                <option value="price_desc">Price High → Low</option>
+                <option value="">Mới nhất</option>
+                <option value="price_asc">Giá thấp → cao</option>
+                <option value="price_desc">Giá cao → thấp</option>
             </select>
 
-            <button>Search</button>
+            <button class="btn-search">Tìm kiếm</button>
 
         </form>
 
@@ -57,18 +60,24 @@
 
                     <img src="${pageContext.request.contextPath}${p.thumbnail}">
 
-                    <h3>${p.title}</h3>
+                    <div class="card-body">
 
-                    <p>${p.address}</p>
+                        <h3>${p.title}</h3>
 
-                    <p class="price">${p.price} VND</p>
+                        <p class="address">${p.address}</p>
 
-                    <p class="type">${p.type}</p>
+                        <p class="price">
+                            <fmt:formatNumber value="${p.price}" type="number"/> VNĐ
+                        </p>
 
-                    <a class="btn-view"
-                       href="${pageContext.request.contextPath}/customer/properties/detail?id=${p.id}">
-                        View Detail
-                    </a>
+                        <span class="badge">${p.type}</span>
+
+                        <a class="btn-view"
+                           href="${pageContext.request.contextPath}/customer/properties/detail?id=${p.id}">
+                            Xem chi tiết
+                        </a>
+
+                    </div>
 
                 </div>
 
@@ -79,7 +88,7 @@
         <div class="pagination">
 
             <c:if test="${currentPage > 1}">
-                <a href="?page=${currentPage-1}">Previous</a>
+                <a href="?page=${currentPage-1}">← Trước</a>
             </c:if>
 
             <c:forEach begin="1" end="${totalPages}" var="i">
@@ -92,7 +101,7 @@
             </c:forEach>
 
             <c:if test="${currentPage < totalPages}">
-                <a href="?page=${currentPage+1}">Next</a>
+                <a href="?page=${currentPage+1}">Sau →</a>
             </c:if>
 
         </div>
