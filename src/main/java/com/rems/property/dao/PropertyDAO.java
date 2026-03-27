@@ -78,4 +78,23 @@ public interface PropertyDAO {
     List<PropertyCardDTO> searchAvailableCard(
             Connection conn,
             PropertySearchDTO dto);
+
+    List<Property> searchAdmin(
+            Connection conn,
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice,
+            String sort,
+            int page,
+            int size
+    );
+
+    int countAdmin(
+            Connection conn,
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice
+    );
 }

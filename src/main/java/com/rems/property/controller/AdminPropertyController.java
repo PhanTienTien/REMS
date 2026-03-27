@@ -3,6 +3,7 @@ package com.rems.property.controller;
 import com.rems.common.constant.PropertyType;
 import com.rems.property.dto.CreatePropertyDTO;
 import com.rems.property.dto.UpdatePropertyDTO;
+import com.rems.property.model.PageResult;
 import com.rems.property.model.Property;
 import com.rems.property.service.PropertyService;
 import com.rems.property.service.impl.PropertyServiceImpl;
@@ -35,25 +36,20 @@ public class AdminPropertyController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String path = req.getPathInfo();
-
-        if (path == null || path.equals("/")) {
-            listProperties(req, resp);
-            return;
-        }
+        String path = getPath(req);
 
         switch (path) {
-
+            case "/":
+                list(req, resp);
+                break;
             case "/create":
-                showCreateForm(req, resp);
+                forward(req, resp, "/views/admin/property-create.jsp");
                 break;
-
             case "/edit":
-                showEditForm(req, resp);
+                showEdit(req, resp);
                 break;
-
             default:
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                resp.sendError(404);
         }
     }
 
@@ -61,196 +57,107 @@ public class AdminPropertyController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String path = req.getPathInfo();
+        String path = getPath(req);
 
         switch (path) {
-
             case "/create":
-                createProperty(req, resp);
+                create(req, resp);
                 break;
-
             case "/edit":
-                updateProperty(req, resp);
+                update(req, resp);
                 break;
-
             case "/approve":
-                approveProperty(req, resp);
+                approve(req, resp);
                 break;
-
             case "/deactivate":
-                deactivateProperty(req, resp);
+                deactivate(req, resp);
                 break;
-
             case "/restore":
-                restoreProperty(req, resp);
+                restore(req, resp);
                 break;
-
             case "/delete":
-                deleteProperty(req, resp);
+                delete(req, resp);
                 break;
-
             default:
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                resp.sendError(404);
         }
     }
 
-    private void listProperties(HttpServletRequest req, HttpServletResponse resp)
+    private void list(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        int page = 1;
-        int size = 10;
+        int page = safePage(req.getParameter("page"));
+        int size = safeSize(req.getParameter("size"));
 
-        String pageParam = req.getParameter("page");
-        if (pageParam != null) {
-            page = Integer.parseInt(pageParam);
-        }
-
-        String address = req.getParameter("address");
-        String type = req.getParameter("type");
-
+        String keyword = trim(req.getParameter("address"));
+        String type = trim(req.getParameter("type"));
         Integer minPrice = parseInt(req.getParameter("minPrice"));
         Integer maxPrice = parseInt(req.getParameter("maxPrice"));
+        String sort = trim(req.getParameter("sort"));
 
-        List<Property> properties =
-                propertyService.searchAdmin(
-                        address, type, minPrice, maxPrice, page, size
-                );
+        PageResult<Property> result =
+                propertyService.searchAdminPage(keyword, type, minPrice, maxPrice, sort, page, size);
 
-        int total =
-                propertyService.countAdmin(address, type, minPrice, maxPrice);
+        req.setAttribute("result", result);
+
+        int total = propertyService.countAdmin(
+                keyword, type, minPrice, maxPrice
+        );
 
         int totalPages = (int) Math.ceil((double) total / size);
 
-        req.setAttribute("properties", properties);
+        req.setAttribute("properties", result);
         req.setAttribute("currentPage", page);
         req.setAttribute("totalPages", totalPages);
 
-        req.getRequestDispatcher("/views/admin/property-list.jsp")
-                .forward(req, resp);
+        req.setAttribute("keyword", keyword);
+        req.setAttribute("type", type);
+        req.setAttribute("minPrice", minPrice);
+        req.setAttribute("maxPrice", maxPrice);
+        req.setAttribute("sort", sort);
+
+        forward(req, resp, "/views/admin/property-list.jsp");
     }
 
-    private void showCreateForm(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-
-        req.getRequestDispatcher("/views/admin/property-create.jsp")
-                .forward(req, resp);
-    }
-
-    private void createProperty(HttpServletRequest req, HttpServletResponse resp)
+    private void create(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
 
-        String title = req.getParameter("title");
-        String address = req.getParameter("address");
-        String description = req.getParameter("description");
-        String typeStr = req.getParameter("type");
-        String priceStr = req.getParameter("price");
-
         try {
+            CreatePropertyDTO dto = buildCreateDTO(req);
 
-            PropertyType type = PropertyType.valueOf(typeStr);
-            BigDecimal price = new BigDecimal(priceStr);
+            List<String> images = saveImages(req);
 
-            CreatePropertyDTO dto =
-                    new CreatePropertyDTO(title, address, description, type, price);
+            Long staffId = getStaffId(req);
 
-            dto.validate();
+            propertyService.createProperty(dto, staffId, images);
 
-            List<String> imageUrls = new ArrayList<>();
-
-            String uploadPath =
-                    getServletContext().getRealPath("/uploads");
-
-            File uploadDir = new File(uploadPath);
-
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
-            }
-
-            for (Part part : req.getParts()) {
-
-                if ("images".equals(part.getName()) && part.getSize() > 0) {
-
-                    String fileName =
-                            System.currentTimeMillis() + "_"
-                                    + Paths.get(part.getSubmittedFileName())
-                                    .getFileName()
-                                    .toString();
-
-                    String filePath = uploadPath + File.separator + fileName;
-
-                    part.write(filePath);
-
-                    imageUrls.add("/uploads/" + fileName);
-                }
-            }
-
-            Long staffId = 1L;
-
-            propertyService.createProperty(dto, staffId, imageUrls);
-
-            resp.sendRedirect(req.getContextPath() + "/admin/properties");
+            redirectWithQuery(req, resp);
 
         } catch (Exception e) {
-
             req.setAttribute("error", e.getMessage());
-
             req.setAttribute("openModal", "create");
-
-            req.setAttribute("formTitle", title);
-            req.setAttribute("formAddress", address);
-            req.setAttribute("formDescription", description);
-            req.setAttribute("formType", typeStr);
-            req.setAttribute("formPrice", priceStr);
-
-            req.getRequestDispatcher("/views/admin/property-list.jsp")
-                    .forward(req, resp);
+            forward(req, resp, "/views/admin/property-list.jsp");
         }
     }
 
-    private void updateProperty(HttpServletRequest req, HttpServletResponse resp)
+    private void update(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
 
-        String idStr = req.getParameter("id");
-        String title = req.getParameter("title");
-        String address = req.getParameter("address");
-        String description = req.getParameter("description");
-        String typeStr = req.getParameter("type");
-        String priceStr = req.getParameter("price");
-
         try {
-
-            Long id = Long.parseLong(idStr);
-            PropertyType type = PropertyType.valueOf(typeStr);
-            BigDecimal price = new BigDecimal(priceStr);
-
-            UpdatePropertyDTO dto =
-                    new UpdatePropertyDTO(id, title, address, description, type, price);
-
-            dto.validate();
+            UpdatePropertyDTO dto = buildUpdateDTO(req);
 
             propertyService.updateProperty(dto);
 
-            resp.sendRedirect(req.getContextPath() + "/admin/properties");
+            redirectWithQuery(req, resp);
 
         } catch (Exception e) {
-
             req.setAttribute("error", e.getMessage());
-
             req.setAttribute("openModal", "edit");
-
-            req.setAttribute("formId", idStr);
-            req.setAttribute("formTitle", title);
-            req.setAttribute("formAddress", address);
-            req.setAttribute("formDescription", description);
-            req.setAttribute("formType", typeStr);
-            req.setAttribute("formPrice", priceStr);
-
-            req.getRequestDispatcher("/views/admin/property-list.jsp")
-                    .forward(req, resp);
+            forward(req, resp, "/views/admin/property-list.jsp");
         }
     }
 
-    private void showEditForm(HttpServletRequest req, HttpServletResponse resp)
+    private void showEdit(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
         Long id = Long.parseLong(req.getParameter("id"));
@@ -259,63 +166,133 @@ public class AdminPropertyController extends HttpServlet {
 
         req.setAttribute("property", property);
 
-        req.getRequestDispatcher("/views/admin/property-edit.jsp")
-                .forward(req, resp);
+        forward(req, resp, "/views/admin/property-edit.jsp");
     }
 
-
-
-    private void approveProperty(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-
-        Long propertyId = Long.parseLong(req.getParameter("id"));
-
-        Long staffId = 1L; // sau này lấy từ session
-
-        propertyService.approveProperty(propertyId, staffId);
-
-        resp.sendRedirect(req.getContextPath() + "/admin/properties");
+    private void approve(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        propertyService.approveProperty(parseLong(req, "id"), getStaffId(req));
+        redirectWithQuery(req, resp);
     }
 
-    private void deactivateProperty(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-
-        Long id = Long.parseLong(req.getParameter("id"));
-
-        Long staffId = 1L;
-
-        propertyService.deactivateProperty(id, staffId);
-
-        resp.sendRedirect(req.getContextPath() + "/admin/properties");
+    private void deactivate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        propertyService.deactivateProperty(parseLong(req, "id"), getStaffId(req));
+        redirectWithQuery(req, resp);
     }
 
-    private void restoreProperty(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-
-        Long id = Long.parseLong(req.getParameter("id"));
-
-        Long staffId = 1L;
-
-        propertyService.restoreProperty(id, staffId);
-
-        resp.sendRedirect(req.getContextPath() + "/admin/properties");
+    private void restore(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        propertyService.restoreProperty(parseLong(req, "id"), getStaffId(req));
+        redirectWithQuery(req, resp);
     }
 
-    private void deleteProperty(HttpServletRequest req, HttpServletResponse resp)
+    private void delete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        propertyService.deleteProperty(parseLong(req, "id"));
+        redirectWithQuery(req, resp);
+    }
+
+    private String getPath(HttpServletRequest req) {
+        String path = req.getPathInfo();
+        return (path == null || path.equals("/")) ? "/" : path;
+    }
+
+    private void forward(HttpServletRequest req, HttpServletResponse resp, String view)
+            throws ServletException, IOException {
+        req.getRequestDispatcher(view).forward(req, resp);
+    }
+
+    private void redirectWithQuery(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
 
-        Long id = Long.parseLong(req.getParameter("id"));
+        String query = req.getQueryString();
 
-        propertyService.deleteProperty(id);
+        String url = req.getContextPath() + "/admin/properties";
+        if (query != null) {
+            url += "?" + query;
+        }
 
-        resp.sendRedirect(req.getContextPath() + "/admin/properties");
+        resp.sendRedirect(url);
+    }
+
+    private int safePage(String val) {
+        int p = parseInt(val, 1);
+        return Math.max(p, 1);
+    }
+
+    private int safeSize(String val) {
+        int s = parseInt(val, 10);
+        return Math.min(Math.max(s, 1), 100);
     }
 
     private Integer parseInt(String val) {
         try {
-            return (val == null || val.isBlank()) ? null : Integer.parseInt(val);
+            return val != null ? Integer.parseInt(val) : null;
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private int parseInt(String val, int def) {
+        try {
+            return val != null ? Integer.parseInt(val) : def;
+        } catch (Exception e) {
+            return def;
+        }
+    }
+
+    private Long parseLong(HttpServletRequest req, String name) {
+        return Long.parseLong(req.getParameter(name));
+    }
+
+    private String trim(String s) {
+        return (s == null || s.isBlank()) ? null : s.trim();
+    }
+
+    private Long getStaffId(HttpServletRequest req) {
+        Object user = req.getSession().getAttribute("userId");
+        return user != null ? (Long) user : 1L;
+    }
+
+    private CreatePropertyDTO buildCreateDTO(HttpServletRequest req) {
+        return new CreatePropertyDTO(
+                req.getParameter("title"),
+                req.getParameter("address"),
+                req.getParameter("description"),
+                PropertyType.valueOf(req.getParameter("type")),
+                new BigDecimal(req.getParameter("price"))
+        );
+    }
+
+    private UpdatePropertyDTO buildUpdateDTO(HttpServletRequest req) {
+        return new UpdatePropertyDTO(
+                Long.parseLong(req.getParameter("id")),
+                req.getParameter("title"),
+                req.getParameter("address"),
+                req.getParameter("description"),
+                PropertyType.valueOf(req.getParameter("type")),
+                new BigDecimal(req.getParameter("price"))
+        );
+    }
+
+    private List<String> saveImages(HttpServletRequest req)
+            throws IOException, ServletException {
+
+        List<String> list = new ArrayList<>();
+
+        String uploadPath = getServletContext().getRealPath("/uploads");
+        File dir = new File(uploadPath);
+        if (!dir.exists()) dir.mkdirs();
+
+        for (Part part : req.getParts()) {
+            if ("images".equals(part.getName()) && part.getSize() > 0) {
+
+                String fileName = System.currentTimeMillis() + "_" +
+                        Paths.get(part.getSubmittedFileName()).getFileName();
+
+                part.write(uploadPath + File.separator + fileName);
+
+                list.add("/uploads/" + fileName);
+            }
+        }
+
+        return list;
     }
 }

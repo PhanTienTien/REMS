@@ -11,6 +11,7 @@ import com.rems.property.dto.CreatePropertyDTO;
 import com.rems.property.dto.PropertyCardDTO;
 import com.rems.property.dto.PropertySearchDTO;
 import com.rems.property.dto.UpdatePropertyDTO;
+import com.rems.property.model.PageResult;
 import com.rems.property.model.Property;
 import com.rems.property.service.PropertyImageService;
 import com.rems.property.service.PropertyService;
@@ -277,5 +278,44 @@ public class PropertyServiceImpl implements PropertyService {
                 propertyDAO.searchAvailableCard(conn, dto)
         );
     }
+
+    @Override
+    public PageResult<Property> searchAdminPage(
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice,
+            String sort,
+            int page,
+            int size
+    ) {
+
+        return txManager.execute(conn -> {
+
+            List<Property> data = propertyDAO.searchAdmin(
+                    conn, address, type, minPrice, maxPrice, sort, page, size
+            );
+
+            int total = propertyDAO.countAdmin(
+                    conn, address, type, minPrice, maxPrice
+            );
+
+            return new PageResult<>(data, page, size, total);
+        });
+    }
+
+    @Override
+    public int countAdmin(
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice
+    ) {
+        return txManager.execute(conn ->
+                propertyDAO.countAdmin(conn, address, type, minPrice, maxPrice)
+        );
+    }
+
+
 
 }

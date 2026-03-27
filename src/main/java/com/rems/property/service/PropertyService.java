@@ -6,6 +6,7 @@ import com.rems.property.dto.CreatePropertyDTO;
 import com.rems.property.dto.PropertyCardDTO;
 import com.rems.property.dto.PropertySearchDTO;
 import com.rems.property.dto.UpdatePropertyDTO;
+import com.rems.property.model.PageResult;
 import com.rems.property.model.Property;
 
 import java.math.BigDecimal;
@@ -75,11 +76,12 @@ public interface PropertyService {
 
     List<PropertyCardDTO> searchAvailableCard(PropertySearchDTO dto);
 
-    List<Property> searchAdmin(
+    public PageResult<Property> searchAdminPage(
             String address,
             String type,
             Integer minPrice,
             Integer maxPrice,
+            String sort,
             int page,
             int size
     );

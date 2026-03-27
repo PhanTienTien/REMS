@@ -679,4 +679,140 @@ public class PropertyDAOImpl implements PropertyDAO {
         return list;
     }
 
+    @Override
+    public List<Property> searchAdmin(
+            Connection conn,
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice,
+            String sort,
+            int page,
+            int size
+    ) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT *
+        FROM properties
+        WHERE 1=1
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (address != null && !address.isBlank()) {
+            sql.append(" AND address LIKE ?");
+            params.add("%" + address + "%");
+        }
+
+        if (type != null && !type.isBlank()) {
+            sql.append(" AND type = ?");
+            params.add(type);
+        }
+
+        if (minPrice != null) {
+            sql.append(" AND price >= ?");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null) {
+            sql.append(" AND price <= ?");
+            params.add(maxPrice);
+        }
+
+        // 🔥 SORT
+        sql.append(" ORDER BY ").append(resolveSort(sort));
+
+        // 🔥 PAGINATION
+        sql.append(" LIMIT ? OFFSET ?");
+        params.add(size);
+        params.add((page - 1) * size);
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            setParams(ps, params);
+
+            ResultSet rs = ps.executeQuery();
+            List<Property> list = new ArrayList<>();
+
+            while (rs.next()) {
+                list.add(map(rs));
+            }
+
+            return list;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error searchAdmin", e);
+        }
+    }
+
+    @Override
+    public int countAdmin(
+            Connection conn,
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice
+    ) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(*)
+        FROM properties
+        WHERE 1=1
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (address != null && !address.isBlank()) {
+            sql.append(" AND address LIKE ?");
+            params.add("%" + address + "%");
+        }
+
+        if (type != null && !type.isBlank()) {
+            sql.append(" AND type = ?");
+            params.add(type);
+        }
+
+        if (minPrice != null) {
+            sql.append(" AND price >= ?");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null) {
+            sql.append(" AND price <= ?");
+            params.add(maxPrice);
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            setParams(ps, params);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+            return 0;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error countAdmin", e);
+        }
+    }
+
+    private String resolveSort(String sort) {
+        if (sort == null || sort.isBlank()) {
+            return "created_at DESC";
+        }
+
+        return switch (sort) {
+            case "price_asc" -> "price ASC";
+            case "price_desc" -> "price DESC";
+            case "oldest" -> "created_at ASC";
+            default -> "created_at DESC";
+        };
+    }
+
+    private void setParams(PreparedStatement ps, List<Object> params) throws SQLException {
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
+    }
 }

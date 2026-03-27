@@ -3,7 +3,6 @@
 
 <html>
 <head>
-
     <title>Property Management</title>
 
     <link rel="stylesheet"
@@ -11,85 +10,102 @@
 
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/assets/css/admin/property-dashboard.css">
-
 </head>
 
 <body>
 
 <div class="dashboard-container">
 
+    <!-- SIDEBAR -->
     <c:choose>
-
         <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
             <jsp:include page="/views/admin/components/sidebar.jsp"/>
         </c:when>
-
         <c:otherwise>
             <jsp:include page="/views/staff/components/sidebar.jsp"/>
         </c:otherwise>
-
     </c:choose>
 
     <div class="main-content">
 
+        <!-- TOPBAR -->
         <c:choose>
-
             <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
                 <jsp:include page="/views/admin/components/topbar.jsp"/>
             </c:when>
-
             <c:otherwise>
                 <jsp:include page="/views/staff/components/topbar.jsp"/>
             </c:otherwise>
-
         </c:choose>
 
         <div class="content">
+
+            <!-- ERROR -->
             <c:if test="${not empty error}">
-                <div class="error-box">
-                        ${error}
-                </div>
+                <div class="error-box">${error}</div>
             </c:if>
 
+            <!-- HEADER -->
             <div class="page-header">
-
                 <h2>Property Management</h2>
-
                 <button class="btn-primary" onclick="openCreateModal()">
                     + Create Property
                 </button>
-
             </div>
 
-            <form class="search-bar"
-                  method="get"
-                  action="${pageContext.request.contextPath}/admin/properties/search">
+            <!-- SEARCH + FILTER -->
+            <form class="search-bar" method="get"
+                  action="${pageContext.request.contextPath}/admin/properties">
 
-                <input type="text" name="address" placeholder="Search address">
+                <input type="text" name="address"
+                       value="${keyword}"
+                       placeholder="Search address">
 
                 <select name="type">
                     <option value="">All Type</option>
-                    <option value="SALE">Sale</option>
-                    <option value="RENT">Rent</option>
+                    <option value="SALE" ${type == 'SALE' ? 'selected' : ''}>Sale</option>
+                    <option value="RENT" ${type == 'RENT' ? 'selected' : ''}>Rent</option>
                 </select>
 
-                <input type="number" name="minPrice" placeholder="Min price">
+                <input type="number" name="minPrice"
+                       value="${minPrice}" placeholder="Min price">
 
-                <input type="number" name="maxPrice" placeholder="Max price">
+                <input type="number" name="maxPrice"
+                       value="${maxPrice}" placeholder="Max price">
 
-                <button class="btn-search" type="submit">
-                    Search
-                </button>
+                <select name="sort">
+                    <option value="">Newest</option>
+                    <option value="price_asc" ${sort == 'price_asc' ? 'selected' : ''}>Price ↑</option>
+                    <option value="price_desc" ${sort == 'price_desc' ? 'selected' : ''}>Price ↓</option>
+                    <option value="oldest" ${sort == 'oldest' ? 'selected' : ''}>Oldest</option>
+                </select>
 
+                <select name="size">
+                    <option value="5" ${result.size == 5 ? 'selected' : ''}>5</option>
+                    <option value="10" ${result.size == 10 ? 'selected' : ''}>10</option>
+                    <option value="20" ${result.size == 20 ? 'selected' : ''}>20</option>
+                </select>
+
+                <button class="btn-search">Search</button>
             </form>
 
-            <div class="table-wrapper">
+            <!-- BASE URL (GIỮ FILTER) -->
+            <c:url var="baseUrl" value="/admin/properties">
+                <c:param name="address" value="${keyword}" />
+                <c:param name="type" value="${type}" />
+                <c:param name="minPrice" value="${minPrice}" />
+                <c:param name="maxPrice" value="${maxPrice}" />
+                <c:param name="sort" value="${sort}" />
+                <c:param name="size" value="${result.size}" />
+            </c:url>
 
+            <!-- TABLE -->
+            <div class="table-wrapper">
                 <table class="property-table">
 
                     <thead>
                     <tr>
-                        <th>STT</th>
+                        <th>#</th>
                         <th>Title</th>
                         <th>Address</th>
                         <th>Description</th>
@@ -103,28 +119,24 @@
 
                     <tbody>
 
-                    <c:forEach var="p" items="${properties}" varStatus="loop">
+                    <c:forEach var="p" items="${result.data}" varStatus="loop">
 
                         <tr>
-
-                            <td>${loop.index + 1}</td>
+                            <!-- FIX STT -->
+                            <td>
+                                    ${(result.page - 1) * result.size + loop.index + 1}
+                            </td>
 
                             <td>${p.title}</td>
-
                             <td>${p.address}</td>
-
                             <td>${p.description}</td>
-
                             <td>${p.type}</td>
-
                             <td>$${p.price}</td>
 
                             <td>
-
                                 <span class="status-badge status-${p.status}">
                                         ${p.status}
                                 </span>
-
                             </td>
 
                             <td>${p.createdAt}</td>
@@ -143,31 +155,21 @@
                                     Edit
                                 </button>
 
-                                <form method="post"
-                                      action="${pageContext.request.contextPath}/admin/properties/approve">
-
-                                    <input type="hidden" name="id" value="${p.id}">
-
-                                    <c:choose>
-
-                                        <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
-                                            <button class="btn-approve">Approve</button>
-                                        </c:when>
-
-                                    </c:choose>
-
-                                </form>
+                                <c:if test="${sessionScope.currentUser.role == 'ADMIN'}">
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/admin/properties/approve">
+                                        <input type="hidden" name="id" value="${p.id}">
+                                        <button class="btn-approve">Approve</button>
+                                    </form>
+                                </c:if>
 
                                 <form method="post"
                                       action="${pageContext.request.contextPath}/admin/properties/delete">
-
                                     <input type="hidden" name="id" value="${p.id}">
-
                                     <button class="btn-delete"
                                             onclick="return confirm('Delete this property?')">
                                         Delete
                                     </button>
-
                                 </form>
 
                                 <button class="btn-image"
@@ -176,7 +178,6 @@
                                 </button>
 
                             </td>
-
                         </tr>
 
                     </c:forEach>
@@ -184,36 +185,30 @@
                     </tbody>
 
                 </table>
-
             </div>
 
+            <!-- PAGINATION -->
             <div class="pagination">
 
-                <c:if test="${currentPage > 1}">
-                    <a href="?page=${currentPage - 1}&keyword=${param.keyword}">
-                        Previous
-                    </a>
+                <c:if test="${result.page > 1}">
+                    <a href="${baseUrl}&page=${result.page - 1}">Previous</a>
                 </c:if>
 
-                <c:forEach begin="1" end="${totalPages}" var="i">
-                    <a href="?page=${i}&keyword=${param.keyword}"
-                       class="${i == currentPage ? 'active' : ''}">
+                <c:forEach begin="1" end="${result.totalPages}" var="i">
+                    <a href="${baseUrl}&page=${i}"
+                       class="${i == result.page ? 'active' : ''}">
                             ${i}
                     </a>
                 </c:forEach>
 
-                <c:if test="${currentPage < totalPages}">
-                    <a href="?page=${currentPage + 1}&keyword=${param.keyword}">
-                        Next
-                    </a>
+                <c:if test="${result.page < result.totalPages}">
+                    <a href="${baseUrl}&page=${result.page + 1}">Next</a>
                 </c:if>
 
             </div>
 
         </div>
-
     </div>
-
 </div>
 
 <div id="createModal" class="modal">
@@ -366,7 +361,7 @@
     };
 </script>
 
-<script src="${pageContext.request.contextPath}/assets/js/admin/property-dashboard.js?v=1"></script>
+<script src="${pageContext.request.contextPath}/assets/js/admin/property-dashboard.js?v=2"></script>
 
 </body>
 </html>
