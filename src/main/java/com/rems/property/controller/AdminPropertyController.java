@@ -6,7 +6,6 @@ import com.rems.property.dto.UpdatePropertyDTO;
 import com.rems.property.model.Property;
 import com.rems.property.service.PropertyService;
 import com.rems.property.service.impl.PropertyServiceImpl;
-import com.rems.property.validator.PropertyValidator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -51,10 +50,6 @@ public class AdminPropertyController extends HttpServlet {
 
             case "/edit":
                 showEditForm(req, resp);
-                break;
-
-            case "/search":
-                searchProperties(req, resp);
                 break;
 
             default:
@@ -102,9 +97,33 @@ public class AdminPropertyController extends HttpServlet {
     private void listProperties(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        List<Property> properties = propertyService.getAllProperties();
+        int page = 1;
+        int size = 10;
+
+        String pageParam = req.getParameter("page");
+        if (pageParam != null) {
+            page = Integer.parseInt(pageParam);
+        }
+
+        String address = req.getParameter("address");
+        String type = req.getParameter("type");
+
+        Integer minPrice = parseInt(req.getParameter("minPrice"));
+        Integer maxPrice = parseInt(req.getParameter("maxPrice"));
+
+        List<Property> properties =
+                propertyService.searchAdmin(
+                        address, type, minPrice, maxPrice, page, size
+                );
+
+        int total =
+                propertyService.countAdmin(address, type, minPrice, maxPrice);
+
+        int totalPages = (int) Math.ceil((double) total / size);
 
         req.setAttribute("properties", properties);
+        req.setAttribute("currentPage", page);
+        req.setAttribute("totalPages", totalPages);
 
         req.getRequestDispatcher("/views/admin/property-list.jsp")
                 .forward(req, resp);
@@ -292,27 +311,11 @@ public class AdminPropertyController extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/admin/properties");
     }
 
-    private void searchProperties(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-
-        String address = req.getParameter("address");
-
-        String typeParam = req.getParameter("type");
-        PropertyType type =
-                PropertyValidator.validateType(req.getParameter("type"));
-
-        BigDecimal minPrice =
-                PropertyValidator.validatePrice(req.getParameter("minPrice"), "Min price");
-
-        BigDecimal maxPrice =
-                PropertyValidator.validatePrice(req.getParameter("maxPrice"), "Max price");
-
-        List<Property> properties =
-                propertyService.search(address, type, minPrice, maxPrice);
-
-        req.setAttribute("properties", properties);
-
-        req.getRequestDispatcher("/views/admin/property-list.jsp")
-                .forward(req, resp);
+    private Integer parseInt(String val) {
+        try {
+            return (val == null || val.isBlank()) ? null : Integer.parseInt(val);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

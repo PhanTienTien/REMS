@@ -17,4 +17,8 @@ public interface PropertyImageDAO {
     String getThumbnail(Connection conn, Long propertyId);
 
     void insertMultiple(Connection conn, Long propertyId, List<String> imageUrls);
+
+    void deleteById(Connection conn, Long id);
+
+    void resetThumbnail(Connection conn, Long propertyId);
 }

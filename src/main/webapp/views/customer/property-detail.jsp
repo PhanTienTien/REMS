@@ -13,158 +13,157 @@
       href="${pageContext.request.contextPath}/assets/css/customer/layout.css">
 
 <div class="page-section">
-    <div class="property-container">
+    <div class="container property-detail">
 
-        <div class="gallery">
+        <!-- LEFT -->
+        <div class="left">
 
-            <c:forEach var="img" items="${images}">
-                <img class="gallery-img"
-                     src="${pageContext.request.contextPath}${img.imageUrl}"
-                     alt="Property Image">
-            </c:forEach>
-
-        </div>
-
-        <div class="overview">
-
-            <h1>${property.title}</h1>
-
-            <p class="price">
-
-                $${property.price}
-
-            </p>
-
-            <p class="address">
-
-                ${property.address}
-
-            </p>
-
-            <p>
-
-                Type: ${property.type}
-
-            </p>
-
-            <p>
-
-                ${property.description}
-
-            </p>
-
-        </div>
-
-        <div class="location">
-
-            <h2>Location</h2>
-
-            <p>
-
-                Address: ${property.address}
-
-            </p>
-
-        </div>
-
-        <div class="similar">
-
-            <h2>Similar Properties</h2>
-
-            <div class="similar-grid">
-
-                <c:forEach var="p" items="${similar}">
-
-                    <div class="card">
-
-                        <img src="${pageContext.request.contextPath}${thumbnails[p.id]}">
-
-                        <h3>${p.title}</h3>
-
-                        <p class="price">
-                            <fmt:formatNumber value="${p.price}" type="number"/> đ
-                        </p>
-
-                        <a href="${pageContext.request.contextPath}/customer/properties/detail?id=${p.id}">
-                            View
-                        </a>
-
-                    </div>
-
+            <!-- GALLERY -->
+            <div class="gallery">
+                <c:forEach var="img" items="${images}">
+                    <img class="gallery-img"
+                         src="${pageContext.request.contextPath}${img.imageUrl}">
                 </c:forEach>
+            </div>
+
+            <!-- OVERVIEW -->
+            <div class="overview card">
+
+                <h1>${property.title}</h1>
+
+                <p class="price">
+                    <fmt:formatNumber value="${property.price}" type="number"/> đ
+                </p>
+
+                <p class="address">${property.address}</p>
+
+                <p class="type">
+                    <c:choose>
+                        <c:when test="${property.type == 'SALE'}">Bán</c:when>
+                        <c:when test="${property.type == 'RENT'}">Cho thuê</c:when>
+                        <c:otherwise>${property.type}</c:otherwise>
+                    </c:choose>
+                </p>
+
+                <p class="desc">${property.description}</p>
+
+            </div>
+
+            <!-- LOCATION -->
+            <div class="location card">
+                <h2>Vị trí</h2>
+                <p>${property.address}</p>
+            </div>
+
+            <!-- SIMILAR -->
+            <div class="similar">
+
+                <h2>Bất động sản tương tự</h2>
+
+                <div class="similar-grid">
+
+                    <c:forEach var="p" items="${similar}">
+
+                        <div class="card">
+
+                            <img src="${pageContext.request.contextPath}${thumbnails[p.id]}">
+
+                            <div class="card-body">
+
+                                <h3>${p.title}</h3>
+
+                                <p class="price">
+                                    <fmt:formatNumber value="${p.price}" type="number"/> đ
+                                </p>
+
+                                <a class="btn-view"
+                                   href="${pageContext.request.contextPath}/customer/properties/detail?id=${p.id}">
+                                    Xem
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </c:forEach>
+
+                </div>
 
             </div>
 
         </div>
 
-        <div class="booking">
+        <!-- RIGHT (BOOKING STICKY) -->
+        <div class="right">
 
-            <c:choose>
+            <div class="booking card">
 
-                <c:when test="${property.status == 'AVAILABLE'}">
+                <c:choose>
 
-                    <form method="post"
-                          action="${pageContext.request.contextPath}/customer/bookings/create">
+                    <c:when test="${property.status == 'AVAILABLE'}">
 
-                        <input type="hidden"
-                               name="propertyId"
-                               value="${property.id}"/>
+                        <form method="post"
+                              action="${pageContext.request.contextPath}/customer/bookings/create">
 
-                        <textarea name="note"
-                                  placeholder="Message to agent (optional)"
-                                  class="booking-note"></textarea>
+                            <input type="hidden"
+                                   name="propertyId"
+                                   value="${property.id}"/>
 
-                        <c:choose>
+                            <textarea name="note"
+                                      placeholder="Nhắn cho môi giới (không bắt buộc)"
+                                      class="booking-note"></textarea>
 
-                            <c:when test="${not empty sessionScope.currentUser}">
+                            <c:choose>
 
-                                <button type="submit"
-                                        class="btn-book">
-                                    Book Viewing
-                                </button>
+                                <c:when test="${not empty sessionScope.currentUser}">
 
-                            </c:when>
+                                    <button type="submit"
+                                            class="btn-book">
+                                        Đặt lịch xem
+                                    </button>
 
-                            <c:otherwise>
+                                </c:when>
 
-                                <button type="button"
-                                        class="btn-book"
-                                        onclick="requireLogin()">
-                                    Book Viewing
-                                </button>
+                                <c:otherwise>
 
-                            </c:otherwise>
+                                    <button type="button"
+                                            class="btn-book"
+                                            onclick="requireLogin()">
+                                        Đặt lịch xem
+                                    </button>
 
-                        </c:choose>
+                                </c:otherwise>
 
-                    </form>
+                            </c:choose>
 
-                    <form method="post"
-                          action="${pageContext.request.contextPath}/customer/favorites/add">
+                        </form>
 
-                        <input type="hidden"
-                               name="propertyId"
-                               value="${property.id}"/>
+                        <form method="post"
+                              action="${pageContext.request.contextPath}/customer/favorites/add">
 
-                        <button class="btn-favorite">
+                            <input type="hidden"
+                                   name="propertyId"
+                                   value="${property.id}"/>
 
-                            Save
+                            <button class="btn-favorite">
+                                Lưu yêu thích
+                            </button>
 
-                        </button>
+                        </form>
 
-                    </form>
+                    </c:when>
 
-                </c:when>
+                    <c:otherwise>
 
-                <c:otherwise>
+                        <p class="not-available">
+                            Bất động sản hiện không khả dụng
+                        </p>
 
-                    <p class="not-available">
-                        Property not available
-                    </p>
+                    </c:otherwise>
 
-                </c:otherwise>
+                </c:choose>
 
-            </c:choose>
+            </div>
 
         </div>
 

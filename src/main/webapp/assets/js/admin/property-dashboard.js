@@ -163,21 +163,61 @@ document.querySelectorAll("form").forEach(f=>{
 
 window.onload = function(){
 
-    const modal = "${openModal}";
-
-    if(modal === "create"){
+    if(openModal === "create"){
         openCreateModal();
     }
 
-    if(modal === "edit"){
+    if(openModal === "edit"){
         openEditModal(
-            "${formId}",
-            "${formTitle}",
-            "${formAddress}",
-            "${formDescription}",
-            "${formType}",
-            "${formPrice}"
+            formData.id,
+            formData.title,
+            formData.address,
+            formData.description,
+            formData.type,
+            formData.price
         );
     }
+
+}
+
+function openImageModal(propertyId){
+
+    document.getElementById("imageModal").style.display = "flex";
+    document.getElementById("imagePropertyId").value = propertyId;
+
+    fetch(contextPath + "/admin/property-images?action=list&propertyId=" + propertyId)
+        .then(res => res.json())
+        .then(images => {
+
+            const container = document.getElementById("imageList");
+            container.innerHTML = "";
+
+            images.forEach(img => {
+
+                const div = document.createElement("div");
+                div.className = "image-item";
+
+                div.innerHTML = `
+                    <img src="${contextPath + img.imageUrl}" width="100">
+                    <button onclick="deleteImage(${img.id})">X</button>
+                `;
+
+                container.appendChild(div);
+            });
+        });
+}
+
+function closeImageModal(){
+    document.getElementById("imageModal").style.display = "none";
+}
+
+function deleteImage(imageId){
+
+    fetch(contextPath + "/admin/property-images?action=delete&id=" + imageId, {
+        method: "POST"
+    }).then(() => {
+        showToast("Deleted!");
+        location.reload();
+    });
 
 }

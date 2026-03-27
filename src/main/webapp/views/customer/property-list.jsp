@@ -52,7 +52,13 @@
 
         </form>
 
-        <div class="property-grid">
+        <div id="loading-skeleton" class="property-grid">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+        </div>
+
+        <div id="real-data" class="property-grid" style="display:none;">
 
             <c:forEach var="p" items="${properties}">
 
@@ -70,7 +76,13 @@
                             <fmt:formatNumber value="${p.price}" type="number"/> VNĐ
                         </p>
 
-                        <span class="badge">${p.type}</span>
+                        <span class="badge">
+                            <c:choose>
+                                <c:when test="${p.type == 'SALE'}">Bán</c:when>
+                                <c:when test="${p.type == 'RENT'}">Cho thuê</c:when>
+                                <c:otherwise>${p.type}</c:otherwise>
+                            </c:choose>
+                        </span>
 
                         <a class="btn-view"
                            href="${pageContext.request.contextPath}/customer/properties/detail?id=${p.id}">
@@ -82,6 +94,12 @@
                 </div>
 
             </c:forEach>
+
+            <c:if test="${empty properties}">
+                <div class="empty-state">
+                    Không tìm thấy bất động sản phù hợp
+                </div>
+            </c:if>
 
         </div>
 
@@ -109,5 +127,10 @@
     </div>
 
 </div>
-
+<script>
+    window.addEventListener("load", function () {
+        document.getElementById("loading-skeleton").style.display = "none";
+        document.getElementById("real-data").style.display = "grid";
+    });
+</script>
 <%@ include file="../common/footer.jsp" %>

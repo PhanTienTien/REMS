@@ -1,78 +1,150 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%
-  String path = request.getContextPath();
-%>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Contact</title>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ include file="../common/header.jsp" %>
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="<%=path%>/assets/fonts/icomoon/style.css" />
-  <link rel="stylesheet" href="<%=path%>/assets/fonts/flaticon/font/flaticon.css" />
-  <link rel="stylesheet" href="<%=path%>/assets/css/tiny-slider.css" />
-  <link rel="stylesheet" href="<%=path%>/assets/css/aos.css" />
-  <link rel="stylesheet" href="<%=path%>/assets/css/style.css" />
-</head>
-
-<body>
-
-<!-- NAV -->
-<nav class="site-nav">
-  <div class="container">
-    <a href="<%=path%>/home.jsp" class="logo">REMS</a>
-  </div>
-</nav>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/fonts/icomoon/style.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/fonts/flaticon/font/flaticon.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/tiny-slider.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/aos.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
 
 <!-- HERO -->
 <div class="hero page-inner overlay"
-     style="background-image: url('<%=path%>/images/hero_bg_1.jpg')">
-  <div class="container text-center">
-    <h1>Contact Us</h1>
+     style="background-image: url('${pageContext.request.contextPath}/assets/images/hero_bg_2.jpg');">
+
+  <div class="container">
+    <div class="row justify-content-center align-items-center">
+
+      <div class="col-lg-8 text-center">
+        <h1 class="heading text-white" data-aos="fade-up">
+          Contact Us
+        </h1>
+        <p class="text-white" data-aos="fade-up" data-aos-delay="100">
+          Liên hệ với chúng tôi để được hỗ trợ nhanh nhất
+        </p>
+      </div>
+
+    </div>
   </div>
 </div>
 
-<% if (request.getAttribute("success") != null) { %>
-<p style="color:green;">
-  <%= request.getAttribute("success") %>
-</p>
-<% } %>
 
-<% if (request.getAttribute("error") != null) { %>
-<p style="color:red;">
-  <%= request.getAttribute("error") %>
-</p>
-<% } %>
-
-<!-- CONTACT FORM -->
+<!-- CONTACT -->
 <div class="section">
   <div class="container">
-    <form action="contact" method="post">
-      <input type="text" name="name" placeholder="Your Name" class="form-control"/>
-      <input type="email" name="email" placeholder="Your Email" class="form-control"/>
-      <input type="text" name="subject" placeholder="Subject" class="form-control"/>
-      <textarea name="message" rows="5" placeholder="Message" class="form-control"></textarea>
-      <input type="submit" value="Send Message" class="btn btn-primary"/>
-    </form>
+
+    <div class="row">
+
+      <!-- FORM -->
+      <div class="col-lg-7">
+
+        <div class="contact-form-box" data-aos="fade-up">
+
+          <h3 class="mb-4">Gửi tin nhắn</h3>
+
+          <form method="post"
+                action="${pageContext.request.contextPath}/contact">
+
+            <div class="row">
+              <div class="col-md-6 form-group">
+                <input type="text"
+                       class="form-control"
+                       name="name"
+                       placeholder="Họ tên"
+                       required>
+              </div>
+
+              <div class="col-md-6 form-group">
+                <input type="email"
+                       class="form-control"
+                       name="email"
+                       placeholder="Email"
+                       required>
+              </div>
+            </div>
+
+            <div class="form-group mt-3">
+              <input type="text"
+                     class="form-control"
+                     name="subject"
+                     placeholder="Tiêu đề"
+                     required>
+            </div>
+
+            <div class="form-group mt-3">
+                            <textarea name="message"
+                                      class="form-control"
+                                      rows="6"
+                                      placeholder="Nội dung..."
+                                      required></textarea>
+            </div>
+
+            <div class="mt-4">
+              <button type="submit"
+                      class="btn btn-primary px-4">
+                Gửi liên hệ
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+
+      </div>
+
+
+      <!-- INFO -->
+      <div class="col-lg-5">
+
+        <div class="contact-info-box" data-aos="fade-up" data-aos-delay="100">
+
+          <h3>Thông tin liên hệ</h3>
+
+          <ul class="list-unstyled mt-4">
+
+            <li class="mb-3">
+              📍 <strong>Địa chỉ:</strong><br>
+              Hanoi, Vietnam
+            </li>
+
+            <li class="mb-3">
+              📞 <strong>Điện thoại:</strong><br>
+              +84 123 456 789
+            </li>
+
+            <li class="mb-3">
+              ✉️ <strong>Email:</strong><br>
+              support@rems.com
+            </li>
+
+          </ul>
+
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
 </div>
 
-<!-- FOOTER -->
-<div class="site-footer text-center">
-  <p>
-    Copyright &copy;
-    <%= java.time.Year.now() %>
-    All Rights Reserved.
-  </p>
+
+<!-- MAP -->
+<div class="section pt-0">
+  <div class="container">
+
+    <div class="map-box" data-aos="fade-up">
+      <iframe
+              src="https://www.google.com/maps?q=Hanoi&output=embed"
+              width="100%"
+              height="350"
+              style="border:0; border-radius:10px;"
+              allowfullscreen=""
+              loading="lazy">
+      </iframe>
+    </div>
+
+  </div>
 </div>
 
-<script src="<%=path%>/js/bootstrap.bundle.min.js"></script>
-<script src="<%=path%>/js/tiny-slider.js"></script>
-<script src="<%=path%>/js/aos.js"></script>
-<script src="<%=path%>/js/navbar.js"></script>
-<script src="<%=path%>/js/counter.js"></script>
-<script src="<%=path%>/js/custom.js"></script>
 
-</body>
-</html>
+<%@ include file="../common/footer.jsp" %>

@@ -2,14 +2,14 @@ package com.rems.common.exception;
 
 public class AppException extends RuntimeException {
 
-    private final String errorCode;
+    private final ErrorCode errorCode;
 
-    public AppException(String message, String errorCode) {
+    public AppException(String message, ErrorCode errorCode) {
         super(message);
         this.errorCode = errorCode;
     }
 
-    public String getErrorCode() {
+    public ErrorCode getErrorCode() {
         return errorCode;
     }
 }

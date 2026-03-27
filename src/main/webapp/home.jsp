@@ -17,14 +17,14 @@
                     Easiest way to find your dream home
                 </h1>
 
-                <form action="${pageContext.request.contextPath}/search"
+                <form action="${pageContext.request.contextPath}/customer/properties"
                       method="get"
                       class="narrow-w form-search d-flex align-items-stretch mb-3">
 
                     <input type="text"
                            class="form-control px-4"
                            placeholder="Search property..."
-                           name="q" />
+                           name="address" />
 
                     <button type="submit" class="btn btn-primary">
                         Search
@@ -51,30 +51,38 @@
             </div>
         </div>
 
-        <!-- Sau này sẽ thay bằng c:forEach -->
-        <div class="row">
+        <c:forEach var="p" items="${properties}">
             <div class="col-lg-4">
                 <div class="property-item">
-                    <img src="${pageContext.request.contextPath}/assets/images/img_1.jpg"
+
+                    <img src="${pageContext.request.contextPath}${p.thumbnail}"
                          class="img-fluid"/>
+
                     <div class="property-content">
+
                         <div class="price mb-2">
-                            <span>$1,291,000</span>
+                    <span>
+                        <fmt:formatNumber value="${p.price}" type="number"/> VNĐ
+                    </span>
                         </div>
+
                         <span class="d-block mb-2 text-black-50">
-                            5232 California Fake, Ave. 21BC
+                                ${p.address}
                         </span>
+
                         <span class="city d-block mb-3">
-                            California, USA
+                                ${p.title}
                         </span>
-                        <a href="#"
+
+                        <a href="${pageContext.request.contextPath}/customer/properties/detail?id=${p.id}"
                            class="btn btn-primary py-2 px-3">
                             See details
                         </a>
+
                     </div>
                 </div>
             </div>
-        </div>
+        </c:forEach>
 
     </div>
 </div>

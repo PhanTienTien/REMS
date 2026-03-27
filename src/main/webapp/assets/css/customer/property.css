@@ -1,17 +1,11 @@
+
+
 .property-container{
     max-width:1200px;
     margin:auto;
     display:grid;
     grid-template-columns:2fr 1fr;
     gap:40px;
-}
-
-.property-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(280px,320px));
-    justify-content:center;
-    gap:25px;
-    margin-top:30px;
 }
 
 .property-card{
@@ -277,4 +271,57 @@ form button:hover{
 .pagination a.active{
     background:#4f46e5;
     color:white;
+}
+
+.property-card{
+    position:relative;
+}
+
+/* overlay */
+.property-card::after{
+    pointer-events:none;
+    content:"Xem nhanh";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.45);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px;
+    font-weight:500;
+    opacity:0;
+    transition:0.3s;
+}
+
+.property-card:hover::after{
+    opacity:1;
+}
+
+.skeleton-card{
+    height:300px;
+    border-radius:12px;
+    background:linear-gradient(
+            90deg,
+            #f0f0f0 25%,
+            #e0e0e0 37%,
+            #f0f0f0 63%
+    );
+    background-size:400% 100%;
+    animation:loading 1.4s ease infinite;
+}
+
+@keyframes loading{
+    0%{ background-position:100% 0; }
+    100%{ background-position:0 0; }
+}
+
+.empty-state{
+    text-align:center;
+    padding:40px;
+    color:#777;
+    font-size:16px;
 }

@@ -497,7 +497,7 @@ public class PropertyDAOImpl implements PropertyDAO {
     """);
 
         if (dto.getKeyword() != null && !dto.getKeyword().isEmpty()) {
-            sql.append(" AND title LIKE ?");
+            sql.append(" AND p.address LIKE ?");
         }
 
         if (dto.getType() != null && !dto.getType().isEmpty()) {
@@ -598,18 +598,22 @@ public class PropertyDAOImpl implements PropertyDAO {
         List<PropertyCardDTO> list = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("""
-        SELECT 
-            p.id,
-            p.title,
-            p.address,
-            p.price,
-            p.type,
-            pi.image_url AS thumbnail
-        FROM properties p
-        LEFT JOIN property_images pi 
-            ON pi.property_id = p.id
-        WHERE p.status = 'AVAILABLE'
-    """);
+    SELECT 
+        p.id,
+        p.title,
+        p.address,
+        p.price,
+        p.type,
+        (
+            SELECT image_url
+            FROM property_images
+            WHERE property_id = p.id
+            ORDER BY is_thumbnail DESC, sort_order ASC
+            LIMIT 1
+        ) AS thumbnail
+    FROM properties p
+    WHERE p.status = 'AVAILABLE'
+""");
 
         if (dto.getKeyword() != null && !dto.getKeyword().isEmpty()) {
             sql.append(" AND p.title LIKE ?");

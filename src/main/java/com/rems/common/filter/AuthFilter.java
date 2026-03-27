@@ -25,9 +25,9 @@ public class AuthFilter implements Filter {
         boolean isPublic =
                 uri.equals(req.getContextPath() + "/")
                         || uri.contains("/home")
-                        || uri.contains("/about")
+                        || uri.contains("/customer/about")
                         || uri.contains("/services")
-                        || uri.contains("/contact")
+                        || uri.contains("/customer/contact")
                         || uri.contains("/customer/properties")
                         || uri.contains("/customer/properties/detail")
                         || uri.contains("/customer/profile")

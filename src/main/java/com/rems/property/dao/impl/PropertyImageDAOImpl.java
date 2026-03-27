@@ -126,4 +126,32 @@ public class PropertyImageDAOImpl implements PropertyImageDAO {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void deleteById(Connection conn, Long id) {
+
+        String sql = "DELETE FROM property_images WHERE id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void resetThumbnail(Connection conn, Long propertyId) {
+
+        String sql = "UPDATE property_images SET is_thumbnail = false WHERE property_id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, propertyId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

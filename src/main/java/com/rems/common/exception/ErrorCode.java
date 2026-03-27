@@ -2,6 +2,8 @@ package com.rems.common.exception;
 
 public enum ErrorCode {
 
+    VALIDATION_ERROR("COMMON_001", "Validation error"),
+
     EMAIL_ALREADY_EXISTS("AUTH_001", "Email already exists"),
     USER_NOT_FOUND("AUTH_002", "User not found"),
     INVALID_CREDENTIALS("AUTH_003", "Invalid credentials"),
@@ -19,7 +21,6 @@ public enum ErrorCode {
     PASSWORD_REQUIRED("AUTH_0015", "Password must be at least 6 characters"),
     PASSWORD_INCORRECT("AUTH_0016", "Password incorrect" ),
     PROPERTY_NOT_FOUND("AUTH_0017", "Property not found" ),
-    PROPERT_NOT_AVAILABLE("AUTH_0018", "Property not available" ),
     TRANSACTION_NOT_FOUND("AUTH_0019", "Transaction not found" ),
     PRICE_IS_NOT_VALID("AUTH_0020", "Price is not valid" ),
     PERMISSION_DENIED("AUTH_0021", "Permission denied" ),

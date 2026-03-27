@@ -9,6 +9,7 @@ import com.rems.auth.model.dto.RegisterDto;
 import com.rems.auth.service.AuthService;
 import com.rems.auth.service.impl.AuthServiceImpl;
 import com.rems.common.exception.BusinessException;
+import com.rems.common.exception.ErrorCode;
 import com.rems.common.transaction.TransactionManager;
 import com.rems.user.dao.UserDAO;
 import com.rems.user.dao.impl.UserDAOImpl;
@@ -108,25 +109,47 @@ public class AuthController extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        AuthAccount account = authService.login(email, password);
+        try {
 
-        User user = userService.findByAuthId(account.getId());
+            AuthAccount account = authService.login(email, password);
 
-        HttpSession session = request.getSession();
+            User user = userService.findByAuthId(account.getId());
 
-        session.setAttribute("currentUser", user);
-        session.setAttribute("userId", user.getId());
-        session.setAttribute("role", user.getRole().name());
+            HttpSession session = request.getSession();
 
-        if (user.getRole().name().equals("ADMIN")
-                || user.getRole().name().equals("STAFF")) {
+            session.setAttribute("currentUser", user);
+            session.setAttribute("userId", user.getId());
+            session.setAttribute("role", user.getRole().name());
 
-            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            if (user.getRole().name().equals("ADMIN")
+                    || user.getRole().name().equals("STAFF")) {
 
-        } else {
+                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
 
-            response.sendRedirect(request.getContextPath() + "/home.jsp");
+            } else {
 
+                response.sendRedirect(request.getContextPath() + "/home.jsp");
+            }
+
+        } catch (Exception e) {
+
+            Throwable cause = e.getCause();
+
+            if (cause instanceof BusinessException be) {
+
+                ErrorCode code = be.getErrorCode();
+
+                request.setAttribute("error", code.getMessage());
+
+            } else {
+
+                request.setAttribute("error", "Unexpected error occurred");
+            }
+
+            request.setAttribute("email", email);
+
+            request.getRequestDispatcher("/views/auth/login.jsp")
+                    .forward(request, response);
         }
     }
 

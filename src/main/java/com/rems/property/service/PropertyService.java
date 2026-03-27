@@ -75,4 +75,20 @@ public interface PropertyService {
 
     List<PropertyCardDTO> searchAvailableCard(PropertySearchDTO dto);
 
+    List<Property> searchAdmin(
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice,
+            int page,
+            int size
+    );
+
+    int countAdmin(
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice
+    );
+
 }

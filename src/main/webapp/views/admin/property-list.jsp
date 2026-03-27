@@ -170,6 +170,11 @@
 
                                 </form>
 
+                                <button class="btn-image"
+                                        onclick="openImageModal('${p.id}')">
+                                    Images
+                                </button>
+
                             </td>
 
                         </tr>
@@ -301,6 +306,34 @@
 
 </div>
 
+<div id="imageModal" class="modal">
+    <div class="modal-content">
+
+        <h3>Manage Images</h3>
+
+        <div id="imageList" class="image-grid">
+
+        </div>
+
+        <form id="uploadForm"
+              method="post"
+              enctype="multipart/form-data"
+              action="${pageContext.request.contextPath}/admin/property-images?action=add">
+
+            <input type="hidden" name="propertyId" id="imagePropertyId">
+
+            <input type="file" name="images" multiple>
+
+            <button>Add Images</button>
+        </form>
+
+        <button onclick="closeImageModal()" class="btn-cancel">
+            Close
+        </button>
+
+    </div>
+</div>
+
 <div id="loadingSpinner" class="loading-spinner">
     <div class="spinner"></div>
 </div>
@@ -320,7 +353,20 @@
     </div>
 </div>
 
-<script src="${pageContext.request.contextPath}/assets/js/admin/property-dashboard.js"></script>
+<script>
+    const contextPath = "${pageContext.request.contextPath}";
+    const openModal = "${openModal}";
+    const formData = {
+        id: "${formId}",
+        title: "${formTitle}",
+        address: "${formAddress}",
+        description: "${formDescription}",
+        type: "${formType}",
+        price: "${formPrice}"
+    };
+</script>
+
+<script src="${pageContext.request.contextPath}/assets/js/admin/property-dashboard.js?v=1"></script>
 
 </body>
 </html>

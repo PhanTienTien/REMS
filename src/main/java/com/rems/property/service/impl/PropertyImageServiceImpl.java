@@ -37,4 +37,24 @@ public class PropertyImageServiceImpl implements PropertyImageService {
 
         propertyImageDAO.insertMultiple(conn, propertyId, imageUrls);
     }
+
+    @Override
+    public void addImagesAction(Long propertyId, List<String> imageUrls) {
+
+        txManager.executeWithoutResult(conn -> {
+
+            propertyImageDAO.resetThumbnail(conn, propertyId);
+
+            propertyImageDAO.insertMultiple(conn, propertyId, imageUrls);
+
+        });
+    }
+
+    @Override
+    public void deleteImage(Long imageId) {
+
+        txManager.executeWithoutResult(conn ->
+                propertyImageDAO.deleteById(conn, imageId)
+        );
+    }
 }

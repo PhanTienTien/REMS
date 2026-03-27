@@ -37,7 +37,7 @@ public class CustomerPropertyController extends HttpServlet {
 
         PropertySearchDTO searchDTO = new PropertySearchDTO();
 
-        searchDTO.setKeyword(req.getParameter("keyword"));
+        searchDTO.setKeyword(req.getParameter("address"));
         searchDTO.setType(req.getParameter("type"));
 
         searchDTO.setMinPrice(parseLong(req.getParameter("minPrice")));

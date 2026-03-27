@@ -15,4 +15,8 @@ public interface PropertyImageService {
                    Long propertyId,
                    List<String> imageUrls);
 
+    void addImagesAction(Long propertyId, List<String> imageUrls);
+
+    void deleteImage(Long imageId);
+
 }
