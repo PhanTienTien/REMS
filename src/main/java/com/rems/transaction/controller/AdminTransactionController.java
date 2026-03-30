@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @WebServlet("/admin/transactions")
@@ -43,7 +45,9 @@ public class AdminTransactionController extends HttpServlet {
 
             Long id = Long.valueOf(req.getParameter("id"));
 
-            Transaction tx = transactionService.findById(id);
+            Transaction tx = user.getRole() == Role.STAFF
+                    ? transactionService.findByIdForStaff(id, user.getId())
+                    : transactionService.findById(id);
 
             req.setAttribute("transaction", tx);
 
@@ -70,8 +74,17 @@ public class AdminTransactionController extends HttpServlet {
         if (sortBy == null) sortBy = "created_at";
         if (sortDir == null) sortDir = "desc";
 
-        List<Transaction> transactions =
-                transactionService.searchTransactions(
+        List<Transaction> transactions = user.getRole() == Role.STAFF
+                ? transactionService.searchTransactionsByStaff(
+                        user.getId(),
+                        keyword,
+                        status,
+                        sortBy,
+                        sortDir,
+                        page,
+                        size
+                )
+                : transactionService.searchTransactions(
                         keyword,
                         status,
                         sortBy,
@@ -80,8 +93,9 @@ public class AdminTransactionController extends HttpServlet {
                         size
                 );
 
-        int totalItems =
-                transactionService.countTransactions(keyword, status);
+        int totalItems = user.getRole() == Role.STAFF
+                ? transactionService.countTransactionsByStaff(user.getId(), keyword, status)
+                : transactionService.countTransactions(keyword, status);
 
         int totalPages =
                 (int) Math.ceil((double) totalItems / size);
@@ -96,6 +110,7 @@ public class AdminTransactionController extends HttpServlet {
         req.setAttribute("status", status);
         req.setAttribute("sortBy", sortBy);
         req.setAttribute("sortDir", sortDir);
+        req.setAttribute("baseUrl", buildBaseUrl(req, keyword, status, sortBy, sortDir));
 
         req.getRequestDispatcher(
                 "/views/admin/transaction-list.jsp"
@@ -122,10 +137,17 @@ public class AdminTransactionController extends HttpServlet {
                     Long.parseLong(req.getParameter("transactionId"));
 
             try {
-                transactionService.completeTransaction(
-                        transactionId,
-                        user.getId()
-                );
+                if (user.getRole() == Role.STAFF) {
+                    transactionService.completeTransactionByStaff(
+                            transactionId,
+                            user.getId()
+                    );
+                } else {
+                    transactionService.completeTransaction(
+                            transactionId,
+                            user.getId()
+                    );
+                }
 
             } catch (Exception e) {
                 req.getSession().setAttribute("error", e.getMessage());
@@ -141,5 +163,35 @@ public class AdminTransactionController extends HttpServlet {
         } catch (Exception e) {
             return defaultVal;
         }
+    }
+
+    private String buildBaseUrl(HttpServletRequest req,
+                                String keyword,
+                                String status,
+                                String sortBy,
+                                String sortDir) {
+
+        StringBuilder url =
+                new StringBuilder(req.getContextPath() + "/admin/transactions?");
+
+        if (keyword != null && !keyword.isBlank()) {
+            url.append("keyword=")
+                    .append(URLEncoder.encode(keyword, StandardCharsets.UTF_8))
+                    .append("&");
+        }
+
+        if (status != null && !status.isBlank()) {
+            url.append("status=").append(status).append("&");
+        }
+
+        if (sortBy != null && !sortBy.isBlank()) {
+            url.append("sortBy=").append(sortBy).append("&");
+        }
+
+        if (sortDir != null && !sortDir.isBlank()) {
+            url.append("sortDir=").append(sortDir).append("&");
+        }
+
+        return url.toString();
     }
 }

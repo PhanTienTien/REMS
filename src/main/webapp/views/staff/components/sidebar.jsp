@@ -1,41 +1,33 @@
-<div class="sidebar">
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
+<div class="sidebar">
     <div class="sidebar-logo">
         <h2>REMS</h2>
     </div>
 
     <ul class="sidebar-menu">
-
         <li>
             <a href="${pageContext.request.contextPath}/admin/dashboard">
-                Dashboard
+                Bảng điều khiển
             </a>
         </li>
 
         <li>
             <a href="${pageContext.request.contextPath}/admin/properties">
-                Properties
+                Bất động sản
             </a>
         </li>
 
         <li>
             <a href="${pageContext.request.contextPath}/admin/bookings">
-                Bookings
+                Đặt lịch
             </a>
         </li>
 
         <li>
             <a href="${pageContext.request.contextPath}/admin/transactions">
-                Transactions
+                Giao dịch
             </a>
         </li>
-
-        <li>
-            <a href="${pageContext.request.contextPath}/admin/activity-logs">
-                Activity Logs
-            </a>
-        </li>
-
     </ul>
-
 </div>

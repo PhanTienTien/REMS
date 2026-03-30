@@ -1,13 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%
-    String path = request.getContextPath();
-%>
 <jsp:include page="/views/common/header.jsp"/>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Register - REMS</title>
+    <title>Đăng ký - REMS</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/auth.css">
 </head>
 
@@ -57,9 +54,7 @@
 
 <div class="otp-modal" id="otpModal">
     <div class="otp-content">
-
         <h3>Xác thực OTP</h3>
-
         <p>Mã có hiệu lực trong <b>5 phút</b></p>
 
         <div class="otp-inputs">
@@ -84,9 +79,8 @@
                 id="resendBtn"
                 onclick="resendOtp()"
                 disabled>
-            Gửi lại OTP (60s)
+            Gửi lại OTP (60 giây)
         </button>
-
     </div>
 </div>
 <script src="${pageContext.request.contextPath}/assets/js/auth.js"></script>

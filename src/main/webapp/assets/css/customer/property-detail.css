@@ -1,152 +1,119 @@
-/* LAYOUT */
-.property-detail{
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:30px;
+.property-detail {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+    gap: 28px;
+    align-items: start;
 }
 
-/* LEFT */
-.left{
-    display:flex;
-    flex-direction:column;
-    gap:20px;
+.left {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
 }
 
-/* RIGHT */
-.right{
-    position:sticky;
-    top:120px;
-    height:fit-content;
+.right {
+    position: sticky;
+    top: 116px;
 }
 
-/* CARD */
-.card{
-    background:white;
-    border-radius:12px;
-    padding:16px;
-    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+.card {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(234, 223, 206, 0.95);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 18px 42px rgba(66, 48, 20, 0.1);
 }
 
-/* GALLERY */
-.gallery{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
 }
 
-.gallery-img{
-    width:100%;
-    height:200px;
-    object-fit:cover;
-    border-radius:10px;
+.gallery-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 18px;
 }
 
-/* OVERVIEW */
-.overview h1{
-    font-size:26px;
-    font-weight:600;
+.overview h1 {
+    margin-bottom: 12px;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
 }
 
-.price{
-    font-size:22px;
-    color:#0d9488;
-    font-weight:600;
+.overview .type {
+    margin: 0;
+    color: var(--customer-accent);
+    font-weight: 700;
 }
 
-.address{
-    color:#666;
+.desc {
+    margin: 0;
+    line-height: 1.8;
+    color: var(--customer-muted);
 }
 
-.type{
-    font-size:14px;
-    color:#4f46e5;
+.similar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
 }
 
-.desc{
-    margin-top:10px;
-    line-height:1.6;
+.similar .card {
+    padding: 0;
+    overflow: hidden;
 }
 
-/* SIMILAR */
-.similar-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:16px;
+.similar img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
 }
 
-.similar .card{
-    padding:0;
-    overflow:hidden;
+.booking-note {
+    width: 100%;
+    min-height: 120px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    resize: vertical;
+    border: 1px solid #e7ddce;
+    border-radius: 16px;
+    background: #fffdfa;
 }
 
-.similar img{
-    width:100%;
-    height:140px;
-    object-fit:cover;
+.not-available {
+    margin: 0;
+    padding: 18px;
+    border-radius: 16px;
+    background: #fff1f2;
+    color: #be123c;
+    text-align: center;
+    font-weight: 600;
 }
 
-.card-body{
-    padding:10px;
-}
-
-.btn-view{
-    display:block;
-    text-align:center;
-    margin-top:8px;
-    padding:8px;
-    background:#4f46e5;
-    color:white;
-    border-radius:6px;
-    text-decoration:none;
-}
-
-/* BOOKING */
-.booking textarea{
-    width:100%;
-    height:90px;
-    border-radius:8px;
-    border:1px solid #ddd;
-    padding:10px;
-    margin-bottom:10px;
-}
-
-.btn-book{
-    width:100%;
-    background:#0d9488;
-    color:white;
-    border:none;
-    padding:10px;
-    border-radius:8px;
-    margin-bottom:8px;
-    cursor:pointer;
-}
-
-.btn-favorite{
-    width:100%;
-    background:#f43f5e;
-    color:white;
-    border:none;
-    padding:10px;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-.not-available{
-    color:red;
-    text-align:center;
-}
-
-/* RESPONSIVE */
-@media (max-width:768px){
-    .property-detail{
-        grid-template-columns:1fr;
+@media (max-width: 991px) {
+    .property-detail {
+        grid-template-columns: 1fr;
     }
 
-    .right{
-        position:static;
+    .right {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .gallery {
+        grid-template-columns: 1fr 1fr;
     }
 
-    .gallery{
-        grid-template-columns:1fr 1fr;
+    .gallery-img {
+        height: 180px;
+    }
+
+    .overview h1 {
+        font-size: 28px;
     }
 }

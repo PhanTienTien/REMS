@@ -97,7 +97,7 @@ public class AuthController extends HttpServlet {
 
             } else {
 
-                response.sendRedirect(request.getContextPath() + "/home.jsp");
+                response.sendRedirect(request.getContextPath() + "/home");
             }
 
         } catch (Exception e) {

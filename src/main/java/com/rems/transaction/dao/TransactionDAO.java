@@ -42,4 +42,22 @@ public interface TransactionDAO {
               String keyword,
               TransactionStatus status);
 
+    Optional<Transaction> findByIdForStaff(Connection conn,
+                                           Long id,
+                                           Long staffId);
+
+    List<Transaction> searchByStaff(Connection conn,
+                                    Long staffId,
+                                    String keyword,
+                                    TransactionStatus status,
+                                    String sortBy,
+                                    String sortDir,
+                                    int offset,
+                                    int limit);
+
+    int countByStaff(Connection conn,
+                     Long staffId,
+                     String keyword,
+                     TransactionStatus status);
+
 }

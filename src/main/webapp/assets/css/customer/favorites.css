@@ -1,84 +1,54 @@
-/* SECTION */
-
-.favorites-section{
-    padding:80px 0;
+.property-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
 }
 
-.page-title{
-    font-size:28px;
-    font-weight:600;
-    margin-bottom:30px;
+.favorite-card {
+    overflow: hidden;
+    border: 1px solid rgba(234, 223, 206, 0.95);
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 16px 38px rgba(66, 48, 20, 0.09);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* GRID */
-
-.property-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-    gap:25px;
+.favorite-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 42px rgba(66, 48, 20, 0.14);
 }
 
-/* CARD */
-
-.favorite-card{
-    background:white;
-    border-radius:12px;
-    overflow:hidden;
-    box-shadow:0 4px 14px rgba(0,0,0,0.08);
-    transition:0.25s;
-    display:flex;
-    flex-direction:column;
+.favorite-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
 }
 
-.favorite-card:hover{
-    transform:translateY(-6px);
-    box-shadow:0 10px 28px rgba(0,0,0,0.12);
+.favorite-card h3,
+.favorite-card p,
+.favorite-card a {
+    margin-left: 18px;
+    margin-right: 18px;
 }
 
-/* IMAGE */
-
-.favorite-card img{
-    width:100%;
-    height:200px;
-    object-fit:cover;
+.favorite-card h3 {
+    margin-top: 18px;
+    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: 700;
 }
 
-/* BODY */
-
-.card-body{
-    padding:16px;
+.favorite-card .price {
+    margin-bottom: 16px;
 }
 
-.card-body h3{
-    font-size:18px;
-    margin-bottom:6px;
+.favorite-card .btn-view {
+    margin-bottom: 18px;
 }
 
-.price{
-    font-size:18px;
-    color:#0d9488;
-    font-weight:600;
-    margin-bottom:12px;
-}
-
-/* BUTTON */
-
-.btn-view{
-    display:inline-block;
-    padding:8px 14px;
-    background:#4f46e5;
-    color:white;
-    border-radius:6px;
-    text-decoration:none;
-    font-size:14px;
-}
-
-.btn-view:hover{
-    background:#4338ca;
-}
-
-.empty{
-    text-align:center;
-    color:#777;
-    margin-top:40px;
+@media (max-width: 768px) {
+    .property-grid {
+        grid-template-columns: 1fr;
+    }
 }

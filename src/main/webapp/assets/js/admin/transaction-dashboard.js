@@ -1,30 +1,22 @@
-document.addEventListener("DOMContentLoaded", function(){
-
+document.addEventListener("DOMContentLoaded", function () {
     const forms = document.querySelectorAll(".complete-form");
 
     forms.forEach(form => {
+        form.addEventListener("submit", function (e) {
+            const ok = confirm("Bạn có chắc muốn hoàn tất giao dịch này?");
 
-        form.addEventListener("submit", function(e){
-
-            const ok = confirm("Complete this transaction?");
-
-            if(!ok){
+            if (!ok) {
                 e.preventDefault();
             }
-
         });
-
     });
-
 });
 
 const modal = document.getElementById("transactionModal");
 const closeBtn = document.querySelector(".close-btn");
 
 document.querySelectorAll(".view-btn").forEach(btn => {
-
     btn.addEventListener("click", () => {
-
         document.getElementById("m-id").innerText = btn.dataset.id;
         document.getElementById("m-property").innerText = btn.dataset.property;
         document.getElementById("m-customer").innerText = btn.dataset.customer;
@@ -36,7 +28,6 @@ document.querySelectorAll(".view-btn").forEach(btn => {
 
         modal.style.display = "block";
     });
-
 });
 
 closeBtn.onclick = () => modal.style.display = "none";

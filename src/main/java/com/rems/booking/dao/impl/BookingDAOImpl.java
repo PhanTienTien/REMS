@@ -572,6 +572,64 @@ public class BookingDAOImpl implements BookingDAO {
     }
 
     @Override
+    public Optional<BookingAdminDetailDTO> findDetailForStaff(Connection conn,
+                                                              Long bookingId,
+                                                              Long staffId) {
+
+        String sql = """
+        SELECT
+            b.id,
+            b.status,
+            b.note,
+            b.created_at,
+            b.accepted_at,
+            p.title AS property_title,
+            p.address AS property_address,
+            u.full_name AS customer_name,
+            u.email AS customer_email,
+            s.full_name AS staff_name
+        FROM bookings b
+        JOIN properties p ON p.id = b.property_id
+        JOIN users u ON u.id = b.customer_id
+        LEFT JOIN users s ON s.id = b.accepted_by
+        WHERE b.id = ?
+          AND p.created_by = ?
+    """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, bookingId);
+            ps.setLong(2, staffId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                BookingAdminDetailDTO dto = new BookingAdminDetailDTO();
+                dto.setBookingId(rs.getLong("id"));
+                dto.setStatus(rs.getString("status"));
+                dto.setNote(rs.getString("note"));
+                dto.setPropertyTitle(rs.getString("property_title"));
+                dto.setPropertyAddress(rs.getString("property_address"));
+                dto.setCustomerName(rs.getString("customer_name"));
+                dto.setCustomerEmail(rs.getString("customer_email"));
+                dto.setStaffName(rs.getString("staff_name"));
+                dto.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+
+                if (rs.getTimestamp("accepted_at") != null) {
+                    dto.setAcceptedAt(rs.getTimestamp("accepted_at").toLocalDateTime());
+                }
+
+                return Optional.of(dto);
+            }
+
+            return Optional.empty();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public List<CustomerBookingDTO> findByCustomer(Connection conn,
                                                    Long customerId) {
 
@@ -758,6 +816,116 @@ public class BookingDAOImpl implements BookingDAO {
 
             ResultSet rs = ps.executeQuery();
 
+            rs.next();
+            return rs.getInt(1);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<BookingAdminViewDTO> searchByStaff(Connection conn,
+                                                   Long staffId,
+                                                   String keyword,
+                                                   BookingStatus status,
+                                                   String sort,
+                                                   int limit,
+                                                   int offset) {
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT b.id, p.title, u.full_name, b.status, b.created_at
+        FROM bookings b
+        JOIN properties p ON p.id = b.property_id
+        JOIN users u ON u.id = b.customer_id
+        WHERE p.created_by = ?
+    """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(staffId);
+
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND (p.title LIKE ? OR u.full_name LIKE ?)");
+            params.add("%" + keyword + "%");
+            params.add("%" + keyword + "%");
+        }
+
+        if (status != null) {
+            sql.append(" AND b.status = ?");
+            params.add(status.name());
+        }
+
+        if ("oldest".equals(sort)) {
+            sql.append(" ORDER BY b.created_at ASC");
+        } else {
+            sql.append(" ORDER BY b.created_at DESC");
+        }
+
+        sql.append(" LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            List<BookingAdminViewDTO> list = new ArrayList<>();
+
+            while (rs.next()) {
+                BookingAdminViewDTO dto = new BookingAdminViewDTO();
+                dto.setBookingId(rs.getLong("id"));
+                dto.setPropertyTitle(rs.getString("title"));
+                dto.setCustomerName(rs.getString("full_name"));
+                dto.setStatus(BookingStatus.valueOf(rs.getString("status")));
+                dto.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                list.add(dto);
+            }
+
+            return list;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public int countSearchByStaff(Connection conn,
+                                  Long staffId,
+                                  String keyword,
+                                  BookingStatus status) {
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(*)
+        FROM bookings b
+        JOIN properties p ON p.id = b.property_id
+        JOIN users u ON u.id = b.customer_id
+        WHERE p.created_by = ?
+    """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(staffId);
+
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND (p.title LIKE ? OR u.full_name LIKE ?)");
+            params.add("%" + keyword + "%");
+            params.add("%" + keyword + "%");
+        }
+
+        if (status != null) {
+            sql.append(" AND b.status = ?");
+            params.add(status.name());
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
             rs.next();
             return rs.getInt(1);
 

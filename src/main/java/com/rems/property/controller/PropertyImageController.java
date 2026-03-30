@@ -1,6 +1,7 @@
 package com.rems.property.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rems.common.util.FileUploadUtil;
 import com.rems.common.util.Factory;
 import com.rems.property.service.PropertyImageService;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -18,8 +19,6 @@ import java.util.List;
 @WebServlet("/admin/property-images")
 @MultipartConfig
 public class PropertyImageController extends HttpServlet {
-
-    private static final String UPLOAD_DIR = "D:/Java/KeySoft/KeyBDS/Image";
 
     private final PropertyImageService service = Factory.getPropertyImageService();
 
@@ -75,6 +74,7 @@ public class PropertyImageController extends HttpServlet {
     private List<String> uploadFiles(HttpServletRequest req) throws Exception {
 
         List<String> urls = new ArrayList<>();
+        File dir = FileUploadUtil.getUploadDirectory(getServletContext());
 
         for (Part part : req.getParts()) {
 
@@ -82,12 +82,9 @@ public class PropertyImageController extends HttpServlet {
 
                 String fileName = part.getSubmittedFileName();
 
-                File dir = new File(UPLOAD_DIR);
-                if (!dir.exists()) dir.mkdirs();
-
                 String uniqueFileName = System.currentTimeMillis() + "_" + fileName;
 
-                String filePath = UPLOAD_DIR + File.separator + uniqueFileName;
+                String filePath = new File(dir, uniqueFileName).getAbsolutePath();
 
                 part.write(filePath);
 

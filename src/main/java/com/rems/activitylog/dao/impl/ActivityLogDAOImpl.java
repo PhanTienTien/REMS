@@ -3,6 +3,7 @@ package com.rems.activitylog.dao.impl;
 import com.rems.activitylog.dao.ActivityLogDAO;
 import com.rems.activitylog.model.ActivityLog;
 import com.rems.common.util.DBUtil;
+import com.rems.property.dto.PropertyCardDTO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -131,14 +132,76 @@ public class ActivityLogDAOImpl implements ActivityLogDAO {
     }
 
     @Override
+    public int count(String user,
+                     String action,
+                     String fromDate,
+                     String toDate) {
+
+        String sql = """
+        SELECT COUNT(*)
+        FROM activity_logs l
+        JOIN users u ON u.id = l.user_id
+        WHERE 1=1
+        """;
+
+        if (user != null && !user.isEmpty()) {
+            sql += " AND u.full_name LIKE ?";
+        }
+
+        if (action != null && !action.isEmpty()) {
+            sql += " AND l.action = ?";
+        }
+
+        if (fromDate != null && !fromDate.isEmpty()) {
+            sql += " AND l.created_at >= ?";
+        }
+
+        if (toDate != null && !toDate.isEmpty()) {
+            sql += " AND l.created_at <= ?";
+        }
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            int index = 1;
+
+            if (user != null && !user.isEmpty()) {
+                ps.setString(index++, "%" + user + "%");
+            }
+
+            if (action != null && !action.isEmpty()) {
+                ps.setString(index++, action);
+            }
+
+            if (fromDate != null && !fromDate.isEmpty()) {
+                ps.setString(index++, fromDate);
+            }
+
+            if (toDate != null && !toDate.isEmpty()) {
+                ps.setString(index++, toDate);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return 0;
+    }
+
+    @Override
     public void insertView(Connection conn,
                            Long userId,
                            Long propertyId) {
 
         String sql = """
         INSERT INTO activity_logs
-        (user_id, property_id, action, created_at)
-        VALUES (?, ?, 'VIEW_PROPERTY', NOW())
+        (user_id, action, entity_type, entity_id, description, created_at)
+        VALUES (?, 'VIEW_PROPERTY', 'PROPERTY', ?, 'Xem chi tiết bất động sản', NOW())
     """;
 
         try(PreparedStatement ps = conn.prepareStatement(sql)){
@@ -176,5 +239,60 @@ public class ActivityLogDAOImpl implements ActivityLogDAO {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public List<PropertyCardDTO> findMostViewedProperties(int limit) {
+
+        String sql = """
+        SELECT
+            p.id,
+            p.title,
+            p.address,
+            p.price,
+            p.type,
+            (
+                SELECT pi.image_url
+                FROM property_images pi
+                WHERE pi.property_id = p.id
+                ORDER BY pi.is_thumbnail DESC, pi.sort_order ASC
+                LIMIT 1
+            ) AS thumbnail
+        FROM activity_logs l
+        JOIN properties p
+            ON p.id = l.entity_id
+        WHERE l.action = 'VIEW_PROPERTY'
+          AND l.entity_type = 'PROPERTY'
+          AND p.status = 'AVAILABLE'
+        GROUP BY p.id, p.title, p.address, p.price, p.type
+        ORDER BY COUNT(*) DESC, MAX(l.created_at) DESC
+        LIMIT ?
+        """;
+
+        List<PropertyCardDTO> properties = new ArrayList<>();
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, limit);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    PropertyCardDTO dto = new PropertyCardDTO();
+                    dto.setId(rs.getLong("id"));
+                    dto.setTitle(rs.getString("title"));
+                    dto.setAddress(rs.getString("address"));
+                    dto.setPrice(rs.getBigDecimal("price"));
+                    dto.setType(rs.getString("type"));
+                    dto.setThumbnail(rs.getString("thumbnail"));
+                    properties.add(dto);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return properties;
     }
 }

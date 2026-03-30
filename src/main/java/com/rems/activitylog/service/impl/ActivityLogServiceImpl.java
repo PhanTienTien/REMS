@@ -3,7 +3,9 @@ package com.rems.activitylog.service.impl;
 import com.rems.activitylog.dao.ActivityLogDAO;
 import com.rems.activitylog.model.ActivityLog;
 import com.rems.activitylog.service.ActivityLogService;
+import com.rems.common.constant.ActivityLogAction;
 import com.rems.common.transaction.TransactionManager;
+import com.rems.property.dto.PropertyCardDTO;
 
 import java.sql.Connection;
 import java.util.List;
@@ -45,6 +47,24 @@ public class ActivityLogServiceImpl implements ActivityLogService {
     }
 
     @Override
+    public void log(Connection conn,
+                    Long userId,
+                    ActivityLogAction action,
+                    Long entityId,
+                    String ipAddress,
+                    Object... descriptionArgs) {
+        log(
+                conn,
+                userId,
+                action.getAction(),
+                action.getEntityType(),
+                entityId,
+                action.buildDescription(descriptionArgs),
+                ipAddress
+        );
+    }
+
+    @Override
     public List<ActivityLog> getLogs(int page,
                                      String user,
                                      String action,
@@ -58,6 +78,14 @@ public class ActivityLogServiceImpl implements ActivityLogService {
     }
 
     @Override
+    public int countLogs(String user,
+                         String action,
+                         String fromDate,
+                         String toDate) {
+        return logDAO.count(user, action, fromDate, toDate);
+    }
+
+    @Override
     public void logView(Long userId, Long propertyId) {
 
         txManager.execute(conn -> {
@@ -67,5 +95,10 @@ public class ActivityLogServiceImpl implements ActivityLogService {
             return null;
         });
 
+    }
+
+    @Override
+    public List<PropertyCardDTO> getMostViewedProperties(int limit) {
+        return logDAO.findMostViewedProperties(limit);
     }
 }

@@ -1,111 +1,28 @@
-/* PAGE */
-
-.transactions-container{
-    max-width:1100px;
-    margin:auto;
-    padding:80px 0;
+.transaction-detail {
+    max-width: 760px;
+    margin: 0 auto;
 }
 
-.transactions-container h2{
-    font-size:28px;
-    margin-bottom:25px;
-    font-weight:600;
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #fff;
 }
 
-/* TABLE */
-
-.transactions-container table{
-    width:100%;
-    border-collapse:collapse;
-    background:white;
-    box-shadow:0 4px 14px rgba(0,0,0,0.08);
-    border-radius:8px;
-    overflow:hidden;
+.detail-table td {
+    padding: 16px 18px;
+    border-top: 1px solid #f0e7d9;
 }
 
-.transactions-container thead{
-    background:#f1f5f9;
+.detail-table tr:first-child td {
+    border-top: none;
 }
 
-.transactions-container th{
-    text-align:left;
-    padding:14px;
-    font-size:14px;
-    color:#333;
-}
-
-.transactions-container td{
-    padding:14px;
-    border-top:1px solid #eee;
-}
-
-.transactions-container tr:hover{
-    background:#fafafa;
-}
-
-/* MONEY */
-
-.money{
-    font-weight:600;
-    color:#0d9488;
-}
-
-/* BADGES */
-
-.badge{
-    padding:4px 10px;
-    border-radius:20px;
-    font-size:12px;
-    font-weight:600;
-}
-
-.badge-completed{
-    background:#dcfce7;
-    color:#15803d;
-}
-
-.badge-pending{
-    background:#fef9c3;
-    color:#a16207;
-}
-
-.badge-failed{
-    background:#fee2e2;
-    color:#b91c1c;
-}
-
-/* DETAIL PAGE */
-
-.transaction-detail{
-    max-width:700px;
-    margin:auto;
-    padding:80px 0;
-}
-
-.transaction-detail h2{
-    margin-bottom:25px;
-}
-
-.detail-table{
-    width:100%;
-    border-collapse:collapse;
-    background:white;
-    box-shadow:0 4px 14px rgba(0,0,0,0.08);
-    border-radius:8px;
-    overflow:hidden;
-}
-
-.detail-table td{
-    padding:12px 14px;
-    border-top:1px solid #eee;
-}
-
-.detail-table tr:first-child td{
-    border-top:none;
-}
-
-.detail-table td:first-child{
-    font-weight:600;
-    width:200px;
-    background:#f8fafc;
+.detail-table td:first-child {
+    width: 220px;
+    font-weight: 700;
+    color: #6b5b47;
+    background: #f9f4ec;
 }

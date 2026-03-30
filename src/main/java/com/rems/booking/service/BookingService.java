@@ -23,6 +23,9 @@ public interface BookingService {
 
     Optional<BookingAdminDetailDTO> getBookingDetail(Long bookingId);
 
+    Optional<BookingAdminDetailDTO> getBookingDetailForStaff(Long bookingId,
+                                                             Long staffId);
+
     List<CustomerBookingDTO> getBookingsByCustomer(Long customerId);
 
     void expirePendingBookings();
@@ -34,4 +37,17 @@ public interface BookingService {
             int page,
             int size
     );
+
+    PageResult<BookingAdminViewDTO> searchBookingsByStaff(
+            Long staffId,
+            String keyword,
+            BookingStatus status,
+            String sort,
+            int page,
+            int size
+    );
+
+    void acceptBookingByStaff(Long bookingId, Long staffId);
+
+    void rejectBookingByStaff(Long bookingId, Long staffId);
 }

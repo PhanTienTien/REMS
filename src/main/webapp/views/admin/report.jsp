@@ -3,122 +3,82 @@
 
 <html>
 <head>
-
-    <title>REMS Admin Reports</title>
+    <title>Báo cáo quản trị REMS</title>
 
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/assets/css/admin/dashboard.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
 
 <body>
-
 <div class="dashboard-container">
-
     <jsp:include page="components/sidebar.jsp"/>
 
     <div class="main-content">
-
         <jsp:include page="components/topbar.jsp"/>
 
         <div class="dashboard-content">
-
-            <h2>Reports</h2>
+            <h2>Báo cáo</h2>
 
             <div class="filter-container">
-
                 <form method="get"
                       action="${pageContext.request.contextPath}/admin/reports">
 
-                    <label>From</label>
-
+                    <label>Từ ngày</label>
                     <input type="date"
                            name="fromDate"
                            value="${param.fromDate}">
 
-                    <label>To</label>
-
+                    <label>Đến ngày</label>
                     <input type="date"
                            name="toDate"
                            value="${param.toDate}">
 
-                    <button type="submit">Filter</button>
+                    <button type="submit">Lọc</button>
 
                     <a class="btn-export"
                        href="${pageContext.request.contextPath}/admin/reports?action=export">
-                        Export CSV
+                        Xuất CSV
                     </a>
-
                 </form>
-
             </div>
 
-            <!-- REVENUE CHART -->
-
             <div class="chart-container">
-
-                <h3>Monthly Revenue</h3>
-
+                <h3>Doanh thu theo tháng</h3>
                 <canvas id="revenueChart"></canvas>
-
             </div>
-
-            <!-- TRANSACTION CHART -->
 
             <div class="chart-container">
-
-                <h3>Transactions Per Month</h3>
-
+                <h3>Số giao dịch theo tháng</h3>
                 <canvas id="transactionChart"></canvas>
-
             </div>
-
-            <!-- TABLE -->
 
             <div class="transactions-container">
-
-                <h3>Revenue Details</h3>
+                <h3>Chi tiết doanh thu</h3>
 
                 <table>
-
                     <thead>
-
                     <tr>
-                        <th>Month</th>
-                        <th>Revenue</th>
-                        <th>Transactions</th>
+                        <th>Tháng</th>
+                        <th>Doanh thu</th>
+                        <th>Số giao dịch</th>
                     </tr>
-
                     </thead>
 
                     <tbody>
-
                     <c:forEach items="${reports}" var="r">
-
                         <tr>
-
                             <td>${r.month}</td>
-
                             <td class="money">${r.revenue}</td>
-
                             <td>${r.transactions}</td>
-
                         </tr>
-
                     </c:forEach>
-
                     </tbody>
-
                 </table>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
 
 <script>
@@ -134,6 +94,5 @@
 </script>
 
 <script src="${pageContext.request.contextPath}/assets/js/admin/report.js?v=1"></script>
-
 </body>
 </html>

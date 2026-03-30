@@ -22,6 +22,7 @@ public class Transaction {
     private LocalDateTime completedAt;
     private LocalDateTime createdAt;
     private Long processedBy;
+    private String processedByName;
 
     public Transaction() {}
 
@@ -102,6 +103,12 @@ public class Transaction {
     }
     public void setProcessedBy(Long processedBy) {
         this.processedBy = processedBy;
+    }
+    public String getProcessedByName() {
+        return processedByName;
+    }
+    public void setProcessedByName(String processedByName) {
+        this.processedByName = processedByName;
     }
 
     public String getCreatedAtFormatted() {

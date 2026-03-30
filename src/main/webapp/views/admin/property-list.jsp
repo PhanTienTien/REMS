@@ -3,7 +3,7 @@
 
 <html>
 <head>
-    <title>Property Management</title>
+    <title>Quản lý bất động sản</title>
 
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/assets/css/admin/dashboard.css">
@@ -15,8 +15,6 @@
 <body>
 
 <div class="dashboard-container">
-
-    <!-- SIDEBAR -->
     <c:choose>
         <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
             <jsp:include page="/views/admin/components/sidebar.jsp"/>
@@ -27,8 +25,6 @@
     </c:choose>
 
     <div class="main-content">
-
-        <!-- TOPBAR -->
         <c:choose>
             <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
                 <jsp:include page="/views/admin/components/topbar.jsp"/>
@@ -39,45 +35,41 @@
         </c:choose>
 
         <div class="content">
-
-            <!-- ERROR -->
             <c:if test="${not empty error}">
                 <div class="error-box">${error}</div>
             </c:if>
 
-            <!-- HEADER -->
             <div class="page-header">
-                <h2>Property Management</h2>
+                <h2>Quản lý bất động sản</h2>
                 <button class="btn-primary" onclick="openCreateModal()">
-                    + Create Property
+                    + Tạo bất động sản
                 </button>
             </div>
 
-            <!-- SEARCH + FILTER -->
             <form class="search-bar" method="get"
                   action="${pageContext.request.contextPath}/admin/properties">
 
                 <input type="text" name="address"
                        value="${keyword}"
-                       placeholder="Search address">
+                       placeholder="Tìm theo địa chỉ">
 
                 <select name="type">
-                    <option value="">All Type</option>
-                    <option value="SALE" ${type == 'SALE' ? 'selected' : ''}>Sale</option>
-                    <option value="RENT" ${type == 'RENT' ? 'selected' : ''}>Rent</option>
+                    <option value="">Tất cả loại</option>
+                    <option value="SALE" ${type == 'SALE' ? 'selected' : ''}>Bán</option>
+                    <option value="RENT" ${type == 'RENT' ? 'selected' : ''}>Cho thuê</option>
                 </select>
 
                 <input type="number" name="minPrice"
-                       value="${minPrice}" placeholder="Min price">
+                       value="${minPrice}" placeholder="Giá từ">
 
                 <input type="number" name="maxPrice"
-                       value="${maxPrice}" placeholder="Max price">
+                       value="${maxPrice}" placeholder="Giá đến">
 
                 <select name="sort">
-                    <option value="">Newest</option>
-                    <option value="price_asc" ${sort == 'price_asc' ? 'selected' : ''}>Price ↑</option>
-                    <option value="price_desc" ${sort == 'price_desc' ? 'selected' : ''}>Price ↓</option>
-                    <option value="oldest" ${sort == 'oldest' ? 'selected' : ''}>Oldest</option>
+                    <option value="">Mới nhất</option>
+                    <option value="price_asc" ${sort == 'price_asc' ? 'selected' : ''}>Giá tăng dần</option>
+                    <option value="price_desc" ${sort == 'price_desc' ? 'selected' : ''}>Giá giảm dần</option>
+                    <option value="oldest" ${sort == 'oldest' ? 'selected' : ''}>Cũ nhất</option>
                 </select>
 
                 <select name="size">
@@ -86,10 +78,9 @@
                     <option value="20" ${result.size == 20 ? 'selected' : ''}>20</option>
                 </select>
 
-                <button class="btn-search">Search</button>
+                <button class="btn-search">Tìm kiếm</button>
             </form>
 
-            <!-- BASE URL (GIỮ FILTER) -->
             <c:url var="baseUrl" value="/admin/properties">
                 <c:param name="address" value="${keyword}" />
                 <c:param name="type" value="${type}" />
@@ -99,34 +90,39 @@
                 <c:param name="size" value="${result.size}" />
             </c:url>
 
-            <!-- TABLE -->
             <div class="table-wrapper">
                 <table class="property-table">
-
                     <thead>
                     <tr>
                         <th>#</th>
-                        <th>Title</th>
-                        <th>Address</th>
-                        <th>Description</th>
-                        <th>Type</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th>Actions</th>
+                        <th>Ảnh</th>
+                        <th>Tiêu đề</th>
+                        <th>Địa chỉ</th>
+                        <th>Mô tả</th>
+                        <th>Loại</th>
+                        <th>Giá</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
                     </tr>
                     </thead>
 
                     <tbody>
-
                     <c:forEach var="p" items="${result.data}" varStatus="loop">
-
                         <tr>
-                            <!-- FIX STT -->
+                            <td>${(result.page - 1) * result.size + loop.index + 1}</td>
                             <td>
-                                    ${(result.page - 1) * result.size + loop.index + 1}
+                                <c:choose>
+                                    <c:when test="${not empty thumbnails[p.id]}">
+                                        <img src="${pageContext.request.contextPath}${thumbnails[p.id]}"
+                                             alt="${p.title}"
+                                             style="width:72px;height:56px;object-fit:cover;border-radius:8px;">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="text-muted">Chưa có ảnh</span>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
-
                             <td>${p.title}</td>
                             <td>${p.address}</td>
                             <td>${p.description}</td>
@@ -142,7 +138,6 @@
                             <td>${p.createdAt}</td>
 
                             <td class="actions">
-
                                 <button class="btn-edit"
                                         onclick="openEditModal(
                                                 '${p.id}',
@@ -152,14 +147,14 @@
                                                 '${p.type}',
                                                 '${p.price}'
                                                 )">
-                                    Edit
+                                    Sửa
                                 </button>
 
                                 <c:if test="${sessionScope.currentUser.role == 'ADMIN'}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/admin/properties/approve">
                                         <input type="hidden" name="id" value="${p.id}">
-                                        <button class="btn-approve">Approve</button>
+                                        <button class="btn-approve">Duyệt</button>
                                     </form>
                                 </c:if>
 
@@ -167,31 +162,25 @@
                                       action="${pageContext.request.contextPath}/admin/properties/delete">
                                     <input type="hidden" name="id" value="${p.id}">
                                     <button class="btn-delete"
-                                            onclick="return confirm('Delete this property?')">
-                                        Delete
+                                            onclick="return confirm('Bạn có chắc muốn xóa bất động sản này?')">
+                                        Xóa
                                     </button>
                                 </form>
 
                                 <button class="btn-image"
                                         onclick="openImageModal('${p.id}')">
-                                    Images
+                                    Ảnh
                                 </button>
-
                             </td>
                         </tr>
-
                     </c:forEach>
-
                     </tbody>
-
                 </table>
             </div>
 
-            <!-- PAGINATION -->
             <div class="pagination">
-
                 <c:if test="${result.page > 1}">
-                    <a href="${baseUrl}&page=${result.page - 1}">Previous</a>
+                    <a href="${baseUrl}&page=${result.page - 1}">Trước</a>
                 </c:if>
 
                 <c:forEach begin="1" end="${result.totalPages}" var="i">
@@ -202,50 +191,46 @@
                 </c:forEach>
 
                 <c:if test="${result.page < result.totalPages}">
-                    <a href="${baseUrl}&page=${result.page + 1}">Next</a>
+                    <a href="${baseUrl}&page=${result.page + 1}">Sau</a>
                 </c:if>
-
             </div>
-
         </div>
     </div>
 </div>
 
 <div id="createModal" class="modal">
     <div class="modal-content">
-        <h3>Create Property</h3>
+        <h3>Tạo bất động sản</h3>
         <form method="post"
               enctype="multipart/form-data"
               action="${pageContext.request.contextPath}/admin/properties/create">
 
-            <input type="text" name="title" placeholder="Title"
+            <input type="text" name="title" placeholder="Tiêu đề"
                    value="${formTitle}" required>
 
-            <input type="text" name="address" placeholder="Address"
+            <input type="text" name="address" placeholder="Địa chỉ"
                    value="${formAddress}" required>
 
             <textarea name="description"
-                      placeholder="Description">${formDescription}</textarea>
+                      placeholder="Mô tả">${formDescription}</textarea>
 
             <select name="type">
-
                 <option value="SALE"
                         <c:if test="${formType == 'SALE'}">selected</c:if>>
-                    Sale
+                    Bán
                 </option>
 
                 <option value="RENT"
                         <c:if test="${formType == 'RENT'}">selected</c:if>>
-                    Rent
+                    Cho thuê
                 </option>
-
             </select>
 
             <input type="number" name="price"
                    value="${formPrice}"
-                   placeholder="Price" required>
+                   placeholder="Giá" required>
 
-            <label>Property Images</label>
+            <label>Ảnh bất động sản</label>
 
             <input type="file"
                    name="images"
@@ -253,11 +238,10 @@
                    accept="image/*">
 
             <div class="modal-actions">
-
-                <button class="btn-primary">Create</button>
+                <button class="btn-primary">Tạo mới</button>
 
                 <button type="button" onclick="closeCreateModal()" class="btn-cancel">
-                    Cancel
+                    Hủy
                 </button>
             </div>
         </form>
@@ -266,49 +250,38 @@
 
 <div id="editModal" class="modal">
     <div class="modal-content">
-        <h3>Edit Property</h3>
+        <h3>Chỉnh sửa bất động sản</h3>
         <form method="post"
               action="${pageContext.request.contextPath}/admin/properties/edit">
 
             <input type="hidden" name="id" id="editId">
-
             <input type="text" name="title" id="editTitle">
-
             <input type="text" name="address" id="editAddress">
-
             <textarea name="description" id="editDescription"></textarea>
 
             <select name="type" id="editType">
-                <option value="SALE">Sale</option>
-                <option value="RENT">Rent</option>
+                <option value="SALE">Bán</option>
+                <option value="RENT">Cho thuê</option>
             </select>
 
             <input type="number" name="price" id="editPrice">
 
             <div class="modal-actions">
-
-                <button class="btn-primary">Update</button>
+                <button class="btn-primary">Cập nhật</button>
 
                 <button type="button" onclick="closeEditModal()" class="btn-cancel">
-                    Cancel
+                    Hủy
                 </button>
-
             </div>
-
         </form>
-
     </div>
-
 </div>
 
 <div id="imageModal" class="modal">
     <div class="modal-content">
+        <h3>Quản lý ảnh</h3>
 
-        <h3>Manage Images</h3>
-
-        <div id="imageList" class="image-grid">
-
-        </div>
+        <div id="imageList" class="image-grid"></div>
 
         <form id="uploadForm"
               method="post"
@@ -316,16 +289,13 @@
               action="${pageContext.request.contextPath}/admin/property-images?action=add">
 
             <input type="hidden" name="propertyId" id="imagePropertyId">
-
             <input type="file" name="images" multiple>
-
-            <button>Add Images</button>
+            <button>Thêm ảnh</button>
         </form>
 
         <button onclick="closeImageModal()" class="btn-cancel">
-            Close
+            Đóng
         </button>
-
     </div>
 </div>
 
@@ -337,14 +307,12 @@
 
 <div id="confirmDialog" class="confirm-dialog">
     <div class="confirm-box">
-
-        <p id="confirmMessage">Are you sure?</p>
+        <p id="confirmMessage">Bạn có chắc không?</p>
 
         <div class="confirm-actions">
-            <button onclick="confirmYes()" class="btn-danger">Yes</button>
-            <button onclick="closeConfirm()" class="btn-cancel">Cancel</button>
+            <button onclick="confirmYes()" class="btn-danger">Có</button>
+            <button onclick="closeConfirm()" class="btn-cancel">Hủy</button>
         </div>
-
     </div>
 </div>
 

@@ -1,80 +1,27 @@
-.transactions-container{
-    background:white;
-    padding:20px;
-    border-radius:10px;
+.transactions-container {
+    overflow: hidden;
 }
 
-.page-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
+.transactions-container table {
+    overflow-x: auto;
 }
 
-.filter-box{
-    display:flex;
-    gap:10px;
+.transactions-container .page-header form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(219, 228, 240, 0.9);
 }
 
-.filter-btn{
-    padding:6px 12px;
-    background:#f2f2f2;
-    border-radius:6px;
-    text-decoration:none;
-    color:#333;
-    font-size:14px;
+.transactions-container .page-header form input,
+.transactions-container .page-header form select {
+    min-width: 180px;
 }
 
-.filter-btn:hover{
-    background:#e0e0e0;
-}
-
-.action-btn{
-    padding:5px 10px;
-    border-radius:6px;
-    border:none;
-    cursor:pointer;
-    font-size:13px;
-}
-
-.action-btn.view{
-    background:#3498db;
-    color:white;
-}
-
-.action-btn.complete{
-    background:#27ae60;
-    color:white;
-}
-
-.complete-form{
-    display:inline;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-}
-
-.modal-content {
-    background: #fff;
-    margin: 8% auto;
-    padding: 20px;
-    width: 500px;
-    border-radius: 10px;
-    position: relative;
-}
-
-.close-btn {
-    position: absolute;
-    right: 15px;
-    top: 10px;
-    cursor: pointer;
-    font-size: 20px;
+.transactions-container .modal-content {
+    width: min(520px, 100%);
 }

@@ -86,6 +86,7 @@ public final class Factory {
                     bookingDAO,
                     propertyDAO,
                     transactionService,
+                    activityLogService,
                     txManager
             );
 

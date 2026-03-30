@@ -6,6 +6,7 @@ import com.rems.activitylog.service.impl.ActivityLogServiceImpl;
 import com.rems.booking.dao.BookingDAO;
 import com.rems.booking.dao.impl.BookingDAOImpl;
 import com.rems.booking.model.Booking;
+import com.rems.common.constant.ActivityLogAction;
 import com.rems.common.constant.BookingStatus;
 import com.rems.common.constant.PropertyStatus;
 import com.rems.common.constant.TransactionStatus;
@@ -119,11 +120,10 @@ public class TransactionServiceImpl implements TransactionService {
         activityLogService.log(
                 conn,
                 performedBy,
-                "CREATE_TRANSACTION",
-                "TRANSACTION",
+                ActivityLogAction.CREATE_TRANSACTION,
                 transactionId,
-                "Created transaction for booking " + bookingId,
-                ipAddress
+                ipAddress,
+                bookingId
         );
 
         return transactionId;
@@ -133,7 +133,6 @@ public class TransactionServiceImpl implements TransactionService {
     public Long completeTransaction(Long transactionId, Long staffId) {
 
         return txManager.execute(conn -> {
-
             Transaction tx = transactionDAO.findByIdForUpdate(conn, transactionId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.TRANSACTION_NOT_FOUND));
 
@@ -175,11 +174,69 @@ public class TransactionServiceImpl implements TransactionService {
             activityLogService.log(
                     conn,
                     staffId,
-                    "COMPLETE_TRANSACTION",
-                    "TRANSACTION",
+                    ActivityLogAction.COMPLETE_TRANSACTION,
                     tx.getId(),
-                    "Completed transaction for property " + property.getId(),
-                    null
+                    null,
+                    property.getId()
+            );
+
+            return tx.getId();
+        });
+    }
+
+    @Override
+    public Long completeTransactionByStaff(Long transactionId, Long staffId) {
+
+        return txManager.execute(conn -> {
+            Transaction tx = transactionDAO.findByIdForUpdate(conn, transactionId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.TRANSACTION_NOT_FOUND));
+
+            if (tx.getStatus() != TransactionStatus.PENDING) {
+                throw new BusinessException(ErrorCode.INVALID_STATE);
+            }
+
+            Booking booking = bookingDAO.findByIdForUpdate(conn, tx.getBookingId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.BOOKING_NOT_FOUND));
+
+            if (booking.getStatus() != BookingStatus.ACCEPTED) {
+                throw new BusinessException(ErrorCode.INVALID_STATE);
+            }
+
+            Property property = propertyDAO.findByIdForUpdate(conn, tx.getPropertyId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
+
+            if (!staffId.equals(property.getCreatedBy())) {
+                throw new BusinessException(ErrorCode.FORBIDDEN);
+            }
+
+            if (property.getStatus() != PropertyStatus.RESERVED) {
+                throw new BusinessException(ErrorCode.INVALID_STATE);
+            }
+
+            if (tx.getType() != property.getType()) {
+                throw new BusinessException(ErrorCode.TYPE_MISMATCH);
+            }
+
+            tx.setStatus(TransactionStatus.COMPLETED);
+            tx.setCompletedAt(LocalDateTime.now(ZoneOffset.UTC));
+            tx.setProcessedBy(staffId);
+
+            transactionDAO.updateStatus(conn, tx.getId(), TransactionStatus.COMPLETED, staffId);
+            bookingDAO.updateStatus(conn, booking.getId(), BookingStatus.COMPLETED, staffId);
+
+            PropertyStatus finalStatus = property.getType().isSale()
+                    ? PropertyStatus.SOLD
+                    : PropertyStatus.RENTED;
+
+            propertyDAO.updateStatus(conn, property.getId(), finalStatus);
+
+            activityLogService.log(
+                    conn,
+                    staffId,
+                    ActivityLogAction.COMPLETE_TRANSACTION,
+                    tx.getId(),
+                    null,
+                    property.getId()
             );
 
             return tx.getId();
@@ -207,6 +264,14 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public Transaction findByIdForStaff(Long id, Long staffId) {
+        return txManager.execute(conn ->
+                transactionDAO.findByIdForStaff(conn, id, staffId)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.FORBIDDEN))
+        );
+    }
+
+    @Override
     public List<Transaction> getByCustomer(Long customerId) {
         return txManager.execute(conn -> transactionDAO.findByCustomer(conn, customerId));
     }
@@ -227,8 +292,28 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             int offset = (page - 1) * size;
-
             return transactionDAO.search(conn, keyword, st, sortBy, sortDir, offset, size);
+        });
+    }
+
+    @Override
+    public List<Transaction> searchTransactionsByStaff(Long staffId,
+                                                       String keyword,
+                                                       String status,
+                                                       String sortBy,
+                                                       String sortDir,
+                                                       int page,
+                                                       int size) {
+
+        return txManager.execute(conn -> {
+            TransactionStatus st = null;
+
+            if (status != null && !status.isBlank()) {
+                st = TransactionStatus.valueOf(status);
+            }
+
+            int offset = (page - 1) * size;
+            return transactionDAO.searchByStaff(conn, staffId, keyword, st, sortBy, sortDir, offset, size);
         });
     }
 
@@ -244,6 +329,22 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             return transactionDAO.count(conn, keyword, st);
+        });
+    }
+
+    @Override
+    public int countTransactionsByStaff(Long staffId,
+                                        String keyword,
+                                        String status) {
+
+        return txManager.execute(conn -> {
+            TransactionStatus st = null;
+
+            if (status != null && !status.isBlank()) {
+                st = TransactionStatus.valueOf(status);
+            }
+
+            return transactionDAO.countByStaff(conn, staffId, keyword, st);
         });
     }
 }

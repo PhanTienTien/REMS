@@ -1,4 +1,12 @@
 <%@ include file="views/common/header.jsp" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
+<link rel="stylesheet"
+      href="${pageContext.request.contextPath}/assets/css/customer/layout.css">
+<link rel="stylesheet"
+      href="${pageContext.request.contextPath}/assets/css/customer/property.css">
 
 <div class="hero">
     <div class="hero-slide">
@@ -14,20 +22,19 @@
         <div class="row justify-content-center align-items-center">
             <div class="col-lg-9 text-center">
                 <h1 class="heading">
-                    Easiest way to find your dream home
+                    Tìm bất động sản phù hợp cho nhu cầu ở, đầu tư hoặc cho thuê
                 </h1>
 
                 <form action="${pageContext.request.contextPath}/customer/properties"
                       method="get"
                       class="narrow-w form-search d-flex align-items-stretch mb-3">
-
                     <input type="text"
                            class="form-control px-4"
-                           placeholder="Search property..."
+                           placeholder="Nhập khu vực, địa chỉ hoặc tên bất động sản"
                            name="address" />
 
                     <button type="submit" class="btn btn-primary">
-                        Search
+                        Tìm kiếm
                     </button>
                 </form>
             </div>
@@ -35,55 +42,59 @@
     </div>
 </div>
 
-<div class="section">
+<div class="page-section">
     <div class="container">
-        <div class="row mb-5 align-items-center">
-            <div class="col-lg-6">
-                <h2 class="font-weight-bold text-primary heading">
-                    Popular Properties
-                </h2>
-            </div>
-            <div class="col-lg-6 text-lg-end">
-                <a href="${pageContext.request.contextPath}/properties"
-                   class="btn btn-primary text-white py-3 px-4">
-                    View all properties
-                </a>
-            </div>
-        </div>
-
-        <c:forEach var="p" items="${properties}">
-            <div class="col-lg-4">
-                <div class="property-item">
-
-                    <img src="${pageContext.request.contextPath}${p.thumbnail}"
-                         class="img-fluid"/>
-
-                    <div class="property-content">
-
-                        <div class="price mb-2">
-                    <span>
-                        <fmt:formatNumber value="${p.price}" type="number"/> VNĐ
-                    </span>
-                        </div>
-
-                        <span class="d-block mb-2 text-black-50">
-                                ${p.address}
-                        </span>
-
-                        <span class="city d-block mb-3">
-                                ${p.title}
-                        </span>
-
-                        <a href="${pageContext.request.contextPath}/customer/properties/detail?id=${p.id}"
-                           class="btn btn-primary py-2 px-3">
-                            See details
-                        </a>
-
-                    </div>
+        <div class="section-shell">
+            <div class="row mb-4 align-items-center">
+                <div class="col-lg-7">
+                    <h2 class="section-heading">6 bất động sản được xem nhiều nhất</h2>
+                    <p class="section-subtitle">
+                        Danh sách này được gợi ý dựa trên lượt xem chi tiết của khách hàng trong hệ thống.
+                    </p>
+                </div>
+                <div class="col-lg-5 text-lg-end">
+                    <a href="${pageContext.request.contextPath}/customer/properties"
+                       class="btn-view">
+                        Xem toàn bộ bất động sản
+                    </a>
                 </div>
             </div>
-        </c:forEach>
 
+            <div class="property-grid">
+                <c:forEach var="p" items="${properties}">
+                    <div class="property-card">
+                        <img src="${pageContext.request.contextPath}${p.thumbnail}"
+                             alt="${p.title}">
+
+                        <div class="card-body">
+                            <span class="badge">
+                                <c:choose>
+                                    <c:when test="${p.type == 'SALE'}">Bất động sản bán</c:when>
+                                    <c:otherwise>Bất động sản cho thuê</c:otherwise>
+                                </c:choose>
+                            </span>
+
+                            <h3>${p.title}</h3>
+                            <p class="address">${p.address}</p>
+                            <p class="price">
+                                <fmt:formatNumber value="${p.price}" type="number"/> VNĐ
+                            </p>
+
+                            <a href="${pageContext.request.contextPath}/customer/properties/detail?id=${p.id}"
+                               class="btn-view">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </c:forEach>
+            </div>
+
+            <c:if test="${empty properties}">
+                <div class="empty-state mt-4">
+                    Chưa có đủ dữ liệu lượt xem để gợi ý bất động sản trên trang chủ.
+                </div>
+            </c:if>
+        </div>
     </div>
 </div>
 

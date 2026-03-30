@@ -5,12 +5,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login - REMS</title>
+    <title>Đăng nhập - REMS</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/auth.css">
 </head>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-
         const modal = document.getElementById("forgotModal");
         const link = document.getElementById("forgotPasswordLink");
         const closeBtn = document.querySelector(".close");
@@ -28,7 +27,6 @@
                 modal.style.display = "none";
             }
         });
-
     });
 </script>
 <body>
@@ -67,7 +65,6 @@
             </p>
 
             <div class="auth-form"><button type="submit">Đăng nhập</button></div>
-
         </form>
 
         <p class="auth-link">
@@ -87,10 +84,8 @@
         <form action="${pageContext.request.contextPath}/auth" method="post">
             <input type="hidden" name="action" value="resetPassword"/>
 
-            <input type="text" name="otp" placeholder="Nhập mã xác thực (OTP)" required>
-
+            <input type="text" name="otp" placeholder="Nhập mã xác thực OTP" required>
             <input type="password" name="newPassword" placeholder="Mật khẩu mới" required>
-
             <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu mới" required>
 
             <button type="submit">Đổi mật khẩu</button>

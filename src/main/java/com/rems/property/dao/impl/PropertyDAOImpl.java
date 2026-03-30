@@ -514,7 +514,7 @@ public class PropertyDAOImpl implements PropertyDAO {
     """);
 
         if (dto.getKeyword() != null && !dto.getKeyword().isEmpty()) {
-            sql.append(" AND p.address LIKE ?");
+            sql.append(" AND (address LIKE ? OR title LIKE ?)");
         }
 
         if (dto.getType() != null && !dto.getType().isEmpty()) {
@@ -536,6 +536,7 @@ public class PropertyDAOImpl implements PropertyDAO {
             int index = 1;
 
             if (dto.getKeyword() != null && !dto.getKeyword().isEmpty()) {
+                ps.setString(index++, "%" + dto.getKeyword() + "%");
                 ps.setString(index++, "%" + dto.getKeyword() + "%");
             }
 
@@ -633,7 +634,7 @@ public class PropertyDAOImpl implements PropertyDAO {
 """);
 
         if (dto.getKeyword() != null && !dto.getKeyword().isEmpty()) {
-            sql.append(" AND p.title LIKE ?");
+            sql.append(" AND (p.title LIKE ? OR p.address LIKE ?)");
         }
 
         if (dto.getType() != null && !dto.getType().isEmpty()) {
@@ -655,6 +656,7 @@ public class PropertyDAOImpl implements PropertyDAO {
             int index = 1;
 
             if (dto.getKeyword() != null && !dto.getKeyword().isEmpty()) {
+                ps.setString(index++, "%" + dto.getKeyword() + "%");
                 ps.setString(index++, "%" + dto.getKeyword() + "%");
             }
 
@@ -762,6 +764,68 @@ public class PropertyDAOImpl implements PropertyDAO {
     }
 
     @Override
+    public List<Property> searchAdminByCreator(Connection conn,
+                                               Long createdBy,
+                                               String address,
+                                               String type,
+                                               Integer minPrice,
+                                               Integer maxPrice,
+                                               String sort,
+                                               int page,
+                                               int size) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT *
+        FROM properties
+        WHERE created_by = ?
+    """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(createdBy);
+
+        if (address != null && !address.isBlank()) {
+            sql.append(" AND address LIKE ?");
+            params.add("%" + address + "%");
+        }
+
+        if (type != null && !type.isBlank()) {
+            sql.append(" AND type = ?");
+            params.add(type);
+        }
+
+        if (minPrice != null) {
+            sql.append(" AND price >= ?");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null) {
+            sql.append(" AND price <= ?");
+            params.add(maxPrice);
+        }
+
+        sql.append(" ORDER BY ").append(resolveSort(sort));
+        sql.append(" LIMIT ? OFFSET ?");
+        params.add(size);
+        params.add((page - 1) * size);
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            setParams(ps, params);
+
+            ResultSet rs = ps.executeQuery();
+            List<Property> list = new ArrayList<>();
+
+            while (rs.next()) {
+                list.add(map(rs));
+            }
+
+            return list;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error searchAdminByCreator", e);
+        }
+    }
+
+    @Override
     public int countAdmin(
             Connection conn,
             String address,
@@ -811,6 +875,59 @@ public class PropertyDAOImpl implements PropertyDAO {
 
         } catch (Exception e) {
             throw new RuntimeException("Error countAdmin", e);
+        }
+    }
+
+    @Override
+    public int countAdminByCreator(Connection conn,
+                                   Long createdBy,
+                                   String address,
+                                   String type,
+                                   Integer minPrice,
+                                   Integer maxPrice) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(*)
+        FROM properties
+        WHERE created_by = ?
+    """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(createdBy);
+
+        if (address != null && !address.isBlank()) {
+            sql.append(" AND address LIKE ?");
+            params.add("%" + address + "%");
+        }
+
+        if (type != null && !type.isBlank()) {
+            sql.append(" AND type = ?");
+            params.add(type);
+        }
+
+        if (minPrice != null) {
+            sql.append(" AND price >= ?");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null) {
+            sql.append(" AND price <= ?");
+            params.add(maxPrice);
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            setParams(ps, params);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+            return 0;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error countAdminByCreator", e);
         }
     }
 

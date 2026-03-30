@@ -3,7 +3,7 @@
 
 <html>
 <head>
-    <title>User Management</title>
+    <title>Quản lý người dùng</title>
 
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/assets/css/admin/dashboard.css">
@@ -15,37 +15,28 @@
 <script src="${pageContext.request.contextPath}/assets/js/admin/users-dashboard.js"></script>
 
 <body>
-
 <div class="dashboard-container">
-
     <jsp:include page="components/sidebar.jsp"/>
 
     <div class="main-content">
-
         <jsp:include page="components/topbar.jsp"/>
 
         <div class="dashboard-content">
+            <div class="page-title">Quản lý người dùng</div>
 
-            <div class="page-title">
-                User Management
-            </div>
-
-            <!-- SEARCH + CREATE -->
             <div class="user-toolbar">
-
-                <!-- LEFT: SEARCH + FILTER -->
                 <form method="get"
                       action="${pageContext.request.contextPath}/admin/users"
                       class="search-form">
 
                     <input type="text"
                            name="keyword"
-                           placeholder="Search ID, name, email..."
+                           placeholder="Tìm ID, tên, email..."
                            value="${param.keyword}"
                            class="search-input"/>
 
                     <select name="role" class="search-select">
-                        <option value="">All Roles</option>
+                        <option value="">Tất cả vai trò</option>
                         <option value="ADMIN"
                                 <c:if test="${param.role == 'ADMIN'}">selected</c:if>>
                             ADMIN
@@ -60,48 +51,37 @@
                         </option>
                     </select>
 
-                    <button type="submit" class="btn-search">
-                        Search
-                    </button>
+                    <button type="submit" class="btn-search">Tìm kiếm</button>
 
                     <a href="${pageContext.request.contextPath}/admin/users"
-                       class="btn-refresh">
-                        Reset
-                    </a>
-
+                       class="btn-refresh">Đặt lại</a>
                 </form>
 
                 <button class="btn-create"
                         onclick="openCreateModal()">
-                    + Create User
+                    + Tạo người dùng
                 </button>
-
             </div>
 
-
-            <!-- USER TABLE -->
             <table class="user-table">
-
                 <thead>
                 <tr>
                     <th>STT</th>
-                    <th>Full Name</th>
+                    <th>Họ tên</th>
                     <th>Email</th>
-                    <th>Phone</th>
-                    <th>Role</th>
-                    <th>Verified</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Updated</th>
-                    <th>Action</th>
+                    <th>Số điện thoại</th>
+                    <th>Vai trò</th>
+                    <th>Xác thực</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Cập nhật</th>
+                    <th>Thao tác</th>
                 </tr>
                 </thead>
 
                 <tbody>
-
                 <c:forEach var="u" items="${users}" varStatus="loop">
                     <tr>
-
                         <td>${loop.index + 1}</td>
                         <td>${u.fullName}</td>
                         <td>${u.email}</td>
@@ -124,10 +104,10 @@
                         <td>
                             <c:choose>
                                 <c:when test="${u.verified}">
-                                    <span class="badge badge-yes">Verified</span>
+                                    <span class="badge badge-yes">Đã xác thực</span>
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="badge badge-no">No</span>
+                                    <span class="badge badge-no">Chưa</span>
                                 </c:otherwise>
                             </c:choose>
                         </td>
@@ -135,10 +115,10 @@
                         <td>
                             <c:choose>
                                 <c:when test="${u.deleted}">
-                                    <span class="badge badge-no">Deleted</span>
+                                    <span class="badge badge-no">Đã xóa</span>
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="badge badge-yes">Active</span>
+                                    <span class="badge badge-yes">Đang hoạt động</span>
                                 </c:otherwise>
                             </c:choose>
                         </td>
@@ -147,7 +127,6 @@
                         <td>${u.updatedAt}</td>
 
                         <td class="action-buttons">
-
                             <button class="btn-edit"
                                     onclick="openEditModal(
                                             '${u.id}',
@@ -157,132 +136,107 @@
                                             '${u.role}',
                                             '${u.verified}'
                                             )">
-                                Edit
+                                Sửa
                             </button>
 
                             <form method="post"
                                   action="${pageContext.request.contextPath}/admin/users"
                                   style="display:inline">
-
                                 <input type="hidden" name="action" value="delete"/>
                                 <input type="hidden" name="id" value="${u.id}"/>
 
                                 <button type="submit"
                                         class="btn-delete"
-                                        onclick="return confirm('Delete this user?')">
-                                    Delete
+                                        onclick="return confirm('Bạn có chắc muốn xóa người dùng này?')">
+                                    Xóa
                                 </button>
-
                             </form>
-
                         </td>
-
                     </tr>
                 </c:forEach>
-
                 </tbody>
-
             </table>
 
             <div id="createModal" class="modal">
-
                 <div class="modal-content">
-
                     <span class="close" onclick="closeCreateModal()">&times;</span>
 
-                    <h2>Create User</h2>
+                    <h2>Tạo người dùng</h2>
 
                     <form method="post"
                           action="${pageContext.request.contextPath}/admin/users">
-
                         <input type="hidden" name="action" value="create"/>
 
-                        <label>Full Name</label>
+                        <label>Họ tên</label>
                         <input type="text" name="fullName" required>
 
-                        <label>Password</label>
+                        <label>Mật khẩu</label>
                         <input type="password" name="password" required>
 
                         <label>Email</label>
                         <input type="email" name="email" required>
 
-                        <label>Phone</label>
+                        <label>Số điện thoại</label>
                         <input type="text" name="phoneNumber">
 
-                        <label>Role</label>
+                        <label>Vai trò</label>
                         <select name="role">
                             <option value="CUSTOMER">CUSTOMER</option>
                             <option value="STAFF">STAFF</option>
                             <option value="ADMIN">ADMIN</option>
                         </select>
 
-                        <label>Status</label>
+                        <label>Trạng thái</label>
                         <select name="status">
-                            <option value="ACTIVE">ACTIVE</option>
-                            <option value="INACTIVE">INACTIVE</option>
+                            <option value="ACTIVE">ĐANG HOẠT ĐỘNG</option>
+                            <option value="INACTIVE">NGỪNG HOẠT ĐỘNG</option>
                         </select>
 
-                        <button type="submit" class="btn-save">
-                            Create
-                        </button>
-
+                        <button type="submit" class="btn-save">Tạo mới</button>
                     </form>
-
                 </div>
-
             </div>
 
             <div id="editModal" class="modal">
-
                 <div class="modal-content">
-
                     <span class="close" onclick="closeEditModal()">&times;</span>
 
-                    <h2>Edit User</h2>
+                    <h2>Chỉnh sửa người dùng</h2>
 
                     <form method="post"
                           action="${pageContext.request.contextPath}/admin/users">
-
                         <input type="hidden" name="action" value="update"/>
                         <input type="hidden" name="id" id="editId"/>
 
-                        <label>Full Name</label>
+                        <label>Họ tên</label>
                         <input type="text" name="fullName" id="editFullName" required>
 
                         <label>Email</label>
                         <input type="email" name="email" id="editEmail" required>
 
-                        <label>Phone</label>
+                        <label>Số điện thoại</label>
                         <input type="text" name="phoneNumber" id="editPhone">
 
-                        <label>Role</label>
+                        <label>Vai trò</label>
                         <select name="role" id="editRole">
                             <option value="CUSTOMER">CUSTOMER</option>
                             <option value="ADMIN">ADMIN</option>
                         </select>
 
-                        <label>Status</label>
+                        <label>Trạng thái</label>
                         <select name="status" id="editStatus">
-                            <option value="ACTIVE">ACTIVE</option>
-                            <option value="INACTIVE">INACTIVE</option>
+                            <option value="ACTIVE">ĐANG HOẠT ĐỘNG</option>
+                            <option value="INACTIVE">NGỪNG HOẠT ĐỘNG</option>
                         </select>
 
-                        <button type="submit" class="btn-save">
-                            Update
-                        </button>
-
+                        <button type="submit" class="btn-save">Cập nhật</button>
                     </form>
-
                 </div>
-
             </div>
 
             <div class="pagination">
-
                 <c:if test="${currentPage > 1}">
-                    <a href="?page=${currentPage - 1}&keyword=${param.keyword}">
-                        Previous
-                    </a>
+                    <a href="?page=${currentPage - 1}&keyword=${param.keyword}">Trước</a>
                 </c:if>
 
                 <c:forEach begin="1" end="${totalPages}" var="i">
@@ -293,18 +247,11 @@
                 </c:forEach>
 
                 <c:if test="${currentPage < totalPages}">
-                    <a href="?page=${currentPage + 1}&keyword=${param.keyword}">
-                        Next
-                    </a>
+                    <a href="?page=${currentPage + 1}&keyword=${param.keyword}">Sau</a>
                 </c:if>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
-
 </body>
 </html>

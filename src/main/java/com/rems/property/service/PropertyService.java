@@ -49,7 +49,7 @@ public interface PropertyService {
 
     void restoreProperty(Long propertyId, Long staffId);
 
-    void deleteProperty(Long propertyId);
+    void deleteProperty(Long propertyId, Long staffId);
 
     List<Property> searchApproved(String address, String type);
 
@@ -87,6 +87,25 @@ public interface PropertyService {
     );
 
     int countAdmin(
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice
+    );
+
+    PageResult<Property> searchStaffPage(
+            Long staffId,
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice,
+            String sort,
+            int page,
+            int size
+    );
+
+    int countStaff(
+            Long staffId,
             String address,
             String type,
             Integer minPrice,

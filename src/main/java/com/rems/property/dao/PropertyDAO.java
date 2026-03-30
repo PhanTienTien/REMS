@@ -91,8 +91,29 @@ public interface PropertyDAO {
             int size
     );
 
+    List<Property> searchAdminByCreator(
+            Connection conn,
+            Long createdBy,
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice,
+            String sort,
+            int page,
+            int size
+    );
+
     int countAdmin(
             Connection conn,
+            String address,
+            String type,
+            Integer minPrice,
+            Integer maxPrice
+    );
+
+    int countAdminByCreator(
+            Connection conn,
+            Long createdBy,
             String address,
             String type,
             Integer minPrice,

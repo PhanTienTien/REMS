@@ -80,6 +80,7 @@ public class FavoriteDAOImpl implements FavoriteDAO {
         LEFT JOIN property_images pi 
             ON pi.property_id = p.id AND pi.is_thumbnail = 1
         WHERE f.customer_id = ?
+        ORDER BY f.created_at DESC
     """;
 
         List<PropertyCardDTO> list = new ArrayList<>();

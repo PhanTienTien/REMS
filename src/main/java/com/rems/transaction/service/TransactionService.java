@@ -20,6 +20,8 @@ public interface TransactionService {
 
     Transaction findById(Long id);
 
+    Transaction findByIdForStaff(Long id, Long staffId);
+
     List<Transaction> getByCustomer(Long customerId);
 
     List<Transaction> searchTransactions(String keyword,
@@ -29,6 +31,20 @@ public interface TransactionService {
                                          int page,
                                          int size);
 
+    List<Transaction> searchTransactionsByStaff(Long staffId,
+                                                String keyword,
+                                                String status,
+                                                String sortBy,
+                                                String sortDir,
+                                                int page,
+                                                int size);
+
     int countTransactions(String keyword,
                           String status);
+
+    int countTransactionsByStaff(Long staffId,
+                                 String keyword,
+                                 String status);
+
+    Long completeTransactionByStaff(Long transactionId, Long staffId);
 }

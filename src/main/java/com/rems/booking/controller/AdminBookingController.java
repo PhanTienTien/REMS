@@ -54,14 +54,24 @@ public class AdminBookingController extends HttpServlet {
             status = BookingStatus.valueOf(statusParam);
         }
 
-        // ===== SERVICE =====
-        var result = bookingService.searchBookings(
-                keyword,
-                status,
-                sort,
-                page,
-                size
-        );
+        User user = (User) req.getSession().getAttribute("currentUser");
+
+        var result = user != null && user.getRole() == Role.STAFF
+                ? bookingService.searchBookingsByStaff(
+                        user.getId(),
+                        keyword,
+                        status,
+                        sort,
+                        page,
+                        size
+                )
+                : bookingService.searchBookings(
+                        keyword,
+                        status,
+                        sort,
+                        page,
+                        size
+                );
 
         // ===== BASE URL (CRITICAL) =====
         String baseUrl = buildBaseUrl(req, keyword, statusParam, sort);
@@ -82,8 +92,11 @@ public class AdminBookingController extends HttpServlet {
             throws ServletException, IOException {
 
         Long id = Long.valueOf(req.getParameter("id"));
+        User user = (User) req.getSession().getAttribute("currentUser");
 
-        var booking = bookingService.getBookingDetail(id)
+        var booking = (user != null && user.getRole() == Role.STAFF
+                ? bookingService.getBookingDetailForStaff(id, user.getId())
+                : bookingService.getBookingDetail(id))
                 .orElseThrow(() -> new RuntimeException("Not found"));
 
         req.setAttribute("booking", booking);
@@ -111,11 +124,19 @@ public class AdminBookingController extends HttpServlet {
 
             switch (action) {
                 case "accept" -> {
-                    bookingService.acceptBooking(id, user.getId());
+                    if (user.getRole() == Role.STAFF) {
+                        bookingService.acceptBookingByStaff(id, user.getId());
+                    } else {
+                        bookingService.acceptBooking(id, user.getId());
+                    }
                     req.getSession().setAttribute("success", "Booking accepted");
                 }
                 case "reject" -> {
-                    bookingService.rejectBooking(id, user.getId());
+                    if (user.getRole() == Role.STAFF) {
+                        bookingService.rejectBookingByStaff(id, user.getId());
+                    } else {
+                        bookingService.rejectBooking(id, user.getId());
+                    }
                     req.getSession().setAttribute("success", "Booking rejected");
                 }
             }

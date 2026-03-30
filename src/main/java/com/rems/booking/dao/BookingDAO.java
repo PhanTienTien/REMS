@@ -70,6 +70,25 @@ public interface BookingDAO {
             String keyword,
             BookingStatus status);
 
+    List<BookingAdminViewDTO> searchByStaff(
+            Connection conn,
+            Long staffId,
+            String keyword,
+            BookingStatus status,
+            String sort,
+            int limit,
+            int offset);
+
+    int countSearchByStaff(
+            Connection conn,
+            Long staffId,
+            String keyword,
+            BookingStatus status);
+
+    Optional<BookingAdminDetailDTO> findDetailForStaff(Connection conn,
+                                                       Long bookingId,
+                                                       Long staffId);
+
     void rejectOtherBookings(Connection conn,
                              Long propertyId,
                              Long acceptedBookingId,

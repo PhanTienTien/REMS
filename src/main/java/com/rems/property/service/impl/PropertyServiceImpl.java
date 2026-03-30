@@ -3,6 +3,7 @@ package com.rems.property.service.impl;
 import com.rems.activitylog.dao.impl.ActivityLogDAOImpl;
 import com.rems.activitylog.service.ActivityLogService;
 import com.rems.activitylog.service.impl.ActivityLogServiceImpl;
+import com.rems.common.constant.ActivityLogAction;
 import com.rems.common.constant.PropertyStatus;
 import com.rems.common.constant.PropertyType;
 import com.rems.common.exception.BusinessException;
@@ -68,7 +69,6 @@ public class PropertyServiceImpl implements PropertyService {
                                List<String> imageUrls) {
 
         return txManager.execute(conn -> {
-
             Property property = new Property();
             property.setTitle(dto.getTitle());
             property.setAddress(dto.getAddress());
@@ -80,7 +80,7 @@ public class PropertyServiceImpl implements PropertyService {
 
             Long propertyId = propertyDAO.insert(conn, property);
             propertyImageService.addImages(conn, propertyId, imageUrls);
-
+            log(conn, staffId, ActivityLogAction.CREATE_PROPERTY, propertyId);
             return propertyId;
         });
     }
@@ -89,7 +89,6 @@ public class PropertyServiceImpl implements PropertyService {
     public void updateProperty(UpdatePropertyDTO dto) {
 
         txManager.executeWithoutResult(conn -> {
-
             Property property = requireForUpdate(conn, dto.getId());
 
             if (property.getStatus() != PropertyStatus.DRAFT) {
@@ -134,28 +133,24 @@ public class PropertyServiceImpl implements PropertyService {
     public void approveProperty(Long propertyId, Long approverId) {
 
         txManager.executeWithoutResult(conn -> {
-
             Property property = requireForUpdate(conn, propertyId);
             requireStatus(property, PropertyStatus.DRAFT);
 
             propertyDAO.updateStatus(conn, propertyId, PropertyStatus.AVAILABLE);
             propertyDAO.updateApproval(conn, propertyId, approverId, LocalDateTime.now());
-            log(conn, approverId, "APPROVE_PROPERTY", propertyId, "Approved property");
+            log(conn, approverId, ActivityLogAction.APPROVE_PROPERTY, propertyId);
         });
     }
 
     @Override
     public void reserveProperty(Long propertyId, Connection conn) {
-
         Property property = requireForUpdate(conn, propertyId);
         requireStatus(property, PropertyStatus.AVAILABLE);
-
         propertyDAO.updateStatus(conn, propertyId, PropertyStatus.RESERVED);
     }
 
     @Override
     public void completeSale(Long propertyId, Connection conn) {
-
         Property property = requireForUpdate(conn, propertyId);
         requireStatus(property, PropertyStatus.RESERVED);
 
@@ -168,7 +163,6 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Override
     public void completeRent(Long propertyId, Connection conn) {
-
         Property property = requireForUpdate(conn, propertyId);
         requireStatus(property, PropertyStatus.RESERVED);
 
@@ -181,10 +175,8 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Override
     public void failTransaction(Long propertyId, Connection conn) {
-
         Property property = requireForUpdate(conn, propertyId);
         requireStatus(property, PropertyStatus.RESERVED);
-
         propertyDAO.updateStatus(conn, propertyId, PropertyStatus.AVAILABLE);
     }
 
@@ -192,7 +184,6 @@ public class PropertyServiceImpl implements PropertyService {
     public void deactivateProperty(Long propertyId, Long staffId) {
 
         txManager.executeWithoutResult(conn -> {
-
             Property property = requireForUpdate(conn, propertyId);
 
             if (property.getStatus() == PropertyStatus.SOLD
@@ -207,7 +198,7 @@ public class PropertyServiceImpl implements PropertyService {
             }
 
             propertyDAO.updateStatus(conn, propertyId, PropertyStatus.INACTIVE);
-            log(conn, staffId, "DEACTIVATE_PROPERTY", propertyId, "Deactivated property");
+            log(conn, staffId, ActivityLogAction.DEACTIVATE_PROPERTY, propertyId);
         });
     }
 
@@ -215,20 +206,21 @@ public class PropertyServiceImpl implements PropertyService {
     public void restoreProperty(Long propertyId, Long staffId) {
 
         txManager.executeWithoutResult(conn -> {
-
             Property property = requireForUpdate(conn, propertyId);
             requireStatus(property, PropertyStatus.INACTIVE);
 
             propertyDAO.updateStatus(conn, propertyId, PropertyStatus.AVAILABLE);
-            log(conn, staffId, "RESTORE_PROPERTY", propertyId, "Restored property");
+            log(conn, staffId, ActivityLogAction.RESTORE_PROPERTY, propertyId);
         });
     }
 
     @Override
-    public void deleteProperty(Long propertyId) {
-        txManager.executeWithoutResult(conn ->
-                propertyDAO.updateStatus(conn, propertyId, PropertyStatus.INACTIVE)
-        );
+    public void deleteProperty(Long propertyId, Long staffId) {
+        txManager.executeWithoutResult(conn -> {
+            requireForUpdate(conn, propertyId);
+            propertyDAO.updateStatus(conn, propertyId, PropertyStatus.INACTIVE);
+            log(conn, staffId, ActivityLogAction.DELETE_PROPERTY, propertyId);
+        });
     }
 
     @Override
@@ -314,6 +306,51 @@ public class PropertyServiceImpl implements PropertyService {
         );
     }
 
+    @Override
+    public PageResult<Property> searchStaffPage(Long staffId,
+                                                String address,
+                                                String type,
+                                                Integer minPrice,
+                                                Integer maxPrice,
+                                                String sort,
+                                                int page,
+                                                int size) {
+
+        return txManager.execute(conn -> {
+            List<Property> data = propertyDAO.searchAdminByCreator(
+                    conn,
+                    staffId,
+                    address,
+                    type,
+                    minPrice,
+                    maxPrice,
+                    sort,
+                    page,
+                    size
+            );
+            int total = propertyDAO.countAdminByCreator(
+                    conn,
+                    staffId,
+                    address,
+                    type,
+                    minPrice,
+                    maxPrice
+            );
+            return new PageResult<>(data, page, size, total);
+        });
+    }
+
+    @Override
+    public int countStaff(Long staffId,
+                          String address,
+                          String type,
+                          Integer minPrice,
+                          Integer maxPrice) {
+        return txManager.execute(conn ->
+                propertyDAO.countAdminByCreator(conn, staffId, address, type, minPrice, maxPrice)
+        );
+    }
+
     private Property requireForUpdate(Connection conn, Long propertyId) {
         return propertyDAO.findByIdForUpdate(conn, propertyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
@@ -327,9 +364,9 @@ public class PropertyServiceImpl implements PropertyService {
 
     private void log(Connection conn,
                      Long userId,
-                     String action,
+                     ActivityLogAction action,
                      Long propertyId,
-                     String description) {
-        activityLogService.log(conn, userId, action, "PROPERTY", propertyId, description, null);
+                     Object... args) {
+        activityLogService.log(conn, userId, action, propertyId, null, args);
     }
 }

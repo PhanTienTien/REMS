@@ -2,9 +2,6 @@ let currentEmail = "";
 let countdownInterval = null;
 let resendInterval = null;
 
-// ==============================
-// REGISTER FORM SUBMIT
-// ==============================
 const registerForm = document.getElementById("registerForm");
 
 if (registerForm) {
@@ -21,7 +18,7 @@ if (registerForm) {
         const data = await res.json();
 
         if (data.status === "success") {
-            currentEmail = body.get("email"); // URLSearchParams có get()
+            currentEmail = body.get("email");
             openModal();
         } else {
             document.getElementById("registerError").innerText = data.message;
@@ -30,7 +27,6 @@ if (registerForm) {
 }
 
 function openModal() {
-
     const hiddenEmail = document.getElementById("otpEmail");
 
     if (hiddenEmail && hiddenEmail.value) {
@@ -38,26 +34,19 @@ function openModal() {
     }
 
     document.getElementById("otpModal").classList.add("active");
-
     setupOtpInputs();
     startCountdown(300);
     startResendTimer();
 }
 
-// ==============================
-// OTP INPUT AUTO MOVE
-// ==============================
 function setupOtpInputs() {
-
     const inputs = document.querySelectorAll(".otp-inputs input[type='text']");
 
     inputs.forEach((input, index) => {
-
         input.value = "";
 
-        // chỉ cho nhập số
         input.addEventListener("input", function () {
-            this.value = this.value.replace(/[^0-9]/g, '');
+            this.value = this.value.replace(/[^0-9]/g, "");
 
             if (this.value.length === 1 && index < inputs.length - 1) {
                 inputs[index + 1].focus();
@@ -69,7 +58,6 @@ function setupOtpInputs() {
                 inputs[index - 1].focus();
             }
         });
-
     });
 
     if (inputs.length > 0) {
@@ -77,19 +65,12 @@ function setupOtpInputs() {
     }
 }
 
-// ==============================
-// GET OTP VALUE
-// ==============================
 function getOtpValue() {
     const inputs = document.querySelectorAll(".otp-inputs input[type='text']");
     return Array.from(inputs).map(i => i.value).join("");
 }
 
-// ==============================
-// COUNTDOWN 5 MINUTES
-// ==============================
 function startCountdown(seconds) {
-
     const countdown = document.getElementById("countdown");
 
     if (countdownInterval) {
@@ -97,12 +78,11 @@ function startCountdown(seconds) {
     }
 
     countdownInterval = setInterval(() => {
-
         let min = Math.floor(seconds / 60);
         let sec = seconds % 60;
 
         countdown.innerText =
-            `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+            `${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 
         seconds--;
 
@@ -110,15 +90,10 @@ function startCountdown(seconds) {
             clearInterval(countdownInterval);
             countdown.innerText = "Hết hạn OTP";
         }
-
     }, 1000);
 }
 
-// ==============================
-// RESEND TIMER 60s
-// ==============================
 function startResendTimer() {
-
     const btn = document.getElementById("resendBtn");
 
     if (resendInterval) {
@@ -129,7 +104,6 @@ function startResendTimer() {
     let seconds = 60;
 
     resendInterval = setInterval(() => {
-
         btn.innerText = `Gửi lại OTP (${seconds}s)`;
         seconds--;
 
@@ -138,15 +112,10 @@ function startResendTimer() {
             btn.disabled = false;
             btn.innerText = "Gửi lại OTP";
         }
-
     }, 1000);
 }
 
-// ==============================
-// RESEND OTP
-// ==============================
 async function resendOtp() {
-
     const body = new URLSearchParams();
     body.append("action", "resend");
     body.append("email", currentEmail);
@@ -169,11 +138,7 @@ async function resendOtp() {
     }
 }
 
-// ==============================
-// VERIFY OTP
-// ==============================
 async function verifyOtp() {
-
     const otp = getOtpValue();
 
     if (otp.length !== 6) {
@@ -197,22 +162,17 @@ async function verifyOtp() {
     const data = await res.json();
 
     if (data.status === "success") {
-
         document.getElementById("otpError").innerText = "";
         alert("Xác thực thành công!");
 
         setTimeout(() => {
             window.location.href = contextPath() + "/auth?action=login";
         }, 1000);
-
     } else {
         document.getElementById("otpError").innerText = data.message;
     }
 }
 
-// ==============================
-// GET CONTEXT PATH SAFE
-// ==============================
 function contextPath() {
     return document.body.getAttribute("data-context") || "";
 }

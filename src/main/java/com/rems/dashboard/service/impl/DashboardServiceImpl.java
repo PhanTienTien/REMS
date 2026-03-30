@@ -111,11 +111,11 @@ public class DashboardServiceImpl implements DashboardService {
 
         List<DashboardCardDTO> cards = new ArrayList<>();
 
-        cards.add(new DashboardCardDTO("Total Properties", totalProperties));
-        cards.add(new DashboardCardDTO("Available Properties", availableProperties));
-        cards.add(new DashboardCardDTO("Total Bookings", totalBookings));
-        cards.add(new DashboardCardDTO("Completed Transactions", completedTransactions));
-        cards.add(new DashboardCardDTO("Total Revenue", totalRevenue.longValue()));
+        cards.add(new DashboardCardDTO("Tổng bất động sản", totalProperties));
+        cards.add(new DashboardCardDTO("Bất động sản đang mở", availableProperties));
+        cards.add(new DashboardCardDTO("Tổng lượt đặt lịch", totalBookings));
+        cards.add(new DashboardCardDTO("Giao dịch hoàn tất", completedTransactions));
+        cards.add(new DashboardCardDTO("Tổng doanh thu", totalRevenue.longValue()));
 
         return cards;
     }

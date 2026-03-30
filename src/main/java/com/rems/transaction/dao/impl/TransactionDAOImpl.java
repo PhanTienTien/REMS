@@ -32,6 +32,11 @@ public class TransactionDAOImpl implements TransactionDAO {
         tx.setStatus(TransactionStatus.valueOf(rs.getString("status")));
 
         tx.setProcessedBy((Long) rs.getObject("processed_by"));
+        try {
+            tx.setProcessedByName(rs.getString("processed_by_name"));
+        } catch (SQLException ignored) {
+            tx.setProcessedByName(null);
+        }
 
         Timestamp completedAt = rs.getTimestamp("completed_at");
         if (completedAt != null) {
@@ -420,8 +425,9 @@ public class TransactionDAOImpl implements TransactionDAO {
                                     int limit) {
 
         StringBuilder sql = new StringBuilder("""
-        SELECT *
-        FROM transactions
+        SELECT t.*, u.full_name AS processed_by_name
+        FROM transactions t
+        LEFT JOIN users u ON u.id = t.processed_by
         WHERE 1=1
     """);
 
@@ -431,8 +437,8 @@ public class TransactionDAOImpl implements TransactionDAO {
         if (keyword != null && !keyword.isBlank()) {
             sql.append("""
             AND (
-                LOWER(property_title_snapshot) LIKE ?
-                OR LOWER(customer_name_snapshot) LIKE ?
+                LOWER(t.property_title_snapshot) LIKE ?
+                OR LOWER(t.customer_name_snapshot) LIKE ?
             )
         """);
             String kw = "%" + keyword.toLowerCase() + "%";
@@ -442,15 +448,16 @@ public class TransactionDAOImpl implements TransactionDAO {
 
         // 🎯 filter status
         if (status != null) {
-            sql.append(" AND status = ? ");
+            sql.append(" AND t.status = ? ");
             params.add(status.name());
         }
 
         // 🔐 whitelist sort column
         String sortColumn = switch (sortBy) {
-            case "amount" -> "amount";
-            case "status" -> "status";
-            default -> "created_at";
+            case "amount" -> "t.amount";
+            case "status" -> "t.status";
+            case "property" -> "t.property_title_snapshot";
+            default -> "t.created_at";
         };
 
         String direction = "asc".equalsIgnoreCase(sortDir) ? "ASC" : "DESC";
@@ -510,6 +517,163 @@ public class TransactionDAOImpl implements TransactionDAO {
 
         if (status != null) {
             sql.append(" AND status = ? ");
+            params.add(status.name());
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+            return 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Optional<Transaction> findByIdForStaff(Connection conn,
+                                                  Long id,
+                                                  Long staffId) {
+
+        String sql = """
+        SELECT t.*, u.full_name AS processed_by_name
+        FROM transactions t
+        JOIN properties p ON p.id = t.property_id
+        LEFT JOIN users u ON u.id = t.processed_by
+        WHERE t.id = ?
+          AND p.created_by = ?
+    """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+            ps.setLong(2, staffId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return Optional.of(map(rs));
+            }
+
+            return Optional.empty();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Transaction> searchByStaff(Connection conn,
+                                           Long staffId,
+                                           String keyword,
+                                           TransactionStatus status,
+                                           String sortBy,
+                                           String sortDir,
+                                           int offset,
+                                           int limit) {
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT t.*, u.full_name AS processed_by_name
+        FROM transactions t
+        JOIN properties p ON p.id = t.property_id
+        LEFT JOIN users u ON u.id = t.processed_by
+        WHERE p.created_by = ?
+    """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(staffId);
+
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append("""
+            AND (
+                LOWER(t.property_title_snapshot) LIKE ?
+                OR LOWER(t.customer_name_snapshot) LIKE ?
+            )
+        """);
+            String kw = "%" + keyword.toLowerCase() + "%";
+            params.add(kw);
+            params.add(kw);
+        }
+
+        if (status != null) {
+            sql.append(" AND t.status = ? ");
+            params.add(status.name());
+        }
+
+        String sortColumn = switch (sortBy) {
+            case "amount" -> "t.amount";
+            case "status" -> "t.status";
+            case "property" -> "t.property_title_snapshot";
+            default -> "t.created_at";
+        };
+
+        String direction = "asc".equalsIgnoreCase(sortDir) ? "ASC" : "DESC";
+
+        sql.append(" ORDER BY ").append(sortColumn).append(" ").append(direction);
+        sql.append(" LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            List<Transaction> list = new ArrayList<>();
+
+            while (rs.next()) {
+                list.add(map(rs));
+            }
+
+            return list;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public int countByStaff(Connection conn,
+                            Long staffId,
+                            String keyword,
+                            TransactionStatus status) {
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(*)
+        FROM transactions t
+        JOIN properties p ON p.id = t.property_id
+        WHERE p.created_by = ?
+    """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(staffId);
+
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append("""
+            AND (
+                LOWER(t.property_title_snapshot) LIKE ?
+                OR LOWER(t.customer_name_snapshot) LIKE ?
+            )
+        """);
+
+            String kw = "%" + keyword.toLowerCase() + "%";
+            params.add(kw);
+            params.add(kw);
+        }
+
+        if (status != null) {
+            sql.append(" AND t.status = ? ");
             params.add(status.name());
         }
 

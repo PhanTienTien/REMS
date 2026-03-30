@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,7 +10,7 @@
     <link rel="shortcut icon" href="${pageContext.request.contextPath}/assets/images/favicon.png" />
 
     <meta name="description" content="" />
-    <meta name="keywords" content="bootstrap, bootstrap5" />
+    <meta name="keywords" content="bat dong san, quan ly, giao dich" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/aos.css" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
 
-    <title>Property Management System</title>
+    <title>Hệ thống quản lý bất động sản</title>
 </head>
 <body>
 
@@ -44,22 +44,19 @@
                 </a>
 
                 <ul class="js-clone-nav d-none d-lg-inline-block text-start site-menu float-end">
-
-                    <li><a href="${pageContext.request.contextPath}/">Home</a></li>
-                    <li><a href="${pageContext.request.contextPath}/about">About</a></li>
-                    <li><a href="${pageContext.request.contextPath}/customer/properties">Properties</a></li>
-                    <li><a href="${pageContext.request.contextPath}/customer/contact">Contact</a></li>
+                    <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
+                    <li><a href="${pageContext.request.contextPath}/about">Giới thiệu</a></li>
+                    <li><a href="${pageContext.request.contextPath}/customer/properties">Bất động sản</a></li>
+                    <li><a href="${pageContext.request.contextPath}/customer/contact">Liên hệ</a></li>
 
                     <c:choose>
-
                         <c:when test="${not empty sessionScope.currentUser}">
-
                             <li class="has-children">
                                 <a href="#">${sessionScope.currentUser.fullName}</a>
                                 <ul class="dropdown">
                                     <li>
                                         <a href="${pageContext.request.contextPath}/customer/profile">
-                                            My Profile
+                                            Hồ sơ của tôi
                                         </a>
                                     </li>
                                     <li>
@@ -67,28 +64,23 @@
                                               method="post"
                                               style="display:inline;">
                                             <button type="submit" class="logout-link">
-                                                Logout
+                                                Đăng xuất
                                             </button>
                                         </form>
                                     </li>
                                 </ul>
                             </li>
-
                         </c:when>
 
                         <c:otherwise>
-
                             <li>
                                 <a href="${pageContext.request.contextPath}/auth"
                                    class="btn btn-primary text-white px-3">
-                                    Login
+                                    Đăng nhập
                                 </a>
                             </li>
-
                         </c:otherwise>
-
                     </c:choose>
-
                 </ul>
 
                 <a href="#" class="burger light me-auto float-end mt-1 site-menu-toggle js-menu-toggle d-inline-block d-lg-none">
