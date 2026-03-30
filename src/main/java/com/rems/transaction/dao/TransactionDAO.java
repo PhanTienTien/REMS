@@ -30,4 +30,16 @@ public interface TransactionDAO {
     List<Transaction> findByCustomer(Connection conn,
                                      Long customerId);
 
+    List<Transaction> search(Connection conn,
+                             String keyword,
+                             TransactionStatus status,
+                             String sortBy,
+                             String sortDir,
+                             int offset,
+                             int limit);
+
+    int count(Connection conn,
+              String keyword,
+              TransactionStatus status);
+
 }

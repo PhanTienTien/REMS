@@ -1,14 +1,16 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <html>
 <head>
 
-    <title>Bookings - REMS Admin</title>
+    <title>Booking Management</title>
 
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/assets/css/admin/dashboard.css">
+
+    <link rel="stylesheet"
+          href="${pageContext.request.contextPath}/assets/css/admin/property-dashboard.css">
 
 </head>
 
@@ -16,63 +18,63 @@
 
 <div class="dashboard-container">
 
+    <!-- SIDEBAR -->
     <c:choose>
-
         <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
             <jsp:include page="/views/admin/components/sidebar.jsp"/>
         </c:when>
-
         <c:otherwise>
             <jsp:include page="/views/staff/components/sidebar.jsp"/>
         </c:otherwise>
-
     </c:choose>
 
     <div class="main-content">
 
+        <!-- TOPBAR -->
         <c:choose>
-
             <c:when test="${sessionScope.currentUser.role == 'ADMIN'}">
                 <jsp:include page="/views/admin/components/topbar.jsp"/>
             </c:when>
-
             <c:otherwise>
                 <jsp:include page="/views/staff/components/topbar.jsp"/>
             </c:otherwise>
-
         </c:choose>
 
-        <div class="dashboard-content">
+        <div class="content">
 
-            <div class="transactions-container">
+            <h2>Booking Management</h2>
 
-                <h2>Booking Management</h2>
+            <!-- 🔍 SEARCH + FILTER + SORT -->
+            <form method="get"
+                  action="${pageContext.request.contextPath}/admin/bookings"
+                  class="search-bar">
 
-                <div class="filters">
+                <input type="text"
+                       name="keyword"
+                       value="${keyword}"
+                       placeholder="Search property or customer">
 
-                    <a href="${pageContext.request.contextPath}/admin/bookings">
-                        All
-                    </a>
+                <select name="status">
+                    <option value="">All Status</option>
+                    <option value="PENDING" ${status == 'PENDING' ? 'selected' : ''}>Pending</option>
+                    <option value="ACCEPTED" ${status == 'ACCEPTED' ? 'selected' : ''}>Accepted</option>
+                    <option value="REJECTED" ${status == 'REJECTED' ? 'selected' : ''}>Rejected</option>
+                    <option value="CANCELLED" ${status == 'CANCELLED' ? 'selected' : ''}>Cancelled</option>
+                </select>
 
-                    <a href="${pageContext.request.contextPath}/admin/bookings?status=PENDING">
-                        Pending
-                    </a>
+                <select name="sort">
+                    <option value="">Newest</option>
+                    <option value="oldest" ${sort == 'oldest' ? 'selected' : ''}>Oldest</option>
+                </select>
 
-                    <a href="${pageContext.request.contextPath}/admin/bookings?status=ACCEPTED">
-                        Accepted
-                    </a>
+                <button class="btn-search">Search</button>
 
-                    <a href="${pageContext.request.contextPath}/admin/bookings?status=REJECTED">
-                        Rejected
-                    </a>
+            </form>
 
-                    <a href="${pageContext.request.contextPath}/admin/bookings?status=CANCELLED">
-                        Cancelled
-                    </a>
+            <!-- TABLE -->
+            <div class="table-wrapper">
 
-                </div>
-
-                <table>
+                <table class="property-table">
 
                     <thead>
                     <tr>
@@ -81,60 +83,34 @@
                         <th>Customer</th>
                         <th>Status</th>
                         <th>Created</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                     </thead>
 
                     <tbody>
 
-                    <c:forEach items="${bookings}" var="b">
+                    <c:forEach items="${result.data}" var="b">
 
                         <tr>
 
                             <td>${b.bookingId}</td>
-
                             <td>${b.propertyTitle}</td>
-
                             <td>${b.customerName}</td>
 
                             <td>
-
-<span class="badge
-<c:choose>
-
-<c:when test="${b.status == 'ACCEPTED'}">
-badge-completed
-</c:when>
-
-<c:when test="${b.status == 'PENDING'}">
-badge-pending
-</c:when>
-
-<c:when test="${b.status == 'REJECTED'}">
-badge-failed
-</c:when>
-
-<c:when test="${b.status == 'CANCELLED'}">
-badge-cancelled
-</c:when>
-
-</c:choose>
-">
-
-        ${b.status}
-
-</span>
-
+                                <span class="status-badge status-${b.status}">
+                                        ${b.status}
+                                </span>
                             </td>
 
-                            <td>${b.createdAtFormatted}</td>
+                            <td>${b.createdAt}</td>
 
                             <td class="actions">
 
-                                <a href="${pageContext.request.contextPath}/admin/bookings?action=view&id=${b.bookingId}">
+                                <a class="btn-view"
+                                   href="${pageContext.request.contextPath}/admin/bookings?action=view&id=${b.bookingId}">
                                     View
                                 </a>
-
 
                                 <c:if test="${b.status == 'PENDING'}">
 
@@ -144,10 +120,9 @@ badge-cancelled
                                         <input type="hidden" name="action" value="accept"/>
                                         <input type="hidden" name="id" value="${b.bookingId}"/>
 
-                                        <button class="btn-accept">
+                                        <button class="btn-approve">
                                             Accept
                                         </button>
-
                                     </form>
 
                                     <form method="post"
@@ -156,10 +131,9 @@ badge-cancelled
                                         <input type="hidden" name="action" value="reject"/>
                                         <input type="hidden" name="id" value="${b.bookingId}"/>
 
-                                        <button class="btn-reject">
+                                        <button class="btn-delete">
                                             Reject
                                         </button>
-
                                     </form>
 
                                 </c:if>
@@ -174,34 +148,29 @@ badge-cancelled
 
                 </table>
 
-                <div class="pagination">
+            </div>
 
-                    <c:if test="${currentPage > 1}">
+            <!-- PAGINATION -->
+            <div class="pagination">
 
-                        <a href="?page=${currentPage - 1}">
-                            Previous
-                        </a>
+                <c:if test="${result.page > 1}">
+                    <a href="${baseUrl}&page=${result.page - 1}">
+                        Previous
+                    </a>
+                </c:if>
 
-                    </c:if>
+                <c:forEach begin="1" end="${result.totalPages}" var="i">
+                    <a href="${baseUrl}&page=${i}"
+                       class="${i == result.page ? 'active' : ''}">
+                            ${i}
+                    </a>
+                </c:forEach>
 
-                    <c:forEach begin="1" end="${totalPages}" var="p">
-
-                        <a href="?page=${p}"
-                           class="${p == currentPage ? 'active' : ''}">
-                                ${p}
-                        </a>
-
-                    </c:forEach>
-
-                    <c:if test="${currentPage < totalPages}">
-
-                        <a href="?page=${currentPage + 1}">
-                            Next
-                        </a>
-
-                    </c:if>
-
-                </div>
+                <c:if test="${result.page < result.totalPages}">
+                    <a href="${baseUrl}&page=${result.page + 1}">
+                        Next
+                    </a>
+                </c:if>
 
             </div>
 

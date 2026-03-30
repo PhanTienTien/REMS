@@ -1,4 +1,4 @@
-package com.rems.property.model;
+package com.rems.common.util;
 
 import java.util.List;
 

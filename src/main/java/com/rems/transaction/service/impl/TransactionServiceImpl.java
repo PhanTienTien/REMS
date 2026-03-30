@@ -206,4 +206,50 @@ public class TransactionServiceImpl implements TransactionService {
         );
 
     }
+
+    @Override
+    public List<Transaction> searchTransactions(String keyword,
+                                                String status,
+                                                String sortBy,
+                                                String sortDir,
+                                                int page,
+                                                int size) {
+
+        return txManager.execute(conn -> {
+
+            TransactionStatus st = null;
+
+            if (status != null && !status.isBlank()) {
+                st = TransactionStatus.valueOf(status);
+            }
+
+            int offset = (page - 1) * size;
+
+            return transactionDAO.search(
+                    conn,
+                    keyword,
+                    st,
+                    sortBy,
+                    sortDir,
+                    offset,
+                    size
+            );
+        });
+    }
+
+    @Override
+    public int countTransactions(String keyword,
+                                 String status) {
+
+        return txManager.execute(conn -> {
+
+            TransactionStatus st = null;
+
+            if (status != null && !status.isBlank()) {
+                st = TransactionStatus.valueOf(status);
+            }
+
+            return transactionDAO.count(conn, keyword, st);
+        });
+    }
 }

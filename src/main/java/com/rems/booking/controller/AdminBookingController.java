@@ -1,6 +1,5 @@
 package com.rems.booking.controller;
 
-import com.rems.activitylog.dao.ActivityLogDAO;
 import com.rems.activitylog.service.ActivityLogService;
 import com.rems.activitylog.service.impl.ActivityLogServiceImpl;
 import com.rems.booking.service.BookingService;
@@ -23,17 +22,16 @@ import java.io.IOException;
 public class AdminBookingController extends HttpServlet {
 
     private BookingService bookingService;
-    private TransactionManager txManager;
-    private ActivityLogService activityLogService;
-    private ActivityLogDAO activityLogDAO;
 
     @Override
     public void init() {
+        TransactionManager txManager = new TransactionManager();
 
-        txManager = new TransactionManager();
-        activityLogService = new ActivityLogServiceImpl(activityLogDAO, txManager);
+        ActivityLogService activityLogService =
+                new ActivityLogServiceImpl(null, txManager);
 
         PropertyService propertyService = new PropertyServiceImpl();
+
         TransactionService transactionService =
                 new TransactionServiceImpl(txManager, activityLogService);
 
@@ -41,93 +39,128 @@ public class AdminBookingController extends HttpServlet {
                 new BookingServiceImpl(propertyService, transactionService);
     }
 
-
     @Override
     protected void doGet(HttpServletRequest req,
                          HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String statusParam = req.getParameter("status");
-        String pageParam = req.getParameter("page");
         String action = req.getParameter("action");
 
         if ("view".equals(action)) {
-
-            Long bookingId = Long.valueOf(req.getParameter("id"));
-
-            var booking =
-                    bookingService.getBookingDetail(bookingId)
-                            .orElseThrow(() ->
-                                    new RuntimeException("Booking not found"));
-
-            req.setAttribute("booking", booking);
-
-            req.getRequestDispatcher(
-                    "/views/admin/booking-detail.jsp"
-            ).forward(req, resp);
-
+            handleViewDetail(req, resp);
             return;
         }
 
-        int page = 1;
+        handleList(req, resp);
+    }
 
-        if (pageParam != null) {
-            page = Integer.parseInt(pageParam);
+    private void handleList(HttpServletRequest req,
+                            HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        // ===== PARAMS =====
+        String keyword = req.getParameter("keyword");
+        String statusParam = req.getParameter("status");
+        String sort = req.getParameter("sort");
+
+        int page = parseInt(req.getParameter("page"), 1);
+        int size = 10;
+
+        // ===== FILTER =====
+        BookingStatus status = null;
+        if (statusParam != null && !statusParam.isBlank()) {
+            status = BookingStatus.valueOf(statusParam);
         }
 
-        int pageSize = 10;
-
-        var bookings = (statusParam == null)
-                ? bookingService.getBookingsPage(page, pageSize)
-                : bookingService.getBookingsPageByStatus(
-                BookingStatus.valueOf(statusParam),
+        // ===== SERVICE =====
+        var result = bookingService.searchBookings(
+                keyword,
+                status,
+                sort,
                 page,
-                pageSize
+                size
         );
 
-        int total = (statusParam == null)
-                ? bookingService.countBookings()
-                : bookingService.countBookingsByStatus(
-                BookingStatus.valueOf(statusParam)
-        );
+        // ===== BASE URL (CRITICAL) =====
+        String baseUrl = buildBaseUrl(req, keyword, statusParam, sort);
 
-        int totalPages = (int) Math.ceil((double) total / pageSize);
-
-        req.setAttribute("bookings", bookings);
-        req.setAttribute("currentPage", page);
-        req.setAttribute("totalPages", totalPages);
+        // ===== SET ATTR =====
+        req.setAttribute("result", result);
+        req.setAttribute("keyword", keyword);
         req.setAttribute("status", statusParam);
+        req.setAttribute("sort", sort);
+        req.setAttribute("baseUrl", baseUrl);
 
         req.getRequestDispatcher("/views/admin/bookings-list.jsp")
+                .forward(req, resp);
+    }
+
+    private void handleViewDetail(HttpServletRequest req,
+                                  HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        Long id = Long.valueOf(req.getParameter("id"));
+
+        var booking = bookingService.getBookingDetail(id)
+                .orElseThrow(() -> new RuntimeException("Not found"));
+
+        req.setAttribute("booking", booking);
+
+        req.getRequestDispatcher("/views/admin/booking-detail.jsp")
                 .forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req,
                           HttpServletResponse resp)
-            throws ServletException, IOException {
+            throws IOException {
 
         String action = req.getParameter("action");
-        Long bookingId = Long.valueOf(req.getParameter("id"));
+        Long id = Long.valueOf(req.getParameter("id"));
         Long staffId = 1L;
 
         try {
 
-            if ("accept".equals(action)) {
-
-                bookingService.acceptBooking(bookingId, staffId);
-
-            } else if ("reject".equals(action)) {
-
-                bookingService.rejectBooking(bookingId, staffId);
+            switch (action) {
+                case "accept" -> bookingService.acceptBooking(id, staffId);
+                case "reject" -> bookingService.rejectBooking(id, staffId);
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             req.getSession().setAttribute("error", e.getMessage());
         }
 
-        resp.sendRedirect(
-                req.getContextPath() + "/admin/bookings");
+        resp.sendRedirect(req.getContextPath() + "/admin/bookings");
+    }
+
+    private int parseInt(String val, int def) {
+        try {
+            return val == null ? def : Integer.parseInt(val);
+        } catch (Exception e) {
+            return def;
+        }
+    }
+
+    private String buildBaseUrl(HttpServletRequest req,
+                                String keyword,
+                                String status,
+                                String sort) {
+
+        StringBuilder url =
+                new StringBuilder(req.getContextPath() + "/admin/bookings?");
+
+        if (keyword != null && !keyword.isBlank()) {
+            url.append("keyword=").append(keyword).append("&");
+        }
+
+        if (status != null && !status.isBlank()) {
+            url.append("status=").append(status).append("&");
+        }
+
+        if (sort != null && !sort.isBlank()) {
+            url.append("sort=").append(sort).append("&");
+        }
+
+        return url.toString();
     }
 }

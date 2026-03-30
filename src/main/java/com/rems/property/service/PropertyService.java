@@ -6,7 +6,7 @@ import com.rems.property.dto.CreatePropertyDTO;
 import com.rems.property.dto.PropertyCardDTO;
 import com.rems.property.dto.PropertySearchDTO;
 import com.rems.property.dto.UpdatePropertyDTO;
-import com.rems.property.model.PageResult;
+import com.rems.common.util.PageResult;
 import com.rems.property.model.Property;
 
 import java.math.BigDecimal;

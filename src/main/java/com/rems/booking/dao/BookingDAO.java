@@ -57,4 +57,19 @@ public interface BookingDAO {
     List<Booking> findExpiredPending(Connection conn,
                                      int hours);
 
+    public List<BookingAdminViewDTO> search(
+            Connection conn,
+            String keyword,
+            BookingStatus status,
+            String sort,
+            int limit,
+            int offset);
+
+    public int countSearch(
+            Connection conn,
+            String keyword,
+            BookingStatus status);
+
+
+
 }

@@ -1,17 +1,16 @@
 package com.rems.property.service.impl;
 
+import com.rems.activitylog.service.ActivityLogService;
 import com.rems.common.constant.PropertyStatus;
 import com.rems.common.constant.PropertyType;
 import com.rems.common.transaction.TransactionManager;
+import com.rems.common.util.PageResult;
 import com.rems.property.dao.PropertyDAO;
 import com.rems.property.dao.PropertyImageDAO;
-import com.rems.property.dao.impl.PropertyDAOImpl;
-import com.rems.property.dao.impl.PropertyImageDAOImpl;
 import com.rems.property.dto.CreatePropertyDTO;
 import com.rems.property.dto.PropertyCardDTO;
 import com.rems.property.dto.PropertySearchDTO;
 import com.rems.property.dto.UpdatePropertyDTO;
-import com.rems.property.model.PageResult;
 import com.rems.property.model.Property;
 import com.rems.property.service.PropertyImageService;
 import com.rems.property.service.PropertyService;
@@ -24,10 +23,19 @@ import java.util.Optional;
 
 public class PropertyServiceImpl implements PropertyService {
 
-    private final PropertyDAO propertyDAO = new PropertyDAOImpl();
-    private final TransactionManager txManager = new TransactionManager();
-    private final PropertyImageDAO propertyImageDAO = new PropertyImageDAOImpl();
-    private final PropertyImageService propertyImageService = new PropertyImageServiceImpl();
+    private final PropertyDAO propertyDAO;
+    private final TransactionManager txManager;
+    private final PropertyImageDAO propertyImageDAO;
+    private final PropertyImageService propertyImageService;
+    private final ActivityLogService activityLogService;
+
+    public PropertyServiceImpl(PropertyDAO propertyDAO, TransactionManager txManager, PropertyImageDAO propertyImageDAO, PropertyImageService propertyImageService, ActivityLogService activityLogService) {
+        this.propertyDAO = propertyDAO;
+        this.txManager = txManager;
+        this.propertyImageDAO = propertyImageDAO;
+        this.propertyImageService = propertyImageService;
+        this.activityLogService = activityLogService;
+    }
 
     @Override
     public Optional<Property> findById(Long id){

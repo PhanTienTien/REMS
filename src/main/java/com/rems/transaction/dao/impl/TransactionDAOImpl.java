@@ -406,4 +406,126 @@ public class TransactionDAOImpl implements TransactionDAO {
         return list;
     }
 
+    @Override
+    public List<Transaction> search(Connection conn,
+                                    String keyword,
+                                    TransactionStatus status,
+                                    String sortBy,
+                                    String sortDir,
+                                    int offset,
+                                    int limit) {
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT *
+        FROM transactions
+        WHERE 1=1
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        // 🔍 keyword search
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append("""
+            AND (
+                LOWER(property_title_snapshot) LIKE ?
+                OR LOWER(customer_name_snapshot) LIKE ?
+            )
+        """);
+            String kw = "%" + keyword.toLowerCase() + "%";
+            params.add(kw);
+            params.add(kw);
+        }
+
+        // 🎯 filter status
+        if (status != null) {
+            sql.append(" AND status = ? ");
+            params.add(status.name());
+        }
+
+        // 🔐 whitelist sort column
+        String sortColumn = switch (sortBy) {
+            case "amount" -> "amount";
+            case "status" -> "status";
+            default -> "created_at";
+        };
+
+        String direction = "asc".equalsIgnoreCase(sortDir) ? "ASC" : "DESC";
+
+        sql.append(" ORDER BY ").append(sortColumn).append(" ").append(direction);
+        sql.append(" LIMIT ? OFFSET ?");
+
+        params.add(limit);
+        params.add(offset);
+
+        List<Transaction> list = new ArrayList<>();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                list.add(map(rs));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return list;
+    }
+
+    @Override
+    public int count(Connection conn,
+                     String keyword,
+                     TransactionStatus status) {
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(*)
+        FROM transactions
+        WHERE 1=1
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append("""
+            AND (
+                LOWER(property_title_snapshot) LIKE ?
+                OR LOWER(customer_name_snapshot) LIKE ?
+            )
+        """);
+
+            String kw = "%" + keyword.toLowerCase() + "%";
+            params.add(kw);
+            params.add(kw);
+        }
+
+        if (status != null) {
+            sql.append(" AND status = ? ");
+            params.add(status.name());
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+            return 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

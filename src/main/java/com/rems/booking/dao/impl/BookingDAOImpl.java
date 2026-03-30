@@ -621,4 +621,118 @@ public class BookingDAOImpl implements BookingDAO {
 
         return list;
     }
+
+    @Override
+    public List<BookingAdminViewDTO> search(
+            Connection conn,
+            String keyword,
+            BookingStatus status,
+            String sort,
+            int limit,
+            int offset) {
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT b.id, p.title, u.full_name, b.status, b.created_at
+        FROM bookings b
+        JOIN properties p ON p.id = b.property_id
+        JOIN users u ON u.id = b.customer_id
+        WHERE 1=1
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND (p.title LIKE ? OR u.full_name LIKE ?)");
+            params.add("%" + keyword + "%");
+            params.add("%" + keyword + "%");
+        }
+
+        if (status != null) {
+            sql.append(" AND b.status = ?");
+            params.add(status.name());
+        }
+
+        // SORT
+        if ("oldest".equals(sort)) {
+            sql.append(" ORDER BY b.created_at ASC");
+        } else {
+            sql.append(" ORDER BY b.created_at DESC");
+        }
+
+        sql.append(" LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            List<BookingAdminViewDTO> list = new ArrayList<>();
+
+            while (rs.next()) {
+
+                BookingAdminViewDTO dto = new BookingAdminViewDTO();
+
+                dto.setBookingId(rs.getLong("id"));
+                dto.setPropertyTitle(rs.getString("title"));
+                dto.setCustomerName(rs.getString("full_name"));
+                dto.setStatus(BookingStatus.valueOf(rs.getString("status")));
+                dto.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+
+                list.add(dto);
+            }
+
+            return list;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public int countSearch(
+            Connection conn,
+            String keyword,
+            BookingStatus status) {
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(*)
+        FROM bookings b
+        JOIN properties p ON p.id = b.property_id
+        JOIN users u ON u.id = b.customer_id
+        WHERE 1=1
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND (p.title LIKE ? OR u.full_name LIKE ?)");
+            params.add("%" + keyword + "%");
+            params.add("%" + keyword + "%");
+        }
+
+        if (status != null) {
+            sql.append(" AND b.status = ?");
+            params.add(status.name());
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            rs.next();
+            return rs.getInt(1);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

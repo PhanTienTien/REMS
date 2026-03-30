@@ -3,7 +3,7 @@ package com.rems.property.controller;
 import com.rems.common.constant.PropertyType;
 import com.rems.property.dto.CreatePropertyDTO;
 import com.rems.property.dto.UpdatePropertyDTO;
-import com.rems.property.model.PageResult;
+import com.rems.common.util.PageResult;
 import com.rems.property.model.Property;
 import com.rems.property.service.PropertyService;
 import com.rems.property.service.impl.PropertyServiceImpl;

@@ -101,7 +101,7 @@ public class Transaction {
         return processedBy;
     }
     public void setProcessedBy(Long processedBy) {
-        processedBy = processedBy;
+        this.processedBy = processedBy;
     }
 
     public String getCreatedAtFormatted() {

@@ -10,6 +10,7 @@ import com.rems.booking.service.BookingService;
 import com.rems.common.constant.BookingStatus;
 import com.rems.common.constant.PropertyStatus;
 import com.rems.common.transaction.TransactionManager;
+import com.rems.common.util.PageResult;
 import com.rems.property.model.Property;
 import com.rems.property.service.PropertyService;
 import com.rems.transaction.service.TransactionService;
@@ -282,6 +283,28 @@ public class BookingServiceImpl implements BookingService {
             }
 
             return null;
+        });
+    }
+
+    @Override
+    public PageResult<BookingAdminViewDTO> searchBookings(
+            String keyword,
+            BookingStatus status,
+            String sort,
+            int page,
+            int size) {
+
+        return tx.execute(conn -> {
+
+            int offset = (page - 1) * size;
+
+            List<BookingAdminViewDTO> data =
+                    bookingDAO.search(conn, keyword, status, sort, size, offset);
+
+            int total =
+                    bookingDAO.countSearch(conn, keyword, status);
+
+            return new PageResult<>(data, page, size, total);
         });
     }
 }

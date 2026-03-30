@@ -21,4 +21,14 @@ public interface TransactionService {
     Transaction findById(Long id);
 
     List<Transaction> getByCustomer(Long customerId);
+
+    List<Transaction> searchTransactions(String keyword,
+                                         String status,
+                                         String sortBy,
+                                         String sortDir,
+                                         int page,
+                                         int size);
+
+    int countTransactions(String keyword,
+                          String status);
 }

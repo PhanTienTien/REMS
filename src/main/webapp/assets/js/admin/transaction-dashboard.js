@@ -18,14 +18,31 @@ document.addEventListener("DOMContentLoaded", function(){
 
 });
 
-document.querySelectorAll("form").forEach(form => {
+const modal = document.getElementById("transactionModal");
+const closeBtn = document.querySelector(".close-btn");
 
-    form.addEventListener("submit", function(e) {
+document.querySelectorAll(".view-btn").forEach(btn => {
 
-        if (!confirm("Complete this transaction?")) {
-            e.preventDefault();
-        }
+    btn.addEventListener("click", () => {
 
+        document.getElementById("m-id").innerText = btn.dataset.id;
+        document.getElementById("m-property").innerText = btn.dataset.property;
+        document.getElementById("m-customer").innerText = btn.dataset.customer;
+        document.getElementById("m-amount").innerText = btn.dataset.amount;
+        document.getElementById("m-status").innerText = btn.dataset.status;
+        document.getElementById("m-type").innerText = btn.dataset.type;
+        document.getElementById("m-date").innerText = btn.dataset.date;
+        document.getElementById("m-processed").innerText = btn.dataset.processed;
+
+        modal.style.display = "block";
     });
 
 });
+
+closeBtn.onclick = () => modal.style.display = "none";
+
+window.onclick = (e) => {
+    if (e.target === modal) {
+        modal.style.display = "none";
+    }
+};
