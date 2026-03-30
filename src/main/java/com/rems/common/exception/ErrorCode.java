@@ -51,6 +51,7 @@ public enum ErrorCode {
     INVALID_STATE("AUTH_0046", "Invalid state" ),
     DUPLICATE_TRANSACTION("AUTH_0047", "Duplicate transaction" ),
     INVALID_PASSWORD("AUTH_0048", "Invalid password" ),
+    BOOKING_NOT_FOUND("AUTH_0049", "Booking not found" ),
     ;
 
     private final String code;

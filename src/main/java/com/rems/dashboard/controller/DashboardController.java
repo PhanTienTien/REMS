@@ -1,10 +1,9 @@
 package com.rems.dashboard.controller;
 
-import com.rems.common.transaction.TransactionManager;
+import com.rems.common.util.Factory;
 import com.rems.dashboard.dto.AdminDashboardDTO;
 import com.rems.dashboard.dto.StaffDashboardDTO;
 import com.rems.dashboard.service.DashboardService;
-import com.rems.dashboard.service.impl.DashboardServiceImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,13 +14,7 @@ import java.io.IOException;
 @WebServlet("/admin/dashboard")
 public class DashboardController extends HttpServlet {
 
-    private DashboardService dashboardService;
-
-    @Override
-    public void init() {
-        TransactionManager transactionManager = new TransactionManager();
-        dashboardService = new DashboardServiceImpl(transactionManager);
-    }
+    private final DashboardService dashboardService = Factory.getDashboardService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)

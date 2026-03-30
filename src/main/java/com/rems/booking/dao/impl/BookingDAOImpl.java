@@ -130,7 +130,10 @@ public class BookingDAOImpl implements BookingDAO {
         String sql = """
         UPDATE bookings
         SET status = ?,
-            accepted_by = ?,
+            accepted_by = CASE
+                WHEN ? = 'ACCEPTED' THEN ?
+                ELSE accepted_by
+            END,
             accepted_at = CASE
                 WHEN ? = 'ACCEPTED' THEN NOW()
                 ELSE accepted_at
@@ -142,13 +145,40 @@ public class BookingDAOImpl implements BookingDAO {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, status.name());
-            ps.setObject(2, staffId);
-            ps.setString(3, status.name());
-            ps.setLong(4, bookingId);
+            ps.setString(2, status.name());
+            ps.setObject(3, staffId);
+            ps.setString(4, status.name());
+            ps.setLong(5, bookingId);
 
             ps.executeUpdate();
 
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void rejectOtherBookings(Connection conn,
+                                    Long propertyId,
+                                    Long acceptedBookingId,
+                                    Long staffId) {
+
+        String sql = """
+        UPDATE bookings
+        SET status = 'REJECTED',
+            updated_at = NOW()
+        WHERE property_id = ?
+          AND id <> ?
+          AND status = 'PENDING'
+        """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, propertyId);
+            ps.setLong(2, acceptedBookingId);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }

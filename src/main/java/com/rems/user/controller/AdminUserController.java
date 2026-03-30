@@ -1,14 +1,11 @@
 package com.rems.user.controller;
 
-import com.rems.auth.dao.impl.AuthAccountDAOImpl;
 import com.rems.common.constant.AccountStatus;
 import com.rems.common.constant.Role;
-import com.rems.common.transaction.TransactionManager;
-import com.rems.user.dao.impl.UserDAOImpl;
+import com.rems.common.util.Factory;
 import com.rems.user.model.User;
 import com.rems.user.model.dto.CreateUserByAdminDTO;
 import com.rems.user.service.UserService;
-import com.rems.user.service.impl.UserServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -22,13 +19,7 @@ import java.util.Optional;
 @WebServlet("/admin/users")
 public class AdminUserController extends HttpServlet {
 
-    private UserService userService;
-
-    @Override
-    public void init() {
-        TransactionManager txManager = new TransactionManager();
-        userService = new UserServiceImpl(txManager, new UserDAOImpl(), new AuthAccountDAOImpl());
-    }
+    private final UserService userService = Factory.getUserService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)

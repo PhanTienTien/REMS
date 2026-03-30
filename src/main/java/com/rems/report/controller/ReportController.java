@@ -1,8 +1,8 @@
 package com.rems.report.controller;
 
+import com.rems.common.util.Factory;
 import com.rems.report.model.dto.ReportDTO;
 import com.rems.report.service.ReportService;
-import com.rems.report.service.impl.ReportServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,7 +16,7 @@ import java.util.List;
 @WebServlet("/admin/reports")
 public class ReportController extends HttpServlet {
 
-    private ReportService reportService = new ReportServiceImpl();
+    private final ReportService reportService = Factory.getReportService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)

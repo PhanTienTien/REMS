@@ -1,21 +1,13 @@
 package com.rems.auth.controller;
 
-import com.rems.auth.dao.AuthAccountDAO;
-import com.rems.auth.dao.UserOtpDAO;
-import com.rems.auth.dao.impl.AuthAccountDAOImpl;
-import com.rems.auth.dao.impl.UserOtpDAOImpl;
 import com.rems.auth.model.AuthAccount;
 import com.rems.auth.model.dto.RegisterDto;
 import com.rems.auth.service.AuthService;
-import com.rems.auth.service.impl.AuthServiceImpl;
 import com.rems.common.exception.BusinessException;
 import com.rems.common.exception.ErrorCode;
-import com.rems.common.transaction.TransactionManager;
-import com.rems.user.dao.UserDAO;
-import com.rems.user.dao.impl.UserDAOImpl;
+import com.rems.common.util.Factory;
 import com.rems.user.model.User;
 import com.rems.user.service.UserService;
-import com.rems.user.service.impl.UserServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -29,31 +21,8 @@ import java.io.PrintWriter;
 @WebServlet("/auth")
 public class AuthController extends HttpServlet {
 
-    private AuthService authService;
-    private UserService userService;
-
-    @Override
-    public void init() {
-        TransactionManager txManager = new TransactionManager();
-
-        AuthAccountDAO authAccountDAO = new AuthAccountDAOImpl();
-        UserDAO userDAO = new UserDAOImpl();
-        UserOtpDAO userOtpDAO = new UserOtpDAOImpl();
-
-
-        authService = new AuthServiceImpl(
-                authAccountDAO,
-                userDAO,
-                userOtpDAO,
-                txManager
-        );
-
-        userService = new UserServiceImpl(
-                txManager,
-                userDAO,
-                authAccountDAO
-                );
-    }
+    private final AuthService authService = Factory.getAuthService();
+    private final UserService userService = Factory.getUserService();
 
     @Override
     protected void doGet(HttpServletRequest request,

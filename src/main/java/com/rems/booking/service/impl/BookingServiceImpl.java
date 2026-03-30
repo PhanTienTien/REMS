@@ -9,58 +9,77 @@ import com.rems.booking.model.Booking;
 import com.rems.booking.service.BookingService;
 import com.rems.common.constant.BookingStatus;
 import com.rems.common.constant.PropertyStatus;
+import com.rems.common.exception.BusinessException;
+import com.rems.common.exception.ErrorCode;
 import com.rems.common.transaction.TransactionManager;
 import com.rems.common.util.PageResult;
+import com.rems.property.dao.PropertyDAO;
+import com.rems.property.dao.impl.PropertyDAOImpl;
 import com.rems.property.model.Property;
 import com.rems.property.service.PropertyService;
 import com.rems.transaction.service.TransactionService;
+import com.rems.transaction.service.impl.TransactionServiceImpl;
 
 import java.util.List;
 import java.util.Optional;
 
 public class BookingServiceImpl implements BookingService {
 
-    private final BookingDAO bookingDAO = new BookingDAOImpl();
-    private final TransactionManager tx = new TransactionManager();
-    private final PropertyService propertyService;
+    private final BookingDAO bookingDAO;
+    private final PropertyDAO propertyDAO;
     private final TransactionService transactionService;
+    private final TransactionManager tx;
 
-    public BookingServiceImpl(PropertyService propertyService, TransactionService transactionService) {
-        this.propertyService = propertyService;
+    public BookingServiceImpl() {
+        this(
+                new BookingDAOImpl(),
+                new PropertyDAOImpl(),
+                new TransactionServiceImpl(),
+                new TransactionManager()
+        );
+    }
+
+    public BookingServiceImpl(PropertyService propertyService,
+                              TransactionService transactionService) {
+        this(
+                new BookingDAOImpl(),
+                new PropertyDAOImpl(),
+                transactionService,
+                new TransactionManager()
+        );
+    }
+
+    public BookingServiceImpl(BookingDAO bookingDAO,
+                              PropertyDAO propertyDAO,
+                              TransactionService transactionService,
+                              TransactionManager tx) {
+        this.bookingDAO = bookingDAO;
+        this.propertyDAO = propertyDAO;
         this.transactionService = transactionService;
+        this.tx = tx;
     }
 
     @Override
-    public Long createBooking(Long propertyId,
-                              Long customerId,
-                              String note) {
+    public Long createBooking(Long propertyId, Long customerId, String note) {
 
         return tx.execute(conn -> {
 
-            Property property =
-                    propertyService.findById(propertyId)
-                            .orElseThrow(() ->
-                                    new RuntimeException("Property not found"));
+            Property property = propertyDAO.findByIdForUpdate(conn, propertyId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
 
             if (property.getStatus() != PropertyStatus.AVAILABLE) {
-                throw new RuntimeException("Property not available");
+                throw new BusinessException(ErrorCode.PROPERTY_NOT_AVAILABLE);
             }
 
-            boolean exists =
-                    bookingDAO.existsActiveBooking(conn,
-                            propertyId,
-                            customerId);
-
-            if (exists) {
-                throw new RuntimeException(
-                        "You already have a booking for this property");
+            if (bookingDAO.existsActiveBooking(conn, propertyId, customerId)) {
+                throw new BusinessException(ErrorCode.INVALID_STATE);
             }
 
             Booking booking = new Booking();
-
             booking.setPropertyId(propertyId);
             booking.setCustomerId(customerId);
-            booking.setNote(note == null ? "" : note.trim());
+            booking.setNote(note);
+            booking.setStatus(BookingStatus.PENDING);
 
             return bookingDAO.insert(conn, booking);
         });
@@ -71,46 +90,24 @@ public class BookingServiceImpl implements BookingService {
 
         tx.executeWithoutResult(conn -> {
 
-            Booking booking = bookingDAO
-                    .findByIdForUpdate(conn, bookingId)
-                    .orElseThrow(() -> new RuntimeException("Booking not found"));
+            Booking booking = bookingDAO.findByIdForUpdate(conn, bookingId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.BOOKING_NOT_FOUND));
 
             if (booking.getStatus() != BookingStatus.PENDING) {
-                throw new RuntimeException("Booking not pending");
+                throw new BusinessException(ErrorCode.INVALID_STATE);
             }
 
-            Long propertyId = booking.getPropertyId();
+            Property property = propertyDAO.findByIdForUpdate(conn, booking.getPropertyId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
 
-            if (bookingDAO.existsAcceptedByProperty(conn, propertyId)) {
-                throw new RuntimeException("Property already has accepted booking");
+            if (property.getStatus() != PropertyStatus.AVAILABLE) {
+                throw new BusinessException(ErrorCode.PROPERTY_NOT_AVAILABLE);
             }
 
-            bookingDAO.updateStatus(conn,
-                    bookingId,
-                    BookingStatus.ACCEPTED,
-                    staffId);
-
-            propertyService.reserveProperty(propertyId, conn);
-            transactionService.createTransaction(
-                    conn,
-                    bookingId,
-                    staffId,
-                    "SYSTEM"
-            );
-
-            List<Booking> pending =
-                    bookingDAO.findPendingByPropertyForUpdate(conn, propertyId);
-
-            for (Booking b : pending) {
-
-                if (!b.getId().equals(bookingId)) {
-
-                    bookingDAO.updateStatus(conn,
-                            b.getId(),
-                            BookingStatus.REJECTED,
-                            staffId);
-                }
-            }
+            propertyDAO.updateStatus(conn, property.getId(), PropertyStatus.RESERVED);
+            bookingDAO.updateStatus(conn, bookingId, BookingStatus.ACCEPTED, staffId);
+            transactionService.createTransaction(conn, bookingId, staffId, "SYSTEM");
+            bookingDAO.rejectOtherBookings(conn, property.getId(), bookingId, staffId);
         });
     }
 
@@ -119,144 +116,45 @@ public class BookingServiceImpl implements BookingService {
 
         tx.executeWithoutResult(conn -> {
 
-            Booking booking = bookingDAO
-                    .findByIdForUpdate(conn, bookingId)
-                    .orElseThrow(() -> new RuntimeException("Booking not found"));
+            Booking booking = bookingDAO.findByIdForUpdate(conn, bookingId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.BOOKING_NOT_FOUND));
 
             if (booking.getStatus() != BookingStatus.PENDING) {
-                throw new RuntimeException("Cannot reject");
+                throw new BusinessException(ErrorCode.INVALID_STATE);
             }
 
-            bookingDAO.updateStatus(conn,
-                    bookingId,
-                    BookingStatus.REJECTED,
-                    staffId);
+            bookingDAO.updateStatus(conn, bookingId, BookingStatus.REJECTED, staffId);
         });
     }
 
     @Override
-    public void cancelBooking(Long bookingId,
-                              Long customerId) {
+    public void cancelBooking(Long bookingId, Long customerId) {
 
-        tx.execute(conn -> {
+        tx.executeWithoutResult(conn -> {
 
-            var bookingOpt =
-                    bookingDAO.findByIdForUpdate(conn, bookingId);
-
-            if (bookingOpt.isEmpty()) {
-                throw new RuntimeException("Booking not found");
-            }
-
-            Booking booking = bookingOpt.get();
+            Booking booking = bookingDAO.findByIdForUpdate(conn, bookingId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.BOOKING_NOT_FOUND));
 
             if (!booking.getCustomerId().equals(customerId)) {
-                throw new RuntimeException("Not your booking");
+                throw new BusinessException(ErrorCode.FORBIDDEN);
             }
 
             if (booking.getStatus() != BookingStatus.PENDING) {
-                throw new RuntimeException("Booking cannot be cancelled");
+                throw new BusinessException(ErrorCode.INVALID_STATE);
             }
 
-            bookingDAO.updateStatus(
-                    conn,
-                    bookingId,
-                    BookingStatus.CANCELLED,
-                    null
-            );
-
-            var property =
-                    propertyService
-                            .findById(booking.getPropertyId())
-                            .orElseThrow();
-
-            if (property.getStatus() == PropertyStatus.RESERVED) {
-
-                propertyService.failTransaction(
-                        booking.getPropertyId(),
-                        conn
-                );
-            }
-
-            return null;
+            bookingDAO.updateStatus(conn, bookingId, BookingStatus.CANCELLED, null);
         });
-    }
-
-    @Override
-    public List<BookingAdminViewDTO> getAllBookingsForAdmin() {
-
-        return tx.execute(conn ->
-                bookingDAO.findAllForAdmin(conn)
-        );
-    }
-
-    @Override
-    public List<BookingAdminViewDTO> getBookingsByStatus(BookingStatus status) {
-
-        return tx.execute(conn ->
-                bookingDAO.findByStatusForAdmin(conn, status)
-        );
-    }
-
-    @Override
-    public List<BookingAdminViewDTO> getBookingsPage(int page,
-                                                     int pageSize) {
-
-        int offset = (page - 1) * pageSize;
-
-        return tx.execute(conn ->
-                bookingDAO.findPageForAdmin(conn,
-                        pageSize,
-                        offset)
-        );
-    }
-
-    @Override
-    public int countBookings() {
-
-        return tx.execute(conn ->
-                bookingDAO.countAll(conn)
-        );
-    }
-
-    @Override
-    public List<BookingAdminViewDTO> getBookingsPageByStatus(BookingStatus status,
-                                                             int page,
-                                                             int pageSize) {
-
-        int offset = (page - 1) * pageSize;
-
-        return tx.execute(conn ->
-                bookingDAO.findPageByStatusForAdmin(
-                        conn,
-                        status,
-                        pageSize,
-                        offset
-                )
-        );
-    }
-
-    @Override
-    public int countBookingsByStatus(BookingStatus status) {
-
-        return tx.execute(conn ->
-                bookingDAO.countByStatus(conn, status)
-        );
     }
 
     @Override
     public Optional<BookingAdminDetailDTO> getBookingDetail(Long bookingId) {
-
-        return tx.execute(conn ->
-                bookingDAO.findDetailForAdmin(conn, bookingId)
-        );
+        return tx.execute(conn -> bookingDAO.findDetailForAdmin(conn, bookingId));
     }
 
     @Override
     public List<CustomerBookingDTO> getBookingsByCustomer(Long customerId) {
-
-        return tx.execute(conn ->
-                bookingDAO.findByCustomer(conn, customerId)
-        );
+        return tx.execute(conn -> bookingDAO.findByCustomer(conn, customerId));
     }
 
     @Override
@@ -264,22 +162,10 @@ public class BookingServiceImpl implements BookingService {
 
         tx.execute(conn -> {
 
-            List<Booking> expired =
-                    bookingDAO.findExpiredPending(conn, 24);
+            List<Booking> expired = bookingDAO.findExpiredPending(conn, 24);
 
             for (Booking booking : expired) {
-
-                bookingDAO.updateStatus(
-                        conn,
-                        booking.getId(),
-                        BookingStatus.CANCELLED,
-                        null
-                );
-
-                propertyService.failTransaction(
-                        booking.getPropertyId(),
-                        conn
-                );
+                bookingDAO.updateStatus(conn, booking.getId(), BookingStatus.CANCELLED, null);
             }
 
             return null;
@@ -287,23 +173,16 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public PageResult<BookingAdminViewDTO> searchBookings(
-            String keyword,
-            BookingStatus status,
-            String sort,
-            int page,
-            int size) {
+    public PageResult<BookingAdminViewDTO> searchBookings(String keyword,
+                                                          BookingStatus status,
+                                                          String sort,
+                                                          int page,
+                                                          int size) {
 
         return tx.execute(conn -> {
-
             int offset = (page - 1) * size;
-
-            List<BookingAdminViewDTO> data =
-                    bookingDAO.search(conn, keyword, status, sort, size, offset);
-
-            int total =
-                    bookingDAO.countSearch(conn, keyword, status);
-
+            List<BookingAdminViewDTO> data = bookingDAO.search(conn, keyword, status, sort, size, offset);
+            int total = bookingDAO.countSearch(conn, keyword, status);
             return new PageResult<>(data, page, size, total);
         });
     }

@@ -1,6 +1,8 @@
 package com.rems.transaction.service.impl;
 
+import com.rems.activitylog.dao.impl.ActivityLogDAOImpl;
 import com.rems.activitylog.service.ActivityLogService;
+import com.rems.activitylog.service.impl.ActivityLogServiceImpl;
 import com.rems.booking.dao.BookingDAO;
 import com.rems.booking.dao.impl.BookingDAOImpl;
 import com.rems.booking.model.Booking;
@@ -28,12 +30,49 @@ import java.util.List;
 
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionManager txManager;
-    private final TransactionDAO transactionDAO = new TransactionDAOImpl();
+    private final TransactionDAO transactionDAO;
+    private final BookingDAO bookingDAO;
+    private final PropertyDAO propertyDAO;
+    private final UserDAO userDAO;
     private final ActivityLogService activityLogService;
+    private final TransactionManager txManager;
 
-    public TransactionServiceImpl(TransactionManager txManager, ActivityLogService activityLogService) {
+    public TransactionServiceImpl() {
+        this(
+                new TransactionManager(),
+                new TransactionDAOImpl(),
+                new BookingDAOImpl(),
+                new PropertyDAOImpl(),
+                new UserDAOImpl(),
+                new ActivityLogServiceImpl(new TransactionManager(), new ActivityLogDAOImpl())
+        );
+    }
+
+    public TransactionServiceImpl(TransactionManager txManager,
+                                  ActivityLogService activityLogService) {
+        this(
+                txManager != null ? txManager : new TransactionManager(),
+                new TransactionDAOImpl(),
+                new BookingDAOImpl(),
+                new PropertyDAOImpl(),
+                new UserDAOImpl(),
+                activityLogService != null
+                        ? activityLogService
+                        : new ActivityLogServiceImpl(new TransactionManager(), new ActivityLogDAOImpl())
+        );
+    }
+
+    public TransactionServiceImpl(TransactionManager txManager,
+                                  TransactionDAO transactionDAO,
+                                  BookingDAO bookingDAO,
+                                  PropertyDAO propertyDAO,
+                                  UserDAO userDAO,
+                                  ActivityLogService activityLogService) {
         this.txManager = txManager;
+        this.transactionDAO = transactionDAO;
+        this.bookingDAO = bookingDAO;
+        this.propertyDAO = propertyDAO;
+        this.userDAO = userDAO;
         this.activityLogService = activityLogService;
     }
 
@@ -43,14 +82,8 @@ public class TransactionServiceImpl implements TransactionService {
                                   Long performedBy,
                                   String ipAddress) {
 
-
-        BookingDAO bookingDAO = new BookingDAOImpl();
-        PropertyDAO propertyDAO = new PropertyDAOImpl();
-        UserDAO userDAO = new UserDAOImpl();
-
-        Booking booking = bookingDAO
-                .findByIdForUpdate(conn, bookingId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+        Booking booking = bookingDAO.findByIdForUpdate(conn, bookingId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.BOOKING_NOT_FOUND));
 
         if (booking.getStatus() != BookingStatus.ACCEPTED) {
             throw new BusinessException(ErrorCode.INVALID_STATE);
@@ -60,31 +93,25 @@ public class TransactionServiceImpl implements TransactionService {
             throw new BusinessException(ErrorCode.DUPLICATE_TRANSACTION);
         }
 
-        Property property = propertyDAO
-                .findByIdForUpdate(conn, booking.getPropertyId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+        Property property = propertyDAO.findByIdForUpdate(conn, booking.getPropertyId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
 
         if (property.getStatus() != PropertyStatus.RESERVED) {
             throw new BusinessException(ErrorCode.INVALID_STATE);
         }
 
-        User customer = userDAO
-                .findById(conn, booking.getCustomerId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+        User customer = userDAO.findById(conn, booking.getCustomerId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Transaction tx = new Transaction();
-
         tx.setBookingId(booking.getId());
         tx.setPropertyId(property.getId());
         tx.setCustomerId(customer.getId());
-
         tx.setAmount(property.getPrice());
         tx.setType(property.getType());
-
         tx.setPropertyTitleSnapshot(property.getTitle());
         tx.setPropertyPriceSnapshot(property.getPrice());
         tx.setCustomerNameSnapshot(customer.getFullName());
-
         tx.setStatus(TransactionStatus.PENDING);
 
         Long transactionId = transactionDAO.insert(conn, tx);
@@ -106,64 +133,54 @@ public class TransactionServiceImpl implements TransactionService {
     public Long completeTransaction(Long transactionId, Long staffId) {
 
         return txManager.execute(conn -> {
-            BookingDAO bookingDAO = new BookingDAOImpl();
-            PropertyDAO propertyDAO = new PropertyDAOImpl();
 
-            // 1️⃣ Lock transaction
-            Transaction tx = transactionDAO
-                    .findByIdForUpdate(conn, transactionId)
-                    .orElseThrow(() ->
-                            new BusinessException(ErrorCode.NOT_FOUND));
+            Transaction tx = transactionDAO.findByIdForUpdate(conn, transactionId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.TRANSACTION_NOT_FOUND));
 
             if (tx.getStatus() != TransactionStatus.PENDING) {
                 throw new BusinessException(ErrorCode.INVALID_STATE);
             }
 
-            // 2️⃣ Lock booking
-            Booking booking = bookingDAO
-                    .findByIdForUpdate(conn, tx.getBookingId())
-                    .orElseThrow(() ->
-                            new BusinessException(ErrorCode.NOT_FOUND));
+            Booking booking = bookingDAO.findByIdForUpdate(conn, tx.getBookingId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.BOOKING_NOT_FOUND));
 
             if (booking.getStatus() != BookingStatus.ACCEPTED) {
                 throw new BusinessException(ErrorCode.INVALID_STATE);
             }
 
-            // 3️⃣ Lock property
-            Property property = propertyDAO
-                    .findByIdForUpdate(conn, tx.getPropertyId())
-                    .orElseThrow(() ->
-                            new BusinessException(ErrorCode.NOT_FOUND));
+            Property property = propertyDAO.findByIdForUpdate(conn, tx.getPropertyId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
 
             if (property.getStatus() != PropertyStatus.RESERVED) {
                 throw new BusinessException(ErrorCode.INVALID_STATE);
             }
 
-            // 4️⃣ Update transaction
+            if (tx.getType() != property.getType()) {
+                throw new BusinessException(ErrorCode.TYPE_MISMATCH);
+            }
+
             tx.setStatus(TransactionStatus.COMPLETED);
             tx.setCompletedAt(LocalDateTime.now(ZoneOffset.UTC));
             tx.setProcessedBy(staffId);
 
-            transactionDAO.updateStatus(conn,
+            transactionDAO.updateStatus(conn, tx.getId(), TransactionStatus.COMPLETED, staffId);
+            bookingDAO.updateStatus(conn, booking.getId(), BookingStatus.COMPLETED, staffId);
+
+            PropertyStatus finalStatus = property.getType().isSale()
+                    ? PropertyStatus.SOLD
+                    : PropertyStatus.RENTED;
+
+            propertyDAO.updateStatus(conn, property.getId(), finalStatus);
+
+            activityLogService.log(
+                    conn,
+                    staffId,
+                    "COMPLETE_TRANSACTION",
+                    "TRANSACTION",
                     tx.getId(),
-                    TransactionStatus.COMPLETED,
-                    staffId);
-
-            // 5️⃣ Update booking
-            bookingDAO.updateStatus(conn,
-                    booking.getId(),
-                    BookingStatus.COMPLETED,
-                    staffId);
-
-            // 6️⃣ Update property
-            PropertyStatus finalStatus =
-                    property.getType().isSale()
-                            ? PropertyStatus.SOLD
-                            : PropertyStatus.RENTED;
-
-            propertyDAO.updateStatus(conn,
-                    property.getId(),
-                    finalStatus);
+                    "Completed transaction for property " + property.getId(),
+                    null
+            );
 
             return tx.getId();
         });
@@ -171,40 +188,27 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<Transaction> findAll() {
-
-        return txManager.execute(conn ->
-                transactionDAO.findAll(conn)
-        );
+        return txManager.execute(conn -> transactionDAO.findAll(conn));
     }
 
     @Override
     public List<Transaction> findByStatus(String status) {
-
         return txManager.execute(conn ->
-                transactionDAO.findByStatus(
-                        conn,
-                        TransactionStatus.valueOf(status)
-                )
+                transactionDAO.findByStatus(conn, TransactionStatus.valueOf(status))
         );
     }
 
     @Override
     public Transaction findById(Long id) {
-
         return txManager.execute(conn ->
                 transactionDAO.findById(conn, id)
-                        .orElseThrow(() ->
-                                new BusinessException(ErrorCode.NOT_FOUND))
+                        .orElseThrow(() -> new BusinessException(ErrorCode.TRANSACTION_NOT_FOUND))
         );
     }
 
     @Override
     public List<Transaction> getByCustomer(Long customerId) {
-
-        return txManager.execute(conn ->
-                transactionDAO.findByCustomer(conn, customerId)
-        );
-
+        return txManager.execute(conn -> transactionDAO.findByCustomer(conn, customerId));
     }
 
     @Override
@@ -216,7 +220,6 @@ public class TransactionServiceImpl implements TransactionService {
                                                 int size) {
 
         return txManager.execute(conn -> {
-
             TransactionStatus st = null;
 
             if (status != null && !status.isBlank()) {
@@ -225,15 +228,7 @@ public class TransactionServiceImpl implements TransactionService {
 
             int offset = (page - 1) * size;
 
-            return transactionDAO.search(
-                    conn,
-                    keyword,
-                    st,
-                    sortBy,
-                    sortDir,
-                    offset,
-                    size
-            );
+            return transactionDAO.search(conn, keyword, st, sortBy, sortDir, offset, size);
         });
     }
 
@@ -242,7 +237,6 @@ public class TransactionServiceImpl implements TransactionService {
                                  String status) {
 
         return txManager.execute(conn -> {
-
             TransactionStatus st = null;
 
             if (status != null && !status.isBlank()) {

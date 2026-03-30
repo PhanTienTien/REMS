@@ -1,7 +1,7 @@
 package com.rems.favorite.controller;
 
 import com.rems.favorite.service.FavoriteService;
-import com.rems.favorite.service.impl.FavoriteServiceImpl;
+import com.rems.common.util.Factory;
 import com.rems.user.model.User;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,8 +13,7 @@ import java.io.IOException;
 @WebServlet("/customer/favorites/add")
 public class CustomerAddFavoriteController extends HttpServlet {
 
-    private final FavoriteService favoriteService =
-            new FavoriteServiceImpl();
+    private final FavoriteService favoriteService = Factory.getFavoriteService();
 
     @Override
     protected void doPost(HttpServletRequest req,

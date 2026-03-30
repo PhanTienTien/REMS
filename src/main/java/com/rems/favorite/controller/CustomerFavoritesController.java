@@ -1,7 +1,7 @@
 package com.rems.favorite.controller;
 
+import com.rems.common.util.Factory;
 import com.rems.favorite.service.FavoriteService;
-import com.rems.favorite.service.impl.FavoriteServiceImpl;
 import com.rems.property.dto.PropertyCardDTO;
 import com.rems.user.model.User;
 import jakarta.servlet.ServletException;
@@ -16,8 +16,7 @@ import java.util.List;
 @WebServlet("/customer/profile/favorites")
 public class CustomerFavoritesController extends HttpServlet {
 
-    private final FavoriteService favoriteService =
-            new FavoriteServiceImpl();
+    private final FavoriteService favoriteService = Factory.getFavoriteService();
 
     @Override
     protected void doGet(HttpServletRequest req,

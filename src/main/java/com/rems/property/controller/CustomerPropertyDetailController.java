@@ -1,16 +1,11 @@
 package com.rems.property.controller;
 
-import com.rems.activitylog.dao.ActivityLogDAO;
-import com.rems.activitylog.dao.impl.ActivityLogDAOImpl;
 import com.rems.activitylog.service.ActivityLogService;
-import com.rems.activitylog.service.impl.ActivityLogServiceImpl;
-import com.rems.common.transaction.TransactionManager;
+import com.rems.common.util.Factory;
 import com.rems.property.model.Property;
 import com.rems.property.model.PropertyImage;
 import com.rems.property.service.PropertyImageService;
 import com.rems.property.service.PropertyService;
-import com.rems.property.service.impl.PropertyImageServiceImpl;
-import com.rems.property.service.impl.PropertyServiceImpl;
 import com.rems.user.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,19 +21,9 @@ import java.util.Map;
 @WebServlet("/customer/properties/detail")
 public class CustomerPropertyDetailController extends HttpServlet {
 
-    private PropertyService propertyService;
-    private PropertyImageService imageService;
-    private ActivityLogService activityLogService;
-
-    @Override
-    public void init() {
-        TransactionManager txmanager = new TransactionManager();
-        ActivityLogDAO activityLogDAO = new ActivityLogDAOImpl();
-
-        propertyService = new PropertyServiceImpl();
-        imageService = new PropertyImageServiceImpl();
-        activityLogService = new ActivityLogServiceImpl(activityLogDAO, txmanager);
-    }
+    private final PropertyService propertyService = Factory.getPropertyService();
+    private final PropertyImageService imageService = Factory.getPropertyImageService();
+    private final ActivityLogService activityLogService = Factory.getActivityLogService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -79,7 +64,7 @@ public class CustomerPropertyDetailController extends HttpServlet {
             thumbnails.put(p.getId(), thumb);
         }
 
-        User user = (User) req.getSession().getAttribute("user");
+        User user = (User) req.getSession().getAttribute("currentUser");
 
         if (user != null) {
             activityLogService.logView(user.getId(), propertyId);

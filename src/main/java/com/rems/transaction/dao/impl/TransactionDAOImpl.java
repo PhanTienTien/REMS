@@ -361,8 +361,12 @@ public class TransactionDAOImpl implements TransactionDAO {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, status.name());
-            ps.setObject(2, LocalDateTime.now());
-            ps.setLong(3, staffId);
+            if (status == TransactionStatus.COMPLETED) {
+                ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            } else {
+                ps.setNull(2, Types.TIMESTAMP);
+            }
+            ps.setObject(3, staffId);
             ps.setLong(4, id);
 
             ps.executeUpdate();

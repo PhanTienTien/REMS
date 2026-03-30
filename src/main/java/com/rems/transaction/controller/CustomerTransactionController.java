@@ -1,10 +1,8 @@
 package com.rems.transaction.controller;
 
-import com.rems.activitylog.service.ActivityLogService;
-import com.rems.common.transaction.TransactionManager;
+import com.rems.common.util.Factory;
 import com.rems.transaction.model.Transaction;
 import com.rems.transaction.service.TransactionService;
-import com.rems.transaction.service.impl.TransactionServiceImpl;
 import com.rems.user.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,11 +16,7 @@ import java.util.List;
 @WebServlet("/customer/profile/transactions")
 public class CustomerTransactionController extends HttpServlet {
 
-    private TransactionManager txManager = new TransactionManager();
-    private ActivityLogService activityLogService;
-
-    private final TransactionService transactionService =
-            new TransactionServiceImpl(txManager, activityLogService);
+    private final TransactionService transactionService = Factory.getTransactionService();
 
     @Override
     protected void doGet(HttpServletRequest req,

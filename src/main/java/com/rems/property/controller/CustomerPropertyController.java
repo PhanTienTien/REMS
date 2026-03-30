@@ -3,10 +3,9 @@ package com.rems.property.controller;
 import com.rems.property.dto.PropertyCardDTO;
 import com.rems.property.dto.PropertySearchDTO;
 import com.rems.property.model.PropertyImage;
+import com.rems.common.util.Factory;
 import com.rems.property.service.PropertyImageService;
 import com.rems.property.service.PropertyService;
-import com.rems.property.service.impl.PropertyImageServiceImpl;
-import com.rems.property.service.impl.PropertyServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -21,14 +20,8 @@ import java.util.Map;
 @WebServlet("/customer/properties")
 public class CustomerPropertyController extends HttpServlet {
 
-    private PropertyService propertyService;
-    private PropertyImageService propertyImageService;
-
-    @Override
-    public void init() {
-        propertyService = new PropertyServiceImpl();
-        propertyImageService = new PropertyImageServiceImpl();
-    }
+    private final PropertyService propertyService = Factory.getPropertyService();
+    private final PropertyImageService propertyImageService = Factory.getPropertyImageService();
 
     @Override
     protected void doGet(HttpServletRequest req,

@@ -70,6 +70,9 @@ public interface BookingDAO {
             String keyword,
             BookingStatus status);
 
-
+    void rejectOtherBookings(Connection conn,
+                             Long propertyId,
+                             Long acceptedBookingId,
+                             Long staffId);
 
 }

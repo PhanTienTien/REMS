@@ -11,8 +11,17 @@ import java.util.List;
 
 public class PropertyImageServiceImpl implements PropertyImageService {
 
-    private final PropertyImageDAO propertyImageDAO = new PropertyImageDAOImpl();
-    private final TransactionManager txManager = new TransactionManager();
+    private final PropertyImageDAO propertyImageDAO;
+    private final TransactionManager txManager;
+
+    public PropertyImageServiceImpl() {
+        this(new PropertyImageDAOImpl(), new TransactionManager());
+    }
+
+    public PropertyImageServiceImpl(PropertyImageDAO propertyImageDAO, TransactionManager txManager) {
+        this.propertyImageDAO = propertyImageDAO;
+        this.txManager = txManager;
+    }
 
     @Override
     public List<PropertyImage> getByPropertyId(Long propertyId) {

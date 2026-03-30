@@ -1,15 +1,11 @@
 package com.rems.booking.controller;
 
-import com.rems.activitylog.service.ActivityLogService;
-import com.rems.activitylog.service.impl.ActivityLogServiceImpl;
 import com.rems.booking.service.BookingService;
-import com.rems.booking.service.impl.BookingServiceImpl;
 import com.rems.common.constant.BookingStatus;
-import com.rems.common.transaction.TransactionManager;
-import com.rems.property.service.PropertyService;
-import com.rems.property.service.impl.PropertyServiceImpl;
-import com.rems.transaction.service.TransactionService;
-import com.rems.transaction.service.impl.TransactionServiceImpl;
+import com.rems.common.constant.Role;
+import com.rems.common.exception.BusinessException;
+import com.rems.common.util.Factory;
+import com.rems.user.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -17,27 +13,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @WebServlet("/admin/bookings")
 public class AdminBookingController extends HttpServlet {
 
-    private BookingService bookingService;
-
-    @Override
-    public void init() {
-        TransactionManager txManager = new TransactionManager();
-
-        ActivityLogService activityLogService =
-                new ActivityLogServiceImpl(null, txManager);
-
-        PropertyService propertyService = new PropertyServiceImpl();
-
-        TransactionService transactionService =
-                new TransactionServiceImpl(txManager, activityLogService);
-
-        bookingService =
-                new BookingServiceImpl(propertyService, transactionService);
-    }
+    private final BookingService bookingService = Factory.getBookingService();
 
     @Override
     protected void doGet(HttpServletRequest req,
@@ -115,19 +97,44 @@ public class AdminBookingController extends HttpServlet {
                           HttpServletResponse resp)
             throws IOException {
 
+        User user = (User) req.getSession().getAttribute("currentUser");
+
+        if (!isAdmin(user)) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+
         String action = req.getParameter("action");
         Long id = Long.valueOf(req.getParameter("id"));
-        Long staffId = 1L;
 
         try {
 
             switch (action) {
-                case "accept" -> bookingService.acceptBooking(id, staffId);
-                case "reject" -> bookingService.rejectBooking(id, staffId);
+                case "accept" -> {
+                    bookingService.acceptBooking(id, user.getId());
+                    req.getSession().setAttribute("success", "Booking accepted");
+                }
+                case "reject" -> {
+                    bookingService.rejectBooking(id, user.getId());
+                    req.getSession().setAttribute("success", "Booking rejected");
+                }
             }
 
+        } catch (BusinessException e) {
+
+            req.getSession().setAttribute(
+                    "error",
+                    e.getErrorCode().getMessage()
+            );
+
         } catch (Exception e) {
-            req.getSession().setAttribute("error", e.getMessage());
+
+            e.printStackTrace(); // hoặc log
+
+            req.getSession().setAttribute(
+                    "error",
+                    "Internal server error"
+            );
         }
 
         resp.sendRedirect(req.getContextPath() + "/admin/bookings");
@@ -150,7 +157,9 @@ public class AdminBookingController extends HttpServlet {
                 new StringBuilder(req.getContextPath() + "/admin/bookings?");
 
         if (keyword != null && !keyword.isBlank()) {
-            url.append("keyword=").append(keyword).append("&");
+            url.append("keyword=")
+                    .append(URLEncoder.encode(keyword, StandardCharsets.UTF_8))
+                    .append("&");
         }
 
         if (status != null && !status.isBlank()) {
@@ -162,5 +171,11 @@ public class AdminBookingController extends HttpServlet {
         }
 
         return url.toString();
+    }
+
+    private boolean isAdmin(User user) {
+        return user != null &&
+                (user.getRole() == Role.ADMIN ||
+                        user.getRole() == Role.STAFF);
     }
 }

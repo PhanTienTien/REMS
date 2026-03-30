@@ -1,10 +1,9 @@
 package com.rems.transaction.controller;
 
 import com.rems.common.constant.Role;
-import com.rems.common.transaction.TransactionManager;
+import com.rems.common.util.Factory;
 import com.rems.transaction.model.Transaction;
 import com.rems.transaction.service.TransactionService;
-import com.rems.transaction.service.impl.TransactionServiceImpl;
 import com.rems.user.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,13 +17,7 @@ import java.util.List;
 @WebServlet("/admin/transactions")
 public class AdminTransactionController extends HttpServlet {
 
-    private TransactionService transactionService;
-
-    @Override
-    public void init() {
-        TransactionManager txManager = new TransactionManager();
-        transactionService = new TransactionServiceImpl(txManager, null);
-    }
+    private final TransactionService transactionService = Factory.getTransactionService();
 
     @Override
     protected void doGet(HttpServletRequest req,

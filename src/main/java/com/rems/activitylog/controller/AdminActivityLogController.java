@@ -1,11 +1,8 @@
 package com.rems.activitylog.controller;
 
-import com.rems.activitylog.dao.ActivityLogDAO;
-import com.rems.activitylog.dao.impl.ActivityLogDAOImpl;
 import com.rems.activitylog.model.ActivityLog;
 import com.rems.activitylog.service.ActivityLogService;
-import com.rems.activitylog.service.impl.ActivityLogServiceImpl;
-import com.rems.common.transaction.TransactionManager;
+import com.rems.common.util.Factory;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -18,17 +15,7 @@ import java.util.List;
 @WebServlet("/admin/activity-logs")
 public class AdminActivityLogController extends HttpServlet {
 
-    private ActivityLogService service;
-
-    @Override
-    public void init() {
-
-        ActivityLogDAO dao = new ActivityLogDAOImpl();
-        TransactionManager txManager = new TransactionManager();
-
-        service = new ActivityLogServiceImpl(dao, txManager);
-
-    }
+    private final ActivityLogService service = Factory.getActivityLogService();
 
     @Override
     protected void doGet(HttpServletRequest req,

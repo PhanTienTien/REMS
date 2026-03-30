@@ -1,13 +1,7 @@
 package com.rems.booking.controller;
 
-import com.rems.activitylog.service.ActivityLogService;
 import com.rems.booking.service.BookingService;
-import com.rems.booking.service.impl.BookingServiceImpl;
-import com.rems.common.transaction.TransactionManager;
-import com.rems.property.service.PropertyService;
-import com.rems.property.service.impl.PropertyServiceImpl;
-import com.rems.transaction.service.TransactionService;
-import com.rems.transaction.service.impl.TransactionServiceImpl;
+import com.rems.common.util.Factory;
 import com.rems.user.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -20,14 +14,7 @@ import java.io.IOException;
 @WebServlet("/customer/bookings/create")
 public class CustomerCreateBookingController extends HttpServlet {
 
-    private TransactionManager txManager;
-    private ActivityLogService activityLogService;
-
-    PropertyService propertyService = new PropertyServiceImpl();
-    TransactionService transactionService = new TransactionServiceImpl(txManager, activityLogService);
-
-    private final BookingService bookingService =
-            new BookingServiceImpl(propertyService, transactionService);
+    private final BookingService bookingService = Factory.getBookingService();
 
     @Override
     protected void doPost(HttpServletRequest request,

@@ -1,12 +1,12 @@
 package com.rems.property.controller;
 
 import com.rems.common.constant.PropertyType;
+import com.rems.common.util.Factory;
 import com.rems.property.dto.CreatePropertyDTO;
 import com.rems.property.dto.UpdatePropertyDTO;
 import com.rems.common.util.PageResult;
 import com.rems.property.model.Property;
 import com.rems.property.service.PropertyService;
-import com.rems.property.service.impl.PropertyServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -30,7 +30,7 @@ import java.util.List;
 )
 public class AdminPropertyController extends HttpServlet {
 
-    private final PropertyService propertyService = new PropertyServiceImpl();
+    private final PropertyService propertyService = Factory.getPropertyService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)

@@ -24,6 +24,7 @@ public interface PropertyDAO {
 
     void updateApproval(Connection conn,
                         Long id,
+                        Long approvedBy,
                         LocalDateTime approvedAt);
 
     Long insert(Connection conn, Property property);

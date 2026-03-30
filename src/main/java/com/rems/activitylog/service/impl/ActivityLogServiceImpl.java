@@ -1,7 +1,6 @@
 package com.rems.activitylog.service.impl;
 
 import com.rems.activitylog.dao.ActivityLogDAO;
-import com.rems.activitylog.dao.impl.ActivityLogDAOImpl;
 import com.rems.activitylog.model.ActivityLog;
 import com.rems.activitylog.service.ActivityLogService;
 import com.rems.common.transaction.TransactionManager;
@@ -11,12 +10,18 @@ import java.util.List;
 
 public class ActivityLogServiceImpl implements ActivityLogService {
 
-    private final ActivityLogDAO activityLogDAO;
     private final TransactionManager txManager;
+    private final ActivityLogDAO logDAO;
 
-    public ActivityLogServiceImpl(ActivityLogDAO activityLogDAO, TransactionManager txManager) {
-        this.activityLogDAO = new ActivityLogDAOImpl();
+    public ActivityLogServiceImpl(TransactionManager txManager,
+                                  ActivityLogDAO logDAO) {
         this.txManager = txManager;
+        this.logDAO = logDAO;
+    }
+
+    public ActivityLogServiceImpl(ActivityLogDAO logDAO,
+                                  TransactionManager txManager) {
+        this(txManager, logDAO);
     }
 
     public void log(Connection conn,
@@ -36,7 +41,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         log.setDescription(description);
         log.setIpAddress(ipAddress);
 
-        activityLogDAO.insert(conn, log);
+        logDAO.insert(conn, log);
     }
 
     @Override
@@ -49,7 +54,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         int limit = 20;
         int offset = (page - 1) * limit;
 
-        return activityLogDAO.findAll(limit, offset, user, action, fromDate, toDate);
+        return logDAO.findAll(limit, offset, user, action, fromDate, toDate);
     }
 
     @Override
@@ -57,7 +62,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
 
         txManager.execute(conn -> {
 
-            activityLogDAO.insertView(conn, userId, propertyId);
+            logDAO.insertView(conn, userId, propertyId);
 
             return null;
         });

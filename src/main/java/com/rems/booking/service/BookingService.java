@@ -21,21 +21,6 @@ public interface BookingService {
 
     void cancelBooking(Long bookingId, Long customerId);
 
-    List<BookingAdminViewDTO> getAllBookingsForAdmin();
-
-    List<BookingAdminViewDTO> getBookingsByStatus(BookingStatus status);
-
-    List<BookingAdminViewDTO> getBookingsPage(int page,
-                                              int pageSize);
-
-    int countBookings();
-
-    List<BookingAdminViewDTO> getBookingsPageByStatus(BookingStatus status,
-                                                      int page,
-                                                      int pageSize);
-
-    int countBookingsByStatus(BookingStatus status);
-
     Optional<BookingAdminDetailDTO> getBookingDetail(Long bookingId);
 
     List<CustomerBookingDTO> getBookingsByCustomer(Long customerId);

@@ -34,6 +34,7 @@ public class PropertyDAOImpl implements PropertyDAO {
                         ? rs.getTimestamp("approved_at").toLocalDateTime()
                         : null
         );
+        p.setApprovedBy(rs.getObject("approved_by", Long.class));
 
         p.setCreatedBy(rs.getLong("created_by"));
         p.setUpdatedBy(rs.getObject("updated_by") != null
@@ -162,12 +163,24 @@ public class PropertyDAOImpl implements PropertyDAO {
     @Override
     public void updateStatus(Connection conn, Long id, PropertyStatus status) {
 
-        String sql = "UPDATE properties SET status=? WHERE id=?";
+        String sql = """
+        UPDATE properties
+        SET status = ?,
+            updated_at = NOW(),
+            reserved_at = CASE
+                WHEN ? = 'RESERVED' THEN NOW()
+                WHEN ? IN ('AVAILABLE', 'SOLD', 'RENTED', 'INACTIVE') THEN NULL
+                ELSE reserved_at
+            END
+        WHERE id = ?
+        """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, status.name());
-            ps.setLong(2, id);
+            ps.setString(2, status.name());
+            ps.setString(3, status.name());
+            ps.setLong(4, id);
 
             ps.executeUpdate();
 
@@ -179,18 +192,22 @@ public class PropertyDAOImpl implements PropertyDAO {
     @Override
     public void updateApproval(Connection conn,
                                Long id,
+                               Long approvedBy,
                                LocalDateTime approvedAt) {
 
         String sql = """
         UPDATE properties
-        SET approved_at = ?
+        SET approved_at = ?,
+            approved_by = ?,
+            updated_at = NOW()
         WHERE id = ?
     """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setTimestamp(1, Timestamp.valueOf(approvedAt));
-            ps.setLong(2, id);
+            ps.setLong(2, approvedBy);
+            ps.setLong(3, id);
 
             ps.executeUpdate();
 
