@@ -13,6 +13,8 @@ import com.rems.common.constant.TransactionStatus;
 import com.rems.common.exception.BusinessException;
 import com.rems.common.exception.ErrorCode;
 import com.rems.common.transaction.TransactionManager;
+import com.rems.notification.email.service.EmailService;
+import com.rems.notification.email.service.impl.EmailServiceImpl;
 import com.rems.property.dao.PropertyDAO;
 import com.rems.property.dao.impl.PropertyDAOImpl;
 import com.rems.property.model.Property;
@@ -24,10 +26,12 @@ import com.rems.user.dao.UserDAO;
 import com.rems.user.dao.impl.UserDAOImpl;
 import com.rems.user.model.User;
 
+import java.text.NumberFormat;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Locale;
 
 public class TransactionServiceImpl implements TransactionService {
 
@@ -37,6 +41,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final UserDAO userDAO;
     private final ActivityLogService activityLogService;
     private final TransactionManager txManager;
+    private final EmailService emailService;
 
     public TransactionServiceImpl() {
         this(
@@ -45,7 +50,8 @@ public class TransactionServiceImpl implements TransactionService {
                 new BookingDAOImpl(),
                 new PropertyDAOImpl(),
                 new UserDAOImpl(),
-                new ActivityLogServiceImpl(new TransactionManager(), new ActivityLogDAOImpl())
+                new ActivityLogServiceImpl(new TransactionManager(), new ActivityLogDAOImpl()),
+                new EmailServiceImpl()
         );
     }
 
@@ -59,7 +65,8 @@ public class TransactionServiceImpl implements TransactionService {
                 new UserDAOImpl(),
                 activityLogService != null
                         ? activityLogService
-                        : new ActivityLogServiceImpl(new TransactionManager(), new ActivityLogDAOImpl())
+                        : new ActivityLogServiceImpl(new TransactionManager(), new ActivityLogDAOImpl()),
+                new EmailServiceImpl()
         );
     }
 
@@ -68,13 +75,15 @@ public class TransactionServiceImpl implements TransactionService {
                                   BookingDAO bookingDAO,
                                   PropertyDAO propertyDAO,
                                   UserDAO userDAO,
-                                  ActivityLogService activityLogService) {
+                                  ActivityLogService activityLogService,
+                                  EmailService emailService) {
         this.txManager = txManager;
         this.transactionDAO = transactionDAO;
         this.bookingDAO = bookingDAO;
         this.propertyDAO = propertyDAO;
         this.userDAO = userDAO;
         this.activityLogService = activityLogService;
+        this.emailService = emailService != null ? emailService : new EmailServiceImpl();
     }
 
     @Override
@@ -117,6 +126,14 @@ public class TransactionServiceImpl implements TransactionService {
 
         Long transactionId = transactionDAO.insert(conn, tx);
 
+        emailService.sendTransactionCreatedEmail(
+                customer.getEmail(),
+                customer.getFullName(),
+                property.getTitle(),
+                resolveTransactionTypeLabel(property),
+                formatAmount(property.getPrice().doubleValue())
+        );
+
         activityLogService.log(
                 conn,
                 performedBy,
@@ -132,7 +149,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Long completeTransaction(Long transactionId, Long staffId) {
 
-        return txManager.execute(conn -> {
+        CompletionEmailPayload payload = txManager.execute(conn -> {
             Transaction tx = transactionDAO.findByIdForUpdate(conn, transactionId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.TRANSACTION_NOT_FOUND));
 
@@ -180,14 +197,30 @@ public class TransactionServiceImpl implements TransactionService {
                     property.getId()
             );
 
-            return tx.getId();
+            User customer = userDAO.findById(conn, booking.getCustomerId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+            return new CompletionEmailPayload(
+                    tx.getId(),
+                    customer.getEmail(),
+                    customer.getFullName(),
+                    property.getTitle()
+            );
         });
+
+        emailService.sendTransactionCompletedEmail(
+                payload.to(),
+                payload.customerName(),
+                payload.propertyTitle()
+        );
+
+        return payload.transactionId();
     }
 
     @Override
     public Long completeTransactionByStaff(Long transactionId, Long staffId) {
 
-        return txManager.execute(conn -> {
+        CompletionEmailPayload payload = txManager.execute(conn -> {
             Transaction tx = transactionDAO.findByIdForUpdate(conn, transactionId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.TRANSACTION_NOT_FOUND));
 
@@ -239,8 +272,24 @@ public class TransactionServiceImpl implements TransactionService {
                     property.getId()
             );
 
-            return tx.getId();
+            User customer = userDAO.findById(conn, booking.getCustomerId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+            return new CompletionEmailPayload(
+                    tx.getId(),
+                    customer.getEmail(),
+                    customer.getFullName(),
+                    property.getTitle()
+            );
         });
+
+        emailService.sendTransactionCompletedEmail(
+                payload.to(),
+                payload.customerName(),
+                payload.propertyTitle()
+        );
+
+        return payload.transactionId();
     }
 
     @Override
@@ -346,5 +395,20 @@ public class TransactionServiceImpl implements TransactionService {
 
             return transactionDAO.countByStaff(conn, staffId, keyword, st);
         });
+    }
+
+    private String resolveTransactionTypeLabel(Property property) {
+        return property.getType().isSale() ? "Mua" : "Dat coc";
+    }
+
+    private String formatAmount(double amount) {
+        NumberFormat numberFormat = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
+        return numberFormat.format(amount) + " VND";
+    }
+
+    private record CompletionEmailPayload(Long transactionId,
+                                          String to,
+                                          String customerName,
+                                          String propertyTitle) {
     }
 }

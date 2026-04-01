@@ -13,6 +13,7 @@ import com.rems.common.exception.ErrorCode;
 import com.rems.common.transaction.TransactionManager;
 import com.rems.common.util.OtpUtil;
 import com.rems.common.util.PasswordUtil;
+import com.rems.notification.email.service.EmailService;
 import com.rems.user.dao.UserDAO;
 import com.rems.user.model.User;
 
@@ -26,6 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserDAO userDAO;
     private final UserOtpDAO userOtpDAO;
     private final TransactionManager txManager;
+    private final EmailService emailService;
 
     private static final int MAX_LOGIN_ATTEMPT = 5;
     private static final int MAX_OTP_ATTEMPT = 5;
@@ -34,14 +36,16 @@ public class AuthServiceImpl implements AuthService {
 
     public AuthServiceImpl(
             AuthAccountDAO authAccountDAO,
+
             UserDAO userDAO,
             UserOtpDAO userOtpDAO,
-            TransactionManager txManager) {
+            TransactionManager txManager, EmailService emailService) {
 
         this.authAccountDAO = authAccountDAO;
         this.userDAO = userDAO;
         this.userOtpDAO = userOtpDAO;
         this.txManager = txManager;
+        this.emailService = emailService;
     }
 
     // ================= REGISTER =================
@@ -49,14 +53,17 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void register(RegisterDto dto) {
 
+        final String email = dto.getEmail();
+        final String otpCode = OtpUtil.generateOtp();
+
         txManager.execute(conn -> {
 
-            if (authAccountDAO.findByEmail(conn, dto.getEmail()) != null) {
+            if (authAccountDAO.findByEmail(conn, email) != null) {
                 throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
             }
 
             AuthAccount account = AuthAccount.local(
-                    dto.getEmail(),
+                    email,
                     PasswordUtil.hash(dto.getPassword())
             );
 
@@ -65,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
             User user = new User();
             user.setAuthId(authId);
             user.setFullName(dto.getFullName());
-            user.setEmail(dto.getEmail());
+            user.setEmail(email);
             user.setPhoneNumber(dto.getPhoneNumber());
             user.setRole(Role.CUSTOMER);
             user.setVerified(false);
@@ -75,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
 
             UserOtp otp = new UserOtp(
                     authId,
-                    OtpUtil.generateOtp(),
+                    otpCode,
                     LocalDateTime.now().plusMinutes(OTP_EXPIRE_MINUTES)
             );
 
@@ -83,6 +90,8 @@ public class AuthServiceImpl implements AuthService {
 
             return null;
         });
+
+        emailService.sendOtpEmail(email, otpCode);
     }
 
     // ================= LOGIN =================
@@ -155,8 +164,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void resendOtp(String email) {
-
-        txManager.execute(conn -> {
+        String otpCode = txManager.execute(conn -> {
 
             AuthAccount account =
                     authAccountDAO.findByEmail(conn, email);
@@ -176,17 +184,19 @@ public class AuthServiceImpl implements AuthService {
                 validateResendOtp(latest);
             }
 
-            String otpCode = OtpUtil.generateOtp();
+            String generatedOtp = OtpUtil.generateOtp();
             LocalDateTime expiredAt =
                     LocalDateTime.now().plusMinutes(OTP_EXPIRE_MINUTES);
 
             userOtpDAO.save(
                     conn,
-                    new UserOtp(account.getId(), otpCode, expiredAt)
+                    new UserOtp(account.getId(), generatedOtp, expiredAt)
             );
 
-            return null;
+            return generatedOtp;
         });
+
+        emailService.sendOtpEmail(email, otpCode);
     }
 
     @Override

@@ -19,6 +19,8 @@ import com.rems.dashboard.service.DashboardService;
 import com.rems.dashboard.service.impl.DashboardServiceImpl;
 import com.rems.favorite.service.FavoriteService;
 import com.rems.favorite.service.impl.FavoriteServiceImpl;
+import com.rems.notification.email.service.EmailService;
+import com.rems.notification.email.service.impl.EmailServiceImpl;
 import com.rems.property.dao.PropertyDAO;
 import com.rems.property.dao.PropertyImageDAO;
 import com.rems.property.dao.impl.PropertyDAOImpl;
@@ -44,6 +46,7 @@ public final class Factory {
     }
 
     private static final TransactionManager txManager = new TransactionManager();
+    private static final EmailService emailSerice = new EmailServiceImpl();
 
     // DAO (singleton)
     private static final BookingDAO bookingDAO = new BookingDAOImpl();
@@ -70,7 +73,8 @@ public final class Factory {
                     bookingDAO,
                     propertyDAO,
                     userDAO,
-                    activityLogService
+                    activityLogService,
+                    emailSerice
             );
 
     private static final PropertyService propertyService =
@@ -95,7 +99,8 @@ public final class Factory {
                     authAccountDAO,
                     userDAO,
                     userOtpDAO,
-                    txManager
+                    txManager,
+                    emailSerice
             );
 
     private static final UserService userService =
