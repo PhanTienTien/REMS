@@ -137,7 +137,7 @@
 <script>
     function requireLogin() {
         alert("Vui lòng đăng nhập để đặt lịch xem bất động sản này.");
-        window.location.href = "${pageContext.request.contextPath}/login";
+        window.location.href = "${pageContext.request.contextPath}/auth";
     }
 </script>
 

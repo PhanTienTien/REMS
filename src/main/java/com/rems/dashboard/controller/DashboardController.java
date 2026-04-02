@@ -4,10 +4,12 @@ import com.rems.common.util.Factory;
 import com.rems.dashboard.dto.AdminDashboardDTO;
 import com.rems.dashboard.dto.StaffDashboardDTO;
 import com.rems.dashboard.service.DashboardService;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
@@ -23,7 +25,7 @@ public class DashboardController extends HttpServlet {
         HttpSession session = req.getSession(false);
 
         if (session == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return;
         }
 

@@ -32,7 +32,7 @@ public class AdminTransactionController extends HttpServlet {
                 !(user.getRole() == Role.ADMIN ||
                         user.getRole() == Role.STAFF)) {
 
-            resp.sendRedirect(req.getContextPath() + "/login");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return;
         }
 
@@ -125,7 +125,7 @@ public class AdminTransactionController extends HttpServlet {
         User user = (User) req.getSession().getAttribute("currentUser");
 
         if (user == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return;
         }
 

@@ -4,11 +4,11 @@ import com.rems.common.constant.PropertyType;
 import com.rems.common.constant.Role;
 import com.rems.common.util.Factory;
 import com.rems.common.util.FileUploadUtil;
+import com.rems.common.util.PageResult;
 import com.rems.property.dto.CreatePropertyDTO;
 import com.rems.property.dto.UpdatePropertyDTO;
-import com.rems.common.util.PageResult;
-import com.rems.property.model.PropertyImage;
 import com.rems.property.model.Property;
+import com.rems.property.model.PropertyImage;
 import com.rems.property.service.PropertyImageService;
 import com.rems.property.service.PropertyService;
 import com.rems.user.model.User;
@@ -147,7 +147,7 @@ public class AdminPropertyController extends HttpServlet {
 
             List<String> images = saveImages(req);
 
-            Long staffId = getStaffId(req);
+            Long staffId = getStaffId(req, resp);
 
             propertyService.createProperty(dto, staffId, images);
 
@@ -202,7 +202,7 @@ public class AdminPropertyController extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        propertyService.approveProperty(parseLong(req, "id"), getStaffId(req));
+        propertyService.approveProperty(parseLong(req, "id"), getStaffId(req, resp));
         redirectWithQuery(req, resp);
     }
 
@@ -211,7 +211,7 @@ public class AdminPropertyController extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        propertyService.deactivateProperty(parseLong(req, "id"), getStaffId(req));
+        propertyService.deactivateProperty(parseLong(req, "id"), getStaffId(req, resp));
         redirectWithQuery(req, resp);
     }
 
@@ -220,7 +220,7 @@ public class AdminPropertyController extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        propertyService.restoreProperty(parseLong(req, "id"), getStaffId(req));
+        propertyService.restoreProperty(parseLong(req, "id"), getStaffId(req, resp));
         redirectWithQuery(req, resp);
     }
 
@@ -229,7 +229,7 @@ public class AdminPropertyController extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        propertyService.deleteProperty(parseLong(req, "id"), getStaffId(req));
+        propertyService.deleteProperty(parseLong(req, "id"), getStaffId(req, resp));
         redirectWithQuery(req, resp);
     }
 
@@ -290,9 +290,17 @@ public class AdminPropertyController extends HttpServlet {
         return (s == null || s.isBlank()) ? null : s.trim();
     }
 
-    private Long getStaffId(HttpServletRequest req) {
-        Object user = req.getSession().getAttribute("userId");
-        return user != null ? (Long) user : 1L;
+    private Long getStaffId(HttpServletRequest req,
+                            HttpServletResponse resp) throws IOException {
+
+        Object userId = req.getSession().getAttribute("userId");
+
+        if (userId == null) {
+            resp.sendRedirect(req.getContextPath() + "/auth");
+            return null;
+        }
+
+        return (Long) userId;
     }
 
     private User getCurrentUser(HttpServletRequest req) {

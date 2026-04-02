@@ -113,7 +113,7 @@ public class AdminBookingController extends HttpServlet {
         User user = (User) req.getSession().getAttribute("currentUser");
 
         if (!isAdmin(user)) {
-            resp.sendRedirect(req.getContextPath() + "/login");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return;
         }
 

@@ -386,7 +386,7 @@ public class UserDAOImpl implements UserDAO {
                 ps.setString(2, createUserByAdminDTO.getFullName());
                 ps.setString(3, createUserByAdminDTO.getEmail());
                 ps.setString(4, createUserByAdminDTO.getPhoneNumber());
-                ps.setString(3, createUserByAdminDTO.getRole().name());
+                ps.setString(5, createUserByAdminDTO.getRole().name());
 
                 ps.executeUpdate();
             }

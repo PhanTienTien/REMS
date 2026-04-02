@@ -28,7 +28,7 @@ public class CustomerTransactionController extends HttpServlet {
         if (user == null) {
 
             resp.sendRedirect(
-                    req.getContextPath() + "/login"
+                    req.getContextPath() + "/auth"
             );
 
             return;
