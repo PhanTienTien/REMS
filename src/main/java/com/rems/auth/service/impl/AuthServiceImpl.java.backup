@@ -80,11 +80,9 @@ public class AuthServiceImpl implements AuthService {
 
             userDAO.save(conn, user);
 
-            String hashedOtp = PasswordUtil.hash(otpCode);
-
             UserOtp otp = new UserOtp(
                     authId,
-                    hashedOtp,
+                    otpCode,
                     LocalDateTime.now().plusMinutes(OTP_EXPIRE_MINUTES)
             );
 
@@ -145,7 +143,7 @@ public class AuthServiceImpl implements AuthService {
 
             validateOtp(otp);
 
-            if (!PasswordUtil.matches(otpInput, otp.getOtpCode())) {
+            if (!otp.getOtpCode().equals(otpInput)) {
 
                 userOtpDAO.increaseAttempt(conn, otp.getId());
                 throw new BusinessException(ErrorCode.INVALID_OTP);
@@ -187,13 +185,12 @@ public class AuthServiceImpl implements AuthService {
             }
 
             String generatedOtp = OtpUtil.generateOtp();
-            String hashedOtp = PasswordUtil.hash(generatedOtp);
             LocalDateTime expiredAt =
                     LocalDateTime.now().plusMinutes(OTP_EXPIRE_MINUTES);
 
             userOtpDAO.save(
                     conn,
-                    new UserOtp(account.getId(), hashedOtp, expiredAt)
+                    new UserOtp(account.getId(), generatedOtp, expiredAt)
             );
 
             return generatedOtp;

@@ -84,6 +84,7 @@
         <form action="${pageContext.request.contextPath}/auth" method="post">
             <input type="hidden" name="action" value="resetPassword"/>
 
+            <input type="email" name="email" placeholder="Email" required>
             <input type="text" name="otp" placeholder="Nhập mã xác thực OTP" required>
             <input type="password" name="newPassword" placeholder="Mật khẩu mới" required>
             <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu mới" required>

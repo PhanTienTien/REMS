@@ -160,4 +160,8 @@ public final class Factory {
     public static ReportService getReportService() {
         return reportService;
     }
+
+    public static TransactionManager getTxManager() {
+        return txManager;
+    }
 }

@@ -38,6 +38,14 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Override
     public void removeFavorite(Long customerId, Long propertyId) {
 
+        txManager.executeWithoutResult(conn -> {
+
+            boolean exists = favoriteDAO.exists(conn, customerId, propertyId);
+
+            if (exists) {
+                favoriteDAO.delete(conn, customerId, propertyId);
+            }
+        });
     }
 
     @Override
@@ -50,6 +58,9 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     public boolean isFavorite(Long customerId, Long propertyId) {
-        return false;
+
+        return txManager.execute(conn ->
+                favoriteDAO.exists(conn, customerId, propertyId)
+        );
     }
 }

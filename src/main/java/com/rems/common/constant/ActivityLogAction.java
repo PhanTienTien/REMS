@@ -14,6 +14,7 @@ public enum ActivityLogAction {
     CANCEL_BOOKING("CANCEL_BOOKING", "BOOKING", "Hủy lịch hẹn #%s"),
 
     CREATE_TRANSACTION("CREATE_TRANSACTION", "TRANSACTION", "Tạo giao dịch cho lịch hẹn #%s"),
+    CONFIRM_TRANSACTION("CONFIRM_TRANSACTION", "TRANSACTION", "Xác nhận giao dịch #%s"),
     COMPLETE_TRANSACTION("COMPLETE_TRANSACTION", "TRANSACTION", "Hoàn tất giao dịch cho bất động sản #%s");
 
     private final String action;
