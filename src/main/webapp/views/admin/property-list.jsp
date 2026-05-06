@@ -150,7 +150,7 @@
                                     Sửa
                                 </button>
 
-                                <c:if test="${sessionScope.currentUser.role == 'ADMIN'}">
+                                <c:if test="${sessionScope.currentUser.role == 'ADMIN' and p.status == 'DRAFT'}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/admin/properties/approve">
                                         <input type="hidden" name="id" value="${p.id}">

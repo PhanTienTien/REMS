@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @WebServlet("/customer/bookings/create")
 public class CustomerCreateBookingController extends HttpServlet {
@@ -27,6 +28,11 @@ public class CustomerCreateBookingController extends HttpServlet {
                     Long.parseLong(request.getParameter("propertyId"));
 
             String note = request.getParameter("note");
+            String scheduledAtStr = request.getParameter("scheduledAt");
+            LocalDateTime scheduledAt = null;
+            if (scheduledAtStr != null && !scheduledAtStr.isBlank()) {
+                scheduledAt = LocalDateTime.parse(scheduledAtStr);
+            }
 
             User user =
                     (User) request.getSession()

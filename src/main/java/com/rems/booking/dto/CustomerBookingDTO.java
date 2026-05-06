@@ -11,6 +11,7 @@ public class CustomerBookingDTO {
     private String status;
 
     private String note;
+    private LocalDateTime scheduledAt;
 
     private LocalDateTime createdAt;
 
@@ -37,6 +38,12 @@ public class CustomerBookingDTO {
     }
     public void setNote(String note) {
         this.note = note;
+    }
+    public LocalDateTime getScheduledAt() {
+        return scheduledAt;
+    }
+    public void setScheduledAt(LocalDateTime scheduledAt) {
+        this.scheduledAt = scheduledAt;
     }
     public LocalDateTime getCreatedAt() {
         return createdAt;

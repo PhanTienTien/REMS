@@ -25,6 +25,7 @@ import com.rems.transaction.service.TransactionService;
 import com.rems.transaction.service.impl.TransactionServiceImpl;
 
 import java.sql.Connection;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,7 +71,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Long createBooking(Long propertyId, Long customerId, String note) {
+    public Long createBooking(Long propertyId, Long customerId, String note, LocalDateTime scheduledAt) {
 
         return tx.execute(conn -> {
             Property property = propertyDAO.findByIdForUpdate(conn, propertyId)
@@ -88,6 +89,7 @@ public class BookingServiceImpl implements BookingService {
             booking.setPropertyId(propertyId);
             booking.setCustomerId(customerId);
             booking.setNote(note);
+            booking.setScheduledAt(scheduledAt);
             booking.setStatus(BookingStatus.PENDING);
 
             Long bookingId = bookingDAO.insert(conn, booking);
@@ -224,6 +226,16 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<CustomerBookingDTO> getBookingsByCustomer(Long customerId) {
         return tx.execute(conn -> bookingDAO.findByCustomer(conn, customerId));
+    }
+
+    @Override
+    public PageResult<CustomerBookingDTO> getBookingsByCustomerPage(Long customerId, int page, int size) {
+        return tx.execute(conn -> {
+            int offset = (page - 1) * size;
+            List<CustomerBookingDTO> bookings = bookingDAO.findByCustomerPage(conn, customerId, size, offset);
+            int total = bookingDAO.countByCustomer(conn, customerId);
+            return new PageResult<>(bookings, page, size, total);
+        });
     }
 
     @Override

@@ -1,19 +1,199 @@
+/* Improved Bookings UI Styles */
+
+.booking-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.booking-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.booking-table th {
+    padding: 16px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+}
+
+.booking-table tbody tr {
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.2s ease;
+}
+
+.booking-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.booking-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.booking-table td {
+    padding: 16px 12px;
+    vertical-align: middle;
+    border: none;
+}
+
+.table-primary {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.table-secondary {
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+/* Status Pills */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid transparent;
+}
+
+.status-pill.PENDING {
+    background-color: #fef3c7;
+    color: #92400e;
+    border-color: #fbbf24;
+}
+
+.status-pill.ACCEPTED {
+    background-color: #d1fae5;
+    color: #065f46;
+    border-color: #34d399;
+}
+
+.status-pill.REJECTED {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-color: #f87171;
+}
+
+.status-pill.COMPLETED {
+    background-color: #dbeafe;
+    color: #1e40af;
+    border-color: #60a5fa;
+}
+
+.status-pill.CANCELLED {
+    background-color: #f3f4f6;
+    color: #6b7280;
+    border-color: #d1d5db;
+}
+
 .btn-cancel {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 38px;
-    padding: 0 14px;
+    min-height: 36px;
+    padding: 8px 16px;
     border: none;
-    border-radius: 999px;
-    background: #b91c1c;
-    color: #fff;
-    font-weight: 700;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
     cursor: pointer;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 }
 
 .btn-cancel:hover {
     transform: translateY(-1px);
-    background: #991b1b;
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.btn-cancel:active {
+    transform: translateY(0);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: #6b7280;
+    font-size: 1rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 2px dashed #e5e7eb;
+}
+
+.list-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 20px 24px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.list-toolbar h2 {
+    margin: 0 0 4px 0;
+    color: #1f2937;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.section-subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.list-meta {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.table-wrap {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .booking-table {
+        font-size: 0.875rem;
+    }
+    
+    .booking-table th,
+    .booking-table td {
+        padding: 12px 8px;
+    }
+    
+    .list-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .list-meta {
+        align-self: stretch;
+        text-align: center;
+    }
 }

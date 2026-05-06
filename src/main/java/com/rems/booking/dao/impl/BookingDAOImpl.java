@@ -8,6 +8,7 @@ import com.rems.booking.model.Booking;
 import com.rems.common.constant.BookingStatus;
 
 import java.sql.*;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,11 @@ public class BookingDAOImpl implements BookingDAO {
         b.setStatus(BookingStatus.valueOf(rs.getString("status")));
 
         b.setNote(rs.getString("note"));
+
+        Timestamp scheduledAt = rs.getTimestamp("scheduled_at");
+        if (scheduledAt != null) {
+            b.setScheduledAt(scheduledAt.toLocalDateTime());
+        }
 
         b.setAcceptedBy(rs.getObject("accepted_by", Long.class));
 
@@ -187,8 +193,8 @@ public class BookingDAOImpl implements BookingDAO {
     public Long insert(Connection conn, Booking booking) {
 
         String sql = """
-            INSERT INTO bookings(property_id, customer_id, note)
-            VALUES (?, ?, ?)
+            INSERT INTO bookings(property_id, customer_id, note, scheduled_at)
+            VALUES (?, ?, ?, ?)
         """;
 
         try (PreparedStatement ps =
@@ -197,6 +203,11 @@ public class BookingDAOImpl implements BookingDAO {
             ps.setLong(1, booking.getPropertyId());
             ps.setLong(2, booking.getCustomerId());
             ps.setString(3, booking.getNote());
+            if (booking.getScheduledAt() != null) {
+                ps.setTimestamp(4, Timestamp.valueOf(booking.getScheduledAt()));
+            } else {
+                ps.setNull(4, Types.TIMESTAMP);
+            }
 
             ps.executeUpdate();
 
@@ -508,6 +519,7 @@ public class BookingDAOImpl implements BookingDAO {
             b.note,
             b.created_at,
             b.accepted_at,
+            b.scheduled_at,
 
             p.title AS property_title,
             p.address AS property_address,
@@ -550,6 +562,12 @@ public class BookingDAOImpl implements BookingDAO {
 
                 dto.setStaffName(rs.getString("staff_name"));
 
+                if (rs.getTimestamp("scheduled_at") != null) {
+                    dto.setScheduledAt(
+                            rs.getTimestamp("scheduled_at").toLocalDateTime()
+                    );
+                }
+
                 dto.setCreatedAt(
                         rs.getTimestamp("created_at").toLocalDateTime()
                 );
@@ -583,6 +601,7 @@ public class BookingDAOImpl implements BookingDAO {
             b.note,
             b.created_at,
             b.accepted_at,
+            b.scheduled_at,
             p.title AS property_title,
             p.address AS property_address,
             u.full_name AS customer_name,
@@ -613,6 +632,11 @@ public class BookingDAOImpl implements BookingDAO {
                 dto.setCustomerName(rs.getString("customer_name"));
                 dto.setCustomerEmail(rs.getString("customer_email"));
                 dto.setStaffName(rs.getString("staff_name"));
+
+                if (rs.getTimestamp("scheduled_at") != null) {
+                    dto.setScheduledAt(rs.getTimestamp("scheduled_at").toLocalDateTime());
+                }
+
                 dto.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
 
                 if (rs.getTimestamp("accepted_at") != null) {
@@ -639,6 +663,7 @@ public class BookingDAOImpl implements BookingDAO {
             b.status,
             b.note,
             b.created_at,
+            b.scheduled_at,
             p.title AS property_title
         FROM bookings b
         JOIN properties p ON p.id = b.property_id
@@ -663,6 +688,13 @@ public class BookingDAOImpl implements BookingDAO {
                 dto.setStatus(rs.getString("status"));
                 dto.setNote(rs.getString("note"));
 
+                if (rs.getTimestamp("scheduled_at") != null) {
+                    dto.setScheduledAt(
+                            rs.getTimestamp("scheduled_at")
+                                    .toLocalDateTime()
+                    );
+                }
+
                 dto.setCreatedAt(
                         rs.getTimestamp("created_at")
                                 .toLocalDateTime()
@@ -676,6 +708,94 @@ public class BookingDAOImpl implements BookingDAO {
         }
 
         return list;
+    }
+
+    @Override
+    public List<CustomerBookingDTO> findByCustomerPage(Connection conn,
+                                                       Long customerId,
+                                                       int limit,
+                                                       int offset) {
+
+        String sql = """
+        SELECT
+            b.id,
+            b.status,
+            b.note,
+            b.created_at,
+            b.scheduled_at,
+            p.title AS property_title
+        FROM bookings b
+        JOIN properties p ON p.id = b.property_id
+        WHERE b.customer_id = ?
+        ORDER BY b.created_at DESC
+        LIMIT ? OFFSET ?
+    """;
+
+        List<CustomerBookingDTO> list = new ArrayList<>();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, customerId);
+            ps.setInt(2, limit);
+            ps.setInt(3, offset);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                CustomerBookingDTO dto = new CustomerBookingDTO();
+
+                dto.setBookingId(rs.getLong("id"));
+                dto.setPropertyTitle(rs.getString("property_title"));
+                dto.setStatus(rs.getString("status"));
+                dto.setNote(rs.getString("note"));
+
+                if (rs.getTimestamp("scheduled_at") != null) {
+                    dto.setScheduledAt(
+                            rs.getTimestamp("scheduled_at")
+                                    .toLocalDateTime()
+                    );
+                }
+
+                dto.setCreatedAt(
+                        rs.getTimestamp("created_at")
+                                .toLocalDateTime()
+                );
+
+                list.add(dto);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return list;
+    }
+
+    @Override
+    public int countByCustomer(Connection conn, Long customerId) {
+
+        String sql = """
+        SELECT COUNT(*)
+        FROM bookings
+        WHERE customer_id = ?
+    """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, customerId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return 0;
     }
 
     @Override
@@ -720,7 +840,7 @@ public class BookingDAOImpl implements BookingDAO {
             int offset) {
 
         StringBuilder sql = new StringBuilder("""
-        SELECT b.id, p.title, u.full_name, b.status, b.created_at
+        SELECT b.id, p.title, u.full_name, b.status, b.created_at, b.scheduled_at
         FROM bookings b
         JOIN properties p ON p.id = b.property_id
         JOIN users u ON u.id = b.customer_id
@@ -769,6 +889,11 @@ public class BookingDAOImpl implements BookingDAO {
                 dto.setPropertyTitle(rs.getString("title"));
                 dto.setCustomerName(rs.getString("full_name"));
                 dto.setStatus(BookingStatus.valueOf(rs.getString("status")));
+
+                if (rs.getTimestamp("scheduled_at") != null) {
+                    dto.setScheduledAt(rs.getTimestamp("scheduled_at").toLocalDateTime());
+                }
+
                 dto.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
 
                 list.add(dto);
@@ -834,7 +959,7 @@ public class BookingDAOImpl implements BookingDAO {
                                                    int offset) {
 
         StringBuilder sql = new StringBuilder("""
-        SELECT b.id, p.title, u.full_name, b.status, b.created_at
+        SELECT b.id, p.title, u.full_name, b.status, b.created_at, b.scheduled_at
         FROM bookings b
         JOIN properties p ON p.id = b.property_id
         JOIN users u ON u.id = b.customer_id
@@ -880,6 +1005,11 @@ public class BookingDAOImpl implements BookingDAO {
                 dto.setPropertyTitle(rs.getString("title"));
                 dto.setCustomerName(rs.getString("full_name"));
                 dto.setStatus(BookingStatus.valueOf(rs.getString("status")));
+
+                if (rs.getTimestamp("scheduled_at") != null) {
+                    dto.setScheduledAt(rs.getTimestamp("scheduled_at").toLocalDateTime());
+                }
+
                 dto.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 list.add(dto);
             }

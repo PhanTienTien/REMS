@@ -18,6 +18,7 @@ public class BookingAdminDetailDTO {
 
     private String staffName;
 
+    private LocalDateTime scheduledAt;
     private LocalDateTime createdAt;
     private LocalDateTime acceptedAt;
 
@@ -68,6 +69,12 @@ public class BookingAdminDetailDTO {
     }
     public void setStaffName(String staffName) {
         this.staffName = staffName;
+    }
+    public LocalDateTime getScheduledAt() {
+        return scheduledAt;
+    }
+    public void setScheduledAt(LocalDateTime scheduledAt) {
+        this.scheduledAt = scheduledAt;
     }
     public LocalDateTime getCreatedAt() {
         return createdAt;

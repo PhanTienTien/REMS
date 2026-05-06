@@ -1,10 +1,10 @@
 package com.rems.common.filter;
 
+import com.rems.common.util.SecurityUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
@@ -21,35 +21,50 @@ public class AuthFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
 
         String uri = req.getRequestURI();
+        String contextPath = req.getContextPath();
 
-        boolean isPublic =
-                uri.equals(req.getContextPath() + "/")
-                        || uri.contains("/home")
-                        || uri.contains("/customer/about")
-                        || uri.contains("/services")
-                        || uri.contains("/customer/contact")
-                        || uri.contains("/customer/properties")
-                        || uri.contains("/customer/properties/detail")
-                        || uri.contains("/customer/profile")
-                        || uri.contains("/customer/profile/transactions")
-                        || uri.contains("/customer/profile/favorites")
-                        || uri.contains("/customer/profile/bookings")
-                        || uri.contains("/auth")
-                        || uri.contains("/logout")
-                        || uri.contains("/uploads")
-                        || uri.contains("/assets")
-                        || uri.contains("/css")
-                        || uri.contains("/js");
-
-        HttpSession session = req.getSession(false);
-
-        boolean loggedIn = session != null
-                && session.getAttribute("currentUser") != null;
-
-        if (isPublic || loggedIn) {
+        if (isPublicResource(uri, contextPath)) {
             chain.doFilter(request, response);
-        } else {
-            res.sendRedirect(req.getContextPath() + "/auth");
+            return;
         }
+
+        if (!SecurityUtil.isLoggedIn(req)) {
+            res.sendRedirect(contextPath + "/auth");
+            return;
+        }
+
+        if (isAdminUri(uri, contextPath)) {
+            if (!SecurityUtil.isAdminOrStaff(req)) {
+                res.sendError(HttpServletResponse.SC_FORBIDDEN, "Admin or Staff access required");
+                return;
+            }
+        }
+
+        chain.doFilter(request, response);
+    }
+
+    private boolean isPublicResource(String uri, String contextPath) {
+        String path = uri.substring(contextPath.length());
+
+        return uri.equals(contextPath + "/")
+                || path.startsWith("/home")
+                || path.startsWith("/customer/about")
+                || path.startsWith("/services")
+                || path.startsWith("/customer/contact")
+                || path.startsWith("/customer/properties")
+                || path.startsWith("/property-detail")
+                || path.startsWith("/auth")
+                || path.startsWith("/logout")
+                || path.startsWith("/uploads")
+                || path.startsWith("/assets")
+                || path.startsWith("/css")
+                || path.startsWith("/js")
+                || path.startsWith("/images")
+                || path.startsWith("/favicon.ico");
+    }
+
+    private boolean isAdminUri(String uri, String contextPath) {
+        String path = uri.substring(contextPath.length());
+        return path.startsWith("/admin/");
     }
 }

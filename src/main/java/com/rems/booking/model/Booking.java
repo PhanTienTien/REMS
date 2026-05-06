@@ -14,6 +14,7 @@ public class Booking {
     private BookingStatus status;
 
     private String note;
+    private LocalDateTime scheduledAt;
 
     private Long acceptedBy;
     private LocalDateTime acceptedAt;
@@ -35,6 +36,9 @@ public class Booking {
 
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
+
+    public LocalDateTime getScheduledAt() { return scheduledAt; }
+    public void setScheduledAt(LocalDateTime scheduledAt) { this.scheduledAt = scheduledAt; }
 
     public Long getAcceptedBy() { return acceptedBy; }
     public void setAcceptedBy(Long acceptedBy) { this.acceptedBy = acceptedBy; }

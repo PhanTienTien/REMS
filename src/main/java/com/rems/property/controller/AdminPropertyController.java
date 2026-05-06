@@ -5,6 +5,7 @@ import com.rems.common.constant.Role;
 import com.rems.common.util.Factory;
 import com.rems.common.util.FileUploadUtil;
 import com.rems.common.util.PageResult;
+import com.rems.common.util.SecurityUtil;
 import com.rems.property.dto.CreatePropertyDTO;
 import com.rems.property.dto.UpdatePropertyDTO;
 import com.rems.property.model.Property;
@@ -23,7 +24,6 @@ import jakarta.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +43,11 @@ public class AdminPropertyController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
+        // Require admin or staff access
+        if (!SecurityUtil.requireAdminOrStaff(req, resp)) {
+            return;
+        }
 
         String path = getPath(req);
 
@@ -64,6 +69,11 @@ public class AdminPropertyController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
+        // Require admin or staff access
+        if (!SecurityUtil.requireAdminOrStaff(req, resp)) {
+            return;
+        }
 
         String path = getPath(req);
 
@@ -103,8 +113,15 @@ public class AdminPropertyController extends HttpServlet {
         Integer maxPrice = parseInt(req.getParameter("maxPrice"));
         String sort = trim(req.getParameter("sort"));
 
-        User currentUser = getCurrentUser(req);
-        PageResult<Property> result = isStaff(currentUser)
+        User currentUser = SecurityUtil.getCurrentUser(req);
+        
+        // Validate user role - must be admin or staff
+        if (currentUser == null || !SecurityUtil.isAdminOrStaff(req)) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+        
+        PageResult<Property> result = SecurityUtil.isStaff(req)
                 ? propertyService.searchStaffPage(currentUser.getId(), keyword, type, minPrice, maxPrice, sort, page, size)
                 : propertyService.searchAdminPage(keyword, type, minPrice, maxPrice, sort, page, size);
 
@@ -120,7 +137,7 @@ public class AdminPropertyController extends HttpServlet {
         req.setAttribute("result", result);
         req.setAttribute("thumbnails", thumbnails);
 
-        int total = isStaff(currentUser)
+        int total = SecurityUtil.isStaff(req)
                 ? propertyService.countStaff(currentUser.getId(), keyword, type, minPrice, maxPrice)
                 : propertyService.countAdmin(keyword, type, minPrice, maxPrice);
 
@@ -293,14 +310,13 @@ public class AdminPropertyController extends HttpServlet {
     private Long getStaffId(HttpServletRequest req,
                             HttpServletResponse resp) throws IOException {
 
-        Object userId = req.getSession().getAttribute("userId");
-
-        if (userId == null) {
+        User currentUser = SecurityUtil.getCurrentUser(req);
+        if (currentUser == null) {
             resp.sendRedirect(req.getContextPath() + "/auth");
             return null;
         }
 
-        return (Long) userId;
+        return currentUser.getId();
     }
 
     private User getCurrentUser(HttpServletRequest req) {
@@ -312,13 +328,17 @@ public class AdminPropertyController extends HttpServlet {
     }
 
     private boolean hasPropertyAccess(HttpServletRequest req, Long propertyId) {
-        User currentUser = getCurrentUser(req);
-        if (!isStaff(currentUser)) {
+        User currentUser = SecurityUtil.getCurrentUser(req);
+        if (SecurityUtil.isAdmin(req)) {
             return true;
         }
 
-        Property property = propertyService.getPropertyById(propertyId);
-        return currentUser.getId() == property.getCreatedBy();
+        if (SecurityUtil.isStaff(req)) {
+            Property property = propertyService.getPropertyById(propertyId);
+            return currentUser.getId() == property.getCreatedBy();
+        }
+        
+        return false;
     }
 
     private CreatePropertyDTO buildCreateDTO(HttpServletRequest req) {
@@ -352,8 +372,16 @@ public class AdminPropertyController extends HttpServlet {
         for (Part part : req.getParts()) {
             if ("images".equals(part.getName()) && part.getSize() > 0) {
 
-                String fileName = System.currentTimeMillis() + "_" +
-                        Paths.get(part.getSubmittedFileName()).getFileName();
+                if (!FileUploadUtil.isValidImageFile(part)) {
+                    throw new IllegalArgumentException("Invalid file type or size. Only JPG, PNG, GIF, WEBP images under 5MB are allowed.");
+                }
+
+                String safeFileName = FileUploadUtil.getSafeFileName(part.getSubmittedFileName());
+                if (safeFileName == null) {
+                    throw new IllegalArgumentException("Invalid file name.");
+                }
+
+                String fileName = System.currentTimeMillis() + "_" + safeFileName;
 
                 part.write(new File(dir, fileName).getAbsolutePath());
 

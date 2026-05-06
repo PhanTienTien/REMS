@@ -4,7 +4,9 @@ import com.rems.booking.service.BookingService;
 import com.rems.common.constant.BookingStatus;
 import com.rems.common.constant.Role;
 import com.rems.common.exception.BusinessException;
+import com.rems.common.exception.ErrorCode;
 import com.rems.common.util.Factory;
+import com.rems.common.util.SecurityUtil;
 import com.rems.user.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -25,6 +27,11 @@ public class AdminBookingController extends HttpServlet {
     protected void doGet(HttpServletRequest req,
                          HttpServletResponse resp)
             throws ServletException, IOException {
+
+        // Require admin or staff access
+        if (!SecurityUtil.requireAdminOrStaff(req, resp)) {
+            return;
+        }
 
         String action = req.getParameter("action");
 
@@ -54,9 +61,9 @@ public class AdminBookingController extends HttpServlet {
             status = BookingStatus.valueOf(statusParam);
         }
 
-        User user = (User) req.getSession().getAttribute("currentUser");
+        User user = SecurityUtil.getCurrentUser(req);
 
-        var result = user != null && user.getRole() == Role.STAFF
+        var result = SecurityUtil.isStaff(req)
                 ? bookingService.searchBookingsByStaff(
                         user.getId(),
                         keyword,
@@ -92,12 +99,12 @@ public class AdminBookingController extends HttpServlet {
             throws ServletException, IOException {
 
         Long id = Long.valueOf(req.getParameter("id"));
-        User user = (User) req.getSession().getAttribute("currentUser");
+        User user = SecurityUtil.getCurrentUser(req);
 
-        var booking = (user != null && user.getRole() == Role.STAFF
+        var booking = (SecurityUtil.isStaff(req)
                 ? bookingService.getBookingDetailForStaff(id, user.getId())
                 : bookingService.getBookingDetail(id))
-                .orElseThrow(() -> new RuntimeException("Not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.BOOKING_NOT_FOUND));
 
         req.setAttribute("booking", booking);
 
@@ -110,9 +117,9 @@ public class AdminBookingController extends HttpServlet {
                           HttpServletResponse resp)
             throws IOException {
 
-        User user = (User) req.getSession().getAttribute("currentUser");
+        User user = SecurityUtil.getCurrentUser(req);
 
-        if (!isAdmin(user)) {
+        if (!SecurityUtil.isAdminOrStaff(req)) {
             resp.sendRedirect(req.getContextPath() + "/auth");
             return;
         }
@@ -124,7 +131,8 @@ public class AdminBookingController extends HttpServlet {
 
             switch (action) {
                 case "accept" -> {
-                    if (user.getRole() == Role.STAFF) {
+                    // Staff can only accept bookings for their own properties
+                    if (SecurityUtil.isStaff(req)) {
                         bookingService.acceptBookingByStaff(id, user.getId());
                     } else {
                         bookingService.acceptBooking(id, user.getId());
@@ -132,7 +140,8 @@ public class AdminBookingController extends HttpServlet {
                     req.getSession().setAttribute("success", "Booking accepted");
                 }
                 case "reject" -> {
-                    if (user.getRole() == Role.STAFF) {
+                    // Staff can only reject bookings for their own properties
+                    if (SecurityUtil.isStaff(req)) {
                         bookingService.rejectBookingByStaff(id, user.getId());
                     } else {
                         bookingService.rejectBooking(id, user.getId());
@@ -149,8 +158,6 @@ public class AdminBookingController extends HttpServlet {
             );
 
         } catch (Exception e) {
-
-            e.printStackTrace(); // hoặc log
 
             req.getSession().setAttribute(
                     "error",

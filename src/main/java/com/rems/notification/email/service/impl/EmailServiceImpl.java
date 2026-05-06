@@ -1,5 +1,6 @@
 package com.rems.notification.email.service.impl;
 
+import com.rems.common.util.DBUtil;
 import com.rems.notification.email.service.EmailService;
 import com.rems.notification.template.OTPEmail;
 import com.rems.notification.template.TransactionCompletedEmail;
@@ -7,7 +8,6 @@ import com.rems.notification.template.TransactionCreatedEmail;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-
 import java.util.Properties;
 
 public class EmailServiceImpl implements EmailService {
@@ -53,16 +53,16 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private void sendHtmlEmail(String to, String subject, String html) {
-        String host = getConfig("MAIL_HOST", "smtp.gmail.com");
-        String port = getConfig("MAIL_PORT", "587");
-        String username = getConfig("MAIL_USERNAME", null);
-        String password = getConfig("MAIL_PASSWORD", null);
-        String from = getConfig("MAIL_FROM", username);
-        boolean auth = Boolean.parseBoolean(getConfig("MAIL_AUTH", "true"));
-        boolean startTls = Boolean.parseBoolean(getConfig("MAIL_STARTTLS", "true"));
+        String host = getConfigProperty("email.smtp.host", "smtp.gmail.com");
+        String port = getConfigProperty("email.smtp.port", "587");
+        String username = getConfigProperty("email.username", null);
+        String password = getConfigProperty("email.password", null);
+        String from = getConfigProperty("email.from", username);
+        boolean auth = Boolean.parseBoolean(getConfigProperty("email.smtp.auth", "true"));
+        boolean startTls = Boolean.parseBoolean(getConfigProperty("email.smtp.starttls", "true"));
 
         if (username == null || password == null || from == null) {
-            System.err.println("[MAIL] Skip sending email due to missing config (MAIL_USERNAME/MAIL_PASSWORD/MAIL_FROM)");
+            System.err.println("[MAIL] Skip sending email due to missing config (email.username/email.password/email.from)");
             return;
         }
 
@@ -91,15 +91,8 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private String getConfig(String key, String defaultValue) {
-        String fromEnv = System.getenv(key);
-        if (fromEnv != null && !fromEnv.isBlank()) {
-            return fromEnv;
-        }
-        String fromSystem = System.getProperty(key);
-        if (fromSystem != null && !fromSystem.isBlank()) {
-            return fromSystem;
-        }
-        return defaultValue;
+    private String getConfigProperty(String key, String defaultValue) {
+        String value = DBUtil.getConfigProperty(key);
+        return value != null && !value.isBlank() ? value : defaultValue;
     }
 }

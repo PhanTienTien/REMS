@@ -124,7 +124,7 @@ public class AdminTransactionController extends HttpServlet {
 
         User user = (User) req.getSession().getAttribute("currentUser");
 
-        if (user == null) {
+        if (!isAdmin(user)) {
             resp.sendRedirect(req.getContextPath() + "/auth");
             return;
         }
@@ -137,17 +137,12 @@ public class AdminTransactionController extends HttpServlet {
                     Long.parseLong(req.getParameter("transactionId"));
 
             try {
-                if (user.getRole() == Role.STAFF) {
-                    transactionService.completeTransactionByStaff(
-                            transactionId,
-                            user.getId()
-                    );
-                } else {
-                    transactionService.completeTransaction(
-                            transactionId,
-                            user.getId()
-                    );
-                }
+                transactionService.completeTransaction(
+                        transactionId,
+                        user.getId()
+                );
+
+                req.getSession().setAttribute("success", "Transaction completed");
 
             } catch (Exception e) {
                 req.getSession().setAttribute("error", e.getMessage());
@@ -155,6 +150,12 @@ public class AdminTransactionController extends HttpServlet {
         }
 
         resp.sendRedirect(req.getContextPath() + "/admin/transactions");
+    }
+
+    private boolean isAdmin(User user) {
+        return user != null &&
+                (user.getRole() == Role.ADMIN ||
+                        user.getRole() == Role.STAFF);
     }
 
     private int parseInt(String val, int defaultVal) {

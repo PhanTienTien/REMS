@@ -9,6 +9,8 @@ public class PageResult<T> {
     private int size;
     private int total;
     private int totalPages;
+    private int startItem;
+    private int endItem;
 
     public PageResult(List<T> data, int page, int size, int total) {
         this.data = data;
@@ -16,6 +18,13 @@ public class PageResult<T> {
         this.size = size;
         this.total = total;
         this.totalPages = (int) Math.ceil((double) total / size);
+        
+        // Calculate start and end items for display
+        this.startItem = (page - 1) * size + 1;
+        this.endItem = Math.min(page * size, total);
+        if (this.endItem == 0) {
+            this.startItem = 0;
+        }
     }
 
     public List<T> getData() {
@@ -47,5 +56,17 @@ public class PageResult<T> {
     }
     public void setTotalPages(int totalPages) {
         this.totalPages = totalPages;
+    }
+    
+    public int getTotalItems() {
+        return total;
+    }
+    
+    public int getStartItem() {
+        return startItem;
+    }
+    
+    public int getEndItem() {
+        return endItem;
     }
 }

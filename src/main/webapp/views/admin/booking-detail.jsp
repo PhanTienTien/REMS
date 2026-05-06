@@ -3,6 +3,7 @@
 <div>
     <p><b>ID:</b> ${booking.bookingId}</p>
     <p><b>Trạng thái:</b> ${booking.status}</p>
+    <p><b>Thời gian hẹn xem:</b> ${not empty booking.scheduledAt ? booking.scheduledAt : 'Chưa chọn'}</p>
     <p><b>Ngày tạo:</b> ${booking.createdAt}</p>
     <p><b>Thời điểm chấp nhận:</b> ${booking.acceptedAt}</p>
 </div>

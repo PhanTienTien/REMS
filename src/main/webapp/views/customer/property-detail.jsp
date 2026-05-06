@@ -4,6 +4,15 @@
 
 <%@ include file="../common/header.jsp" %>
 
+<!-- Message Display -->
+<c:if test="${not empty sessionScope.message}">
+    <div class="alert alert-info alert-dismissible fade show text-center" role="alert">
+        ${sessionScope.message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <c:remove var="message" scope="session"/>
+</c:if>
+
 <link rel="stylesheet"
       href="${pageContext.request.contextPath}/assets/css/customer/layout.css">
 <link rel="stylesheet"
@@ -89,6 +98,13 @@
                                    name="propertyId"
                                    value="${property.id}"/>
 
+                            <label for="scheduledAt" class="form-label">Chọn thời gian xem BĐS:</label>
+                            <input type="datetime-local"
+                                   id="scheduledAt"
+                                   name="scheduledAt"
+                                   class="booking-datetime"
+                                   required/>
+
                             <textarea name="note"
                                       placeholder="Nhắn cho nhân viên tư vấn nếu bạn có yêu cầu thêm"
                                       class="booking-note"></textarea>
@@ -111,8 +127,11 @@
                         </form>
 
                         <form method="post"
-                              action="${pageContext.request.contextPath}/customer/favorites/add">
+                              action="${pageContext.request.contextPath}/customer/profile/favorites">
 
+                            <input type="hidden"
+                                   name="action"
+                                   value="add"/>
                             <input type="hidden"
                                    name="propertyId"
                                    value="${property.id}"/>

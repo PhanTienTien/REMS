@@ -1,6 +1,7 @@
 package com.rems.report.controller;
 
 import com.rems.common.util.Factory;
+import com.rems.common.util.SecurityUtil;
 import com.rems.report.model.dto.ReportDTO;
 import com.rems.report.service.ReportService;
 import jakarta.servlet.ServletException;
@@ -22,10 +23,15 @@ public class ReportController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
+        // Require admin or staff access
+        if (!SecurityUtil.requireAdminOrStaff(req, resp)) {
+            return;
+        }
+
         String action = req.getParameter("action");
 
         if ("export".equals(action)) {
-            exportCSV(resp);
+            exportCSV(req, resp);
             return;
         }
 
@@ -37,7 +43,12 @@ public class ReportController extends HttpServlet {
                 .forward(req, resp);
     }
 
-    private void exportCSV(HttpServletResponse resp) throws IOException {
+    private void exportCSV(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        
+        // Require admin or staff access
+        if (!SecurityUtil.requireAdminOrStaff(req, resp)) {
+            return;
+        }
 
         resp.setContentType("text/csv");
         resp.setHeader("Content-Disposition","attachment; filename=report.csv");

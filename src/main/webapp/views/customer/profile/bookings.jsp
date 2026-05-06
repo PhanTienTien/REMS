@@ -22,7 +22,7 @@
                                 Theo dõi toàn bộ yêu cầu đặt lịch xem bất động sản và trạng thái xử lý của từng lịch hẹn.
                             </p>
                         </div>
-                        <div class="list-meta">Tổng số lịch hẹn: ${bookings.size()}</div>
+                        <div class="list-meta">Tổng số lịch hẹn: ${pagination.totalItems}</div>
                     </div>
 
                     <c:choose>
@@ -37,6 +37,7 @@
                                         <th>STT</th>
                                         <th>Bất động sản</th>
                                         <th>Trạng thái</th>
+                                        <th>Thời gian hẹn xem</th>
                                         <th>Thời gian tạo</th>
                                         <th>Ghi chú</th>
                                         <th>Thao tác</th>
@@ -60,6 +61,14 @@
                                                         <c:otherwise>${b.status}</c:otherwise>
                                                     </c:choose>
                                                 </span>
+                                            </td>
+                                            <td data-label="Thời gian hẹn xem">
+                                                <div class="table-primary">
+                                                    <c:choose>
+                                                        <c:when test="${not empty b.scheduledAt}">${b.scheduledAt}</c:when>
+                                                        <c:otherwise>Chưa chọn</c:otherwise>
+                                                    </c:choose>
+                                                </div>
                                             </td>
                                             <td data-label="Thời gian tạo">
                                                 <div class="table-secondary">${b.createdAt}</div>
@@ -90,6 +99,9 @@
                             </div>
                         </c:otherwise>
                     </c:choose>
+                    
+                    <%-- Include Pagination Component --%>
+                    <jsp:include page="../../common/components/pagination.jsp"/>
                 </div>
             </div>
         </div>

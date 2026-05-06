@@ -54,6 +54,13 @@ public interface BookingDAO {
     List<CustomerBookingDTO> findByCustomer(Connection conn,
                                             Long customerId);
 
+    List<CustomerBookingDTO> findByCustomerPage(Connection conn,
+                                               Long customerId,
+                                               int limit,
+                                               int offset);
+
+    int countByCustomer(Connection conn, Long customerId);
+
     List<Booking> findExpiredPending(Connection conn,
                                      int hours);
 

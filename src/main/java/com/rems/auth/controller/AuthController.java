@@ -5,6 +5,7 @@ import com.rems.auth.model.dto.RegisterDto;
 import com.rems.auth.service.AuthService;
 import com.rems.common.exception.BusinessException;
 import com.rems.common.exception.ErrorCode;
+import com.rems.common.util.CsrfUtil;
 import com.rems.common.util.Factory;
 import com.rems.user.model.User;
 import com.rems.user.service.UserService;
@@ -89,6 +90,9 @@ public class AuthController extends HttpServlet {
             session.setAttribute("currentUser", user);
             session.setAttribute("userId", user.getId());
             session.setAttribute("role", user.getRole().name());
+
+            // Generate CSRF token for session
+            CsrfUtil.generateToken(session);
 
             if (user.getRole().name().equals("ADMIN")
                     || user.getRole().name().equals("STAFF")) {

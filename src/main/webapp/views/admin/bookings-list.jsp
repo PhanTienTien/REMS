@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="csrf" tagdir="/WEB-INF/tags" %>
 
 <html>
 <head>
@@ -68,6 +69,7 @@
                         <th>Bất động sản</th>
                         <th>Khách hàng</th>
                         <th>Trạng thái</th>
+                        <th>Thời gian hẹn</th>
                         <th>Ngày tạo</th>
                         <th>Thao tác</th>
                     </tr>
@@ -83,6 +85,12 @@
                                     ${b.status}
                                 </span>
                             </td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${not empty b.scheduledAt}">${b.scheduledAt}</c:when>
+                                    <c:otherwise>Chưa chọn</c:otherwise>
+                                </c:choose>
+                            </td>
                             <td>${b.createdAt}</td>
                             <td class="actions">
                                 <a class="btn-view"
@@ -93,6 +101,7 @@
                                 <c:if test="${b.status == 'PENDING'}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/admin/bookings">
+                                        <csrf:csrfToken/>
                                         <input type="hidden" name="action" value="accept"/>
                                         <input type="hidden" name="id" value="${b.bookingId}"/>
                                         <button class="btn-approve">Chấp nhận</button>
@@ -100,6 +109,7 @@
 
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/admin/bookings">
+                                        <csrf:csrfToken/>
                                         <input type="hidden" name="action" value="reject"/>
                                         <input type="hidden" name="id" value="${b.bookingId}"/>
                                         <button class="btn-delete">Từ chối</button>

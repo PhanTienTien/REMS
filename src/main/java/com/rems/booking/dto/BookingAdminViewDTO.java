@@ -14,6 +14,7 @@ public class BookingAdminViewDTO {
     private String customerName;
 
     private BookingStatus status;
+    private LocalDateTime scheduledAt;
 
     private LocalDateTime createdAt;
 
@@ -47,6 +48,14 @@ public class BookingAdminViewDTO {
 
     public void setStatus(BookingStatus status) {
         this.status = status;
+    }
+
+    public LocalDateTime getScheduledAt() {
+        return scheduledAt;
+    }
+
+    public void setScheduledAt(LocalDateTime scheduledAt) {
+        this.scheduledAt = scheduledAt;
     }
 
     public LocalDateTime getCreatedAt() {

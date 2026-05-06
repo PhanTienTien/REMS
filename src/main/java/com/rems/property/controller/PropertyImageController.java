@@ -3,6 +3,7 @@ package com.rems.property.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rems.common.util.FileUploadUtil;
 import com.rems.common.util.Factory;
+import com.rems.common.util.SecurityUtil;
 import com.rems.property.service.PropertyImageService;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,7 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/admin/property-images")
-@MultipartConfig
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024,
+        maxFileSize = 1024 * 1024 * 5,
+        maxRequestSize = 1024 * 1024 * 20
+)
 public class PropertyImageController extends HttpServlet {
 
     private final PropertyImageService service = Factory.getPropertyImageService();
@@ -25,6 +30,11 @@ public class PropertyImageController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
+
+        // Require admin or staff access
+        if (!SecurityUtil.requireAdminOrStaff(req, resp)) {
+            return;
+        }
 
         String action = req.getParameter("action");
 
@@ -45,6 +55,11 @@ public class PropertyImageController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
+        // Require admin or staff access
+        if (!SecurityUtil.requireAdminOrStaff(req, resp)) {
+            return;
+        }
+
         String action = req.getParameter("action");
 
         if ("add".equals(action)) {
@@ -52,11 +67,12 @@ public class PropertyImageController extends HttpServlet {
             Long propertyId =
                     Long.valueOf(req.getParameter("propertyId"));
 
-            List<String> urls = null;
+            List<String> urls;
             try {
                 urls = uploadFiles(req);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+                return;
             }
 
             service.addImagesAction(propertyId, urls);
@@ -80,9 +96,16 @@ public class PropertyImageController extends HttpServlet {
 
             if ("images".equals(part.getName()) && part.getSize() > 0) {
 
-                String fileName = part.getSubmittedFileName();
+                if (!FileUploadUtil.isValidImageFile(part)) {
+                    throw new IllegalArgumentException("Invalid file type or size. Only JPG, PNG, GIF, WEBP images under 5MB are allowed.");
+                }
 
-                String uniqueFileName = System.currentTimeMillis() + "_" + fileName;
+                String safeFileName = FileUploadUtil.getSafeFileName(part.getSubmittedFileName());
+                if (safeFileName == null) {
+                    throw new IllegalArgumentException("Invalid file name.");
+                }
+
+                String uniqueFileName = System.currentTimeMillis() + "_" + safeFileName;
 
                 String filePath = new File(dir, uniqueFileName).getAbsolutePath();
 
