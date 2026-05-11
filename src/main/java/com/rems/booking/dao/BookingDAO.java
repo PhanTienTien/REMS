@@ -101,4 +101,6 @@ public interface BookingDAO {
                              Long acceptedBookingId,
                              Long staffId);
 
+    boolean existsPendingByProperty(Connection conn, Long propertyId);
+
 }

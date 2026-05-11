@@ -351,6 +351,20 @@ public class PropertyServiceImpl implements PropertyService {
         );
     }
 
+    @Override
+    public void incrementViewCount(Long propertyId) {
+        txManager.executeWithoutResult(conn ->
+                propertyDAO.incrementViewCount(conn, propertyId)
+        );
+    }
+
+    @Override
+    public List<com.rems.property.dto.TopViewedPropertyDTO> getTopViewedProperties(int limit) {
+        return txManager.execute(conn ->
+                propertyDAO.findTopByViewCount(conn, limit)
+        );
+    }
+
     private Property requireForUpdate(Connection conn, Long propertyId) {
         return propertyDAO.findByIdForUpdate(conn, propertyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));

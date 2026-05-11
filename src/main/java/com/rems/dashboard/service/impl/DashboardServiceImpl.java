@@ -1,10 +1,13 @@
 package com.rems.dashboard.service.impl;
 
 import com.rems.common.transaction.TransactionManager;
+import com.rems.common.util.Factory;
 import com.rems.dashboard.dao.DashboardDAO;
 import com.rems.dashboard.dao.impl.DashboardDAOImpl;
 import com.rems.dashboard.dto.*;
 import com.rems.dashboard.service.DashboardService;
+import com.rems.property.dto.TopViewedPropertyDTO;
+import com.rems.property.service.PropertyService;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -16,6 +19,7 @@ public class DashboardServiceImpl implements DashboardService {
 
     private final DashboardDAO dashboardDAO = new DashboardDAOImpl();
     private final TransactionManager txManager;
+    private final PropertyService propertyService = Factory.getPropertyService();
 
     public DashboardServiceImpl(TransactionManager txManager) {
         this.txManager = txManager;
@@ -68,6 +72,10 @@ public class DashboardServiceImpl implements DashboardService {
                 dto.setDraftProperties(draftProperties);
                 dto.setPendingTransactions(pendingTransactions);
                 dto.setReservedTooLong(reservedTooLong);
+
+                // Get top 20 viewed properties
+                List<TopViewedPropertyDTO> topViewed = propertyService.getTopViewedProperties(20);
+                dto.setTopViewedProperties(topViewed);
 
                 return dto;
 

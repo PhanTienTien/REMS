@@ -131,21 +131,13 @@ public class AdminBookingController extends HttpServlet {
 
             switch (action) {
                 case "accept" -> {
-                    // Staff can only accept bookings for their own properties
-                    if (SecurityUtil.isStaff(req)) {
-                        bookingService.acceptBookingByStaff(id, user.getId());
-                    } else {
-                        bookingService.acceptBooking(id, user.getId());
-                    }
+                    // Only the property creator (Admin or Staff) can accept bookings
+                    bookingService.acceptBookingByStaff(id, user.getId());
                     req.getSession().setAttribute("success", "Booking accepted");
                 }
                 case "reject" -> {
-                    // Staff can only reject bookings for their own properties
-                    if (SecurityUtil.isStaff(req)) {
-                        bookingService.rejectBookingByStaff(id, user.getId());
-                    } else {
-                        bookingService.rejectBooking(id, user.getId());
-                    }
+                    // Only the property creator (Admin or Staff) can reject bookings
+                    bookingService.rejectBookingByStaff(id, user.getId());
                     req.getSession().setAttribute("success", "Booking rejected");
                 }
             }

@@ -90,7 +90,7 @@ public class PropertyImageController extends HttpServlet {
     private List<String> uploadFiles(HttpServletRequest req) throws Exception {
 
         List<String> urls = new ArrayList<>();
-        File dir = FileUploadUtil.getUploadDirectory(getServletContext());
+        File dir = FileUploadUtil.getLegacyUploadDirectory();
 
         for (Part part : req.getParts()) {
 

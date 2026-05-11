@@ -69,4 +69,20 @@ public class PageResult<T> {
     public int getEndItem() {
         return endItem;
     }
+    
+    public boolean isHasPreviousPage() {
+        return page > 1;
+    }
+    
+    public int getPreviousPage() {
+        return page - 1;
+    }
+    
+    public boolean isHasNextPage() {
+        return page < totalPages;
+    }
+    
+    public int getNextPage() {
+        return page + 1;
+    }
 }

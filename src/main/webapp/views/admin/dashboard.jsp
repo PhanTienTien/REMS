@@ -150,6 +150,54 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="top-viewed-container">
+                <h3>Top 20 BĐS được xem nhiều nhất</h3>
+
+                <table class="property-table">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Ảnh</th>
+                        <th>Tiêu đề</th>
+                        <th>Địa chỉ</th>
+                        <th>Loại</th>
+                        <th>Giá</th>
+                        <th>Lượt xem</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach items="${dashboard.topViewedProperties}" var="p" varStatus="loop">
+                        <tr>
+                            <td>${loop.index + 1}</td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${not empty p.thumbnail}">
+                                        <img src="${pageContext.request.contextPath}${p.thumbnail}"
+                                             alt="${p.title}"
+                                             style="width:60px;height:45px;object-fit:cover;border-radius:4px;">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="text-muted">-</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td>${p.title}</td>
+                            <td>${p.address}</td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${p.type == 'SALE'}">Bán</c:when>
+                                    <c:when test="${p.type == 'RENT'}">Cho thuê</c:when>
+                                    <c:otherwise>${p.type}</c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td class="money">${p.price}</td>
+                            <td><strong>${p.viewCount}</strong></td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

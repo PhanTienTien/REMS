@@ -1,6 +1,5 @@
 <%@ tag language="java" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page import="com.rems.common.util.CsrfUtil" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <c:if test="${not empty sessionScope.currentUser}">
-    <input type="hidden" name="_csrf" value="<%= CsrfUtil.getToken(session) %>" />
+    <input type="hidden" name="_csrf" value="${sessionScope.CSRF_TOKEN}" />
 </c:if>

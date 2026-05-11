@@ -119,4 +119,11 @@ public interface PropertyDAO {
             Integer minPrice,
             Integer maxPrice
     );
+
+    void incrementViewCount(Connection conn, Long propertyId);
+
+    List<com.rems.property.dto.TopViewedPropertyDTO> findTopByViewCount(
+            Connection conn,
+            int limit
+    );
 }

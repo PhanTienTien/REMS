@@ -95,6 +95,9 @@
                               action="${pageContext.request.contextPath}/customer/bookings/create">
 
                             <input type="hidden"
+                                   name="_csrf"
+                                   value="${sessionScope.CSRF_TOKEN}"/>
+                            <input type="hidden"
                                    name="propertyId"
                                    value="${property.id}"/>
 
@@ -129,6 +132,9 @@
                         <form method="post"
                               action="${pageContext.request.contextPath}/customer/profile/favorites">
 
+                            <input type="hidden"
+                                   name="_csrf"
+                                   value="${sessionScope.CSRF_TOKEN}"/>
                             <input type="hidden"
                                    name="action"
                                    value="add"/>

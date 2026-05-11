@@ -1,9 +1,9 @@
 package com.rems.property.controller;
 
+import com.rems.common.util.Factory;
 import com.rems.property.dto.PropertyCardDTO;
 import com.rems.property.dto.PropertySearchDTO;
 import com.rems.property.model.PropertyImage;
-import com.rems.common.util.Factory;
 import com.rems.property.service.PropertyImageService;
 import com.rems.property.service.PropertyService;
 import jakarta.servlet.ServletException;
@@ -33,14 +33,27 @@ public class CustomerPropertyController extends HttpServlet {
         searchDTO.setKeyword(req.getParameter("address"));
         searchDTO.setType(req.getParameter("type"));
 
-        searchDTO.setMinPrice(parseLong(req.getParameter("minPrice")));
-        searchDTO.setMaxPrice(parseLong(req.getParameter("maxPrice")));
+        Long minPrice = parseLong(req.getParameter("minPrice"));
+        Long maxPrice = parseLong(req.getParameter("maxPrice"));
+        searchDTO.setMinPrice(minPrice);
+        searchDTO.setMaxPrice(maxPrice);
 
-        searchDTO.setPage(parseInt(req.getParameter("page"), 1));
-        searchDTO.setSize(parseInt(req.getParameter("size"), 6));
+        int page = parseInt(req.getParameter("page"), 1);
+        int size = parseInt(req.getParameter("size"), 8);
+        searchDTO.setPage(page);
+        searchDTO.setSize(size);
 
         List<PropertyCardDTO> properties =
                 propertyService.searchAvailableCard(searchDTO);
+
+        // Get total count for pagination
+        int totalItems = propertyService.countCustomer(
+                searchDTO.getKeyword(),
+                searchDTO.getType(),
+                minPrice != null ? minPrice.intValue() : null,
+                maxPrice != null ? maxPrice.intValue() : null
+        );
+        int totalPages = (int) Math.ceil((double) totalItems / size);
 
         Map<Long, String> thumbnails = new HashMap<>();
 
@@ -56,6 +69,9 @@ public class CustomerPropertyController extends HttpServlet {
 
         req.setAttribute("properties", properties);
         req.setAttribute("thumbnails", thumbnails);
+        req.setAttribute("currentPage", page);
+        req.setAttribute("totalPages", totalPages);
+        req.setAttribute("totalItems", totalItems);
 
         req.getRequestDispatcher("/views/customer/property-list.jsp")
                 .forward(req, resp);

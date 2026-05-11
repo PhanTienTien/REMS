@@ -138,6 +138,7 @@ public class BookingServiceImpl implements BookingService {
             Property property = propertyDAO.findByIdForUpdate(conn, booking.getPropertyId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
 
+            // Allow the creator of the property (Admin or Staff) to accept the booking
             if (!staffId.equals(property.getCreatedBy())) {
                 throw new BusinessException(ErrorCode.FORBIDDEN);
             }
@@ -184,6 +185,7 @@ public class BookingServiceImpl implements BookingService {
             Property property = propertyDAO.findByIdForUpdate(conn, booking.getPropertyId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.PROPERTY_NOT_FOUND));
 
+            // Allow the creator of the property (Admin or Staff) to reject the booking
             if (!staffId.equals(property.getCreatedBy())) {
                 throw new BusinessException(ErrorCode.FORBIDDEN);
             }
@@ -281,6 +283,11 @@ public class BookingServiceImpl implements BookingService {
             int total = bookingDAO.countSearchByStaff(conn, staffId, keyword, status);
             return new PageResult<>(data, page, size, total);
         });
+    }
+
+    @Override
+    public boolean hasPendingBooking(Long propertyId) {
+        return tx.execute(conn -> bookingDAO.existsPendingByProperty(conn, propertyId));
     }
 
     private void log(Connection conn,

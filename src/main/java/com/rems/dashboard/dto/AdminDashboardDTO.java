@@ -1,5 +1,6 @@
 package com.rems.dashboard.dto;
 
+import com.rems.property.dto.TopViewedPropertyDTO;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ public class AdminDashboardDTO {
     private long draftProperties;
     private long pendingTransactions;
     private long reservedTooLong;
+    private List<TopViewedPropertyDTO> topViewedProperties;
 
     public long getReservedTooLong() {
         return reservedTooLong;
@@ -76,5 +78,13 @@ public class AdminDashboardDTO {
 
     public void setRecentTransactions(List<RecentTransactionDTO> recentTransactions) {
         this.recentTransactions = recentTransactions;
+    }
+
+    public List<TopViewedPropertyDTO> getTopViewedProperties() {
+        return topViewedProperties;
+    }
+
+    public void setTopViewedProperties(List<TopViewedPropertyDTO> topViewedProperties) {
+        this.topViewedProperties = topViewedProperties;
     }
 }

@@ -14,8 +14,8 @@ public interface BookingService {
 
     Long createBooking(Long propertyId,
                        Long customerId,
-                       String note,\
-                       LocalDateTime scheduledAt\);
+                       String note,
+                       LocalDateTime scheduledAt);
 
     void acceptBooking(Long bookingId, Long staffId);
 
@@ -54,4 +54,6 @@ public interface BookingService {
     void acceptBookingByStaff(Long bookingId, Long staffId);
 
     void rejectBookingByStaff(Long bookingId, Long staffId);
+
+    boolean hasPendingBooking(Long propertyId);
 }

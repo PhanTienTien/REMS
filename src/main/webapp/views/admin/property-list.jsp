@@ -153,6 +153,7 @@
                                 <c:if test="${sessionScope.currentUser.role == 'ADMIN' and p.status == 'DRAFT'}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/admin/properties/approve">
+                                        <input type="hidden" name="_csrf" value="${sessionScope.CSRF_TOKEN}"/>
                                         <input type="hidden" name="id" value="${p.id}">
                                         <button class="btn-approve">Duyệt</button>
                                     </form>
@@ -160,6 +161,7 @@
 
                                 <form method="post"
                                       action="${pageContext.request.contextPath}/admin/properties/delete">
+                                    <input type="hidden" name="_csrf" value="${sessionScope.CSRF_TOKEN}"/>
                                     <input type="hidden" name="id" value="${p.id}">
                                     <button class="btn-delete"
                                             onclick="return confirm('Bạn có chắc muốn xóa bất động sản này?')">
@@ -204,6 +206,7 @@
         <form method="post"
               enctype="multipart/form-data"
               action="${pageContext.request.contextPath}/admin/properties/create">
+            <input type="hidden" name="_csrf" value="${sessionScope.CSRF_TOKEN}"/>
 
             <input type="text" name="title" placeholder="Tiêu đề"
                    value="${formTitle}" required>
@@ -253,6 +256,7 @@
         <h3>Chỉnh sửa bất động sản</h3>
         <form method="post"
               action="${pageContext.request.contextPath}/admin/properties/edit">
+            <input type="hidden" name="_csrf" value="${sessionScope.CSRF_TOKEN}"/>
 
             <input type="hidden" name="id" id="editId">
             <input type="text" name="title" id="editTitle">
@@ -288,6 +292,7 @@
               enctype="multipart/form-data"
               action="${pageContext.request.contextPath}/admin/property-images?action=add">
 
+            <input type="hidden" name="_csrf" value="${sessionScope.CSRF_TOKEN}"/>
             <input type="hidden" name="propertyId" id="imagePropertyId">
             <input type="file" name="images" multiple>
             <button>Thêm ảnh</button>

@@ -8,7 +8,6 @@ import com.rems.booking.model.Booking;
 import com.rems.common.constant.BookingStatus;
 
 import java.sql.*;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -1061,6 +1060,28 @@ public class BookingDAOImpl implements BookingDAO {
 
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean existsPendingByProperty(Connection conn, Long propertyId) {
+        String sql = """
+            SELECT EXISTS(
+                SELECT 1 FROM bookings
+                WHERE property_id = ?
+                  AND status = 'PENDING'
+            )
+            """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, propertyId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getBoolean(1);
+            }
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException("Error checking pending booking", e);
         }
     }
 }

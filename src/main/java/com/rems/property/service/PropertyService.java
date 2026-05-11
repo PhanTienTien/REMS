@@ -112,4 +112,8 @@ public interface PropertyService {
             Integer maxPrice
     );
 
+    void incrementViewCount(Long propertyId);
+
+    List<com.rems.property.dto.TopViewedPropertyDTO> getTopViewedProperties(int limit);
+
 }

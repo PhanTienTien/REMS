@@ -1,6 +1,8 @@
 package com.rems.property.controller;
 
 import com.rems.activitylog.service.ActivityLogService;
+import com.rems.booking.service.BookingService;
+import com.rems.common.constant.PropertyStatus;
 import com.rems.common.util.Factory;
 import com.rems.property.model.Property;
 import com.rems.property.model.PropertyImage;
@@ -23,6 +25,7 @@ public class CustomerPropertyDetailController extends HttpServlet {
 
     private final PropertyService propertyService = Factory.getPropertyService();
     private final PropertyImageService imageService = Factory.getPropertyImageService();
+    private final BookingService bookingService = Factory.getBookingService();
     private final ActivityLogService activityLogService = Factory.getActivityLogService();
 
     @Override
@@ -38,10 +41,19 @@ public class CustomerPropertyDetailController extends HttpServlet {
 
         Property property = propertyService.getPropertyById(propertyId);
 
-        if (property == null) {
+        if (property == null || property.getStatus() != PropertyStatus.AVAILABLE) {
             resp.sendRedirect(req.getContextPath() + "/customer/properties");
             return;
         }
+
+        // Check if property has pending booking
+        if (bookingService.hasPendingBooking(propertyId)) {
+            resp.sendRedirect(req.getContextPath() + "/customer/properties");
+            return;
+        }
+
+        // Increment view count
+        propertyService.incrementViewCount(propertyId);
 
         List<PropertyImage> images =
                 imageService.getByPropertyId(propertyId);

@@ -4,8 +4,8 @@
 
     <div class="profile-user">
 
-        <img src="${pageContext.request.contextPath}/assets/img/avatar.png"
-             class="avatar">
+        <img src="${pageContext.request.contextPath}/assets/images/person_1-min.jpg"
+             class="avatar" alt="Avatar">
 
         <div class="user-name">
             ${user.fullName}

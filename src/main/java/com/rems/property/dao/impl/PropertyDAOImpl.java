@@ -276,22 +276,22 @@ public class PropertyDAOImpl implements PropertyDAO {
         List<Object> params = new ArrayList<>();
 
         if (address != null && !address.isBlank()) {
-            sql.append(" AND address LIKE ?");
+            sql.append(" AND p.address LIKE ?");
             params.add("%" + address + "%");
         }
 
         if (type != null) {
-            sql.append(" AND type = ?");
+            sql.append(" AND p.type = ?");
             params.add(type.name());
         }
 
         if (minPrice != null) {
-            sql.append(" AND price >= ?");
+            sql.append(" AND p.price >= ?");
             params.add(minPrice);
         }
 
         if (maxPrice != null) {
-            sql.append(" AND price <= ?");
+            sql.append(" AND p.price <= ?");
             params.add(maxPrice);
         }
 
@@ -376,19 +376,19 @@ public class PropertyDAOImpl implements PropertyDAO {
     """);
 
         if (address != null && !address.isEmpty()) {
-            sql.append(" AND address LIKE ?");
+            sql.append(" AND p.address LIKE ?");
         }
 
         if (type != null && !type.isEmpty()) {
-            sql.append(" AND type = ?");
+            sql.append(" AND p.type = ?");
         }
 
         if (minPrice != null) {
-            sql.append(" AND price >= ?");
+            sql.append(" AND p.price >= ?");
         }
 
         if (maxPrice != null) {
-            sql.append(" AND price <= ?");
+            sql.append(" AND p.price <= ?");
         }
 
         if ("price_asc".equals(sort)) {
@@ -448,24 +448,29 @@ public class PropertyDAOImpl implements PropertyDAO {
 
         StringBuilder sql = new StringBuilder("""
         SELECT COUNT(*)
-        FROM properties
-        WHERE status='AVAILABLE'
+        FROM properties p
+        WHERE p.status='AVAILABLE'
+          AND NOT EXISTS (
+              SELECT 1 FROM bookings b
+              WHERE b.property_id = p.id
+                AND b.status = 'PENDING'
+          )
     """);
 
         if (address != null && !address.isEmpty()) {
-            sql.append(" AND address LIKE ?");
+            sql.append(" AND p.address LIKE ?");
         }
 
         if (type != null && !type.isEmpty()) {
-            sql.append(" AND type = ?");
+            sql.append(" AND p.type = ?");
         }
 
         if (minPrice != null) {
-            sql.append(" AND price >= ?");
+            sql.append(" AND p.price >= ?");
         }
 
         if (maxPrice != null) {
-            sql.append(" AND price <= ?");
+            sql.append(" AND p.price <= ?");
         }
 
         try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -518,15 +523,15 @@ public class PropertyDAOImpl implements PropertyDAO {
         }
 
         if (dto.getType() != null && !dto.getType().isEmpty()) {
-            sql.append(" AND type = ?");
+            sql.append(" AND p.type = ?");
         }
 
         if (dto.getMinPrice() != null) {
-            sql.append(" AND price >= ?");
+            sql.append(" AND p.price >= ?");
         }
 
         if (dto.getMaxPrice() != null) {
-            sql.append(" AND price <= ?");
+            sql.append(" AND p.price <= ?");
         }
 
         sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
@@ -631,6 +636,11 @@ public class PropertyDAOImpl implements PropertyDAO {
         ) AS thumbnail
     FROM properties p
     WHERE p.status = 'AVAILABLE'
+      AND NOT EXISTS (
+          SELECT 1 FROM bookings b
+          WHERE b.property_id = p.id
+            AND b.status = 'PENDING'
+      )
 """);
 
         if (dto.getKeyword() != null && !dto.getKeyword().isEmpty()) {
@@ -718,22 +728,22 @@ public class PropertyDAOImpl implements PropertyDAO {
         List<Object> params = new ArrayList<>();
 
         if (address != null && !address.isBlank()) {
-            sql.append(" AND address LIKE ?");
+            sql.append(" AND p.address LIKE ?");
             params.add("%" + address + "%");
         }
 
         if (type != null && !type.isBlank()) {
-            sql.append(" AND type = ?");
+            sql.append(" AND p.type = ?");
             params.add(type);
         }
 
         if (minPrice != null) {
-            sql.append(" AND price >= ?");
+            sql.append(" AND p.price >= ?");
             params.add(minPrice);
         }
 
         if (maxPrice != null) {
-            sql.append(" AND price <= ?");
+            sql.append(" AND p.price <= ?");
             params.add(maxPrice);
         }
 
@@ -783,22 +793,22 @@ public class PropertyDAOImpl implements PropertyDAO {
         params.add(createdBy);
 
         if (address != null && !address.isBlank()) {
-            sql.append(" AND address LIKE ?");
+            sql.append(" AND p.address LIKE ?");
             params.add("%" + address + "%");
         }
 
         if (type != null && !type.isBlank()) {
-            sql.append(" AND type = ?");
+            sql.append(" AND p.type = ?");
             params.add(type);
         }
 
         if (minPrice != null) {
-            sql.append(" AND price >= ?");
+            sql.append(" AND p.price >= ?");
             params.add(minPrice);
         }
 
         if (maxPrice != null) {
-            sql.append(" AND price <= ?");
+            sql.append(" AND p.price <= ?");
             params.add(maxPrice);
         }
 
@@ -842,22 +852,22 @@ public class PropertyDAOImpl implements PropertyDAO {
         List<Object> params = new ArrayList<>();
 
         if (address != null && !address.isBlank()) {
-            sql.append(" AND address LIKE ?");
+            sql.append(" AND p.address LIKE ?");
             params.add("%" + address + "%");
         }
 
         if (type != null && !type.isBlank()) {
-            sql.append(" AND type = ?");
+            sql.append(" AND p.type = ?");
             params.add(type);
         }
 
         if (minPrice != null) {
-            sql.append(" AND price >= ?");
+            sql.append(" AND p.price >= ?");
             params.add(minPrice);
         }
 
         if (maxPrice != null) {
-            sql.append(" AND price <= ?");
+            sql.append(" AND p.price <= ?");
             params.add(maxPrice);
         }
 
@@ -895,22 +905,22 @@ public class PropertyDAOImpl implements PropertyDAO {
         params.add(createdBy);
 
         if (address != null && !address.isBlank()) {
-            sql.append(" AND address LIKE ?");
+            sql.append(" AND p.address LIKE ?");
             params.add("%" + address + "%");
         }
 
         if (type != null && !type.isBlank()) {
-            sql.append(" AND type = ?");
+            sql.append(" AND p.type = ?");
             params.add(type);
         }
 
         if (minPrice != null) {
-            sql.append(" AND price >= ?");
+            sql.append(" AND p.price >= ?");
             params.add(minPrice);
         }
 
         if (maxPrice != null) {
-            sql.append(" AND price <= ?");
+            sql.append(" AND p.price <= ?");
             params.add(maxPrice);
         }
 
@@ -948,5 +958,66 @@ public class PropertyDAOImpl implements PropertyDAO {
         for (int i = 0; i < params.size(); i++) {
             ps.setObject(i + 1, params.get(i));
         }
+    }
+
+    @Override
+    public void incrementViewCount(Connection conn, Long propertyId) {
+        String sql = "UPDATE properties SET view_count = view_count + 1 WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, propertyId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException("Error incrementing view count", e);
+        }
+    }
+
+    @Override
+    public List<com.rems.property.dto.TopViewedPropertyDTO> findTopByViewCount(
+            Connection conn,
+            int limit) {
+
+        List<com.rems.property.dto.TopViewedPropertyDTO> list = new ArrayList<>();
+
+        String sql = """
+            SELECT
+                p.id,
+                p.title,
+                p.address,
+                p.price,
+                p.type,
+                p.view_count,
+                (
+                    SELECT image_url
+                    FROM property_images
+                    WHERE property_id = p.id
+                    ORDER BY is_thumbnail DESC, sort_order ASC
+                    LIMIT 1
+                ) AS thumbnail
+            FROM properties p
+            ORDER BY p.view_count DESC
+            LIMIT ?
+            """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                com.rems.property.dto.TopViewedPropertyDTO dto =
+                        new com.rems.property.dto.TopViewedPropertyDTO();
+                dto.setId(rs.getLong("id"));
+                dto.setTitle(rs.getString("title"));
+                dto.setAddress(rs.getString("address"));
+                dto.setPrice(rs.getBigDecimal("price"));
+                dto.setType(rs.getString("type"));
+                dto.setViewCount(rs.getInt("view_count"));
+                dto.setThumbnail(rs.getString("thumbnail"));
+                list.add(dto);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error finding top viewed properties", e);
+        }
+
+        return list;
     }
 }

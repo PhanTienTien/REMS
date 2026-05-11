@@ -1,6 +1,7 @@
 package com.rems.booking.controller;
 
 import com.rems.booking.service.BookingService;
+import com.rems.common.exception.BusinessException;
 import com.rems.common.util.Factory;
 import com.rems.user.model.User;
 import jakarta.servlet.ServletException;
@@ -42,7 +43,8 @@ public class CustomerCreateBookingController extends HttpServlet {
                     bookingService.createBooking(
                             propertyId,
                             user.getId(),
-                            note
+                            note,
+                            scheduledAt
                     );
 
             response.sendRedirect(
@@ -51,11 +53,29 @@ public class CustomerCreateBookingController extends HttpServlet {
                             + bookingId
             );
 
+        } catch (BusinessException e) {
+            handleError(request, response, e.getMessage());
+        } catch (RuntimeException e) {
+            // TransactionManager wraps BusinessException in RuntimeException
+            if (e.getCause() instanceof BusinessException) {
+                handleError(request, response, e.getCause().getMessage());
+            } else {
+                throw new ServletException(e);
+            }
         } catch (Exception e) {
-
             throw new ServletException(e);
-
         }
+    }
 
+    private void handleError(HttpServletRequest request,
+                             HttpServletResponse response,
+                             String errorMessage) throws IOException {
+        request.getSession().setAttribute("error", errorMessage);
+        String referer = request.getHeader("Referer");
+        if (referer != null && !referer.isEmpty()) {
+            response.sendRedirect(referer);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/customer/properties");
+        }
     }
 }

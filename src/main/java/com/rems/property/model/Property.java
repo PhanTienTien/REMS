@@ -15,6 +15,7 @@ public class Property {
     private PropertyType type;
     private BigDecimal price;
     private PropertyStatus status;
+    private Integer viewCount;
 
     private Long approvedBy;
     private LocalDateTime approvedAt;
@@ -69,6 +70,12 @@ public class Property {
     }
     public void setStatus(PropertyStatus status) {
         this.status = status;
+    }
+    public Integer getViewCount() {
+        return viewCount;
+    }
+    public void setViewCount(Integer viewCount) {
+        this.viewCount = viewCount;
     }
     public Long getCreatedBy() {
         return createdBy;
